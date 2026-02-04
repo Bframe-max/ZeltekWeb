@@ -1,1 +1,85 @@
-﻿
+﻿@model List<ZeltekWeb.Models.CompraViewModel>
+
+<h2 class="mb-3">🛒 Compras</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">
+    ➕ Nueva Compra
+</a>
+
+<table class="table table-striped table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Proveedor</th>
+            <th>Vendedor</th>
+            <th>Fecha</th>
+            <th>Total</th>
+            <th>Tracking</th>
+            <th>Estado</th>
+            <th style="width:180px;">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var c in Model)
+            {
+                <tr>
+                    <td>@c.CompraID</td>
+                    <td>@c.Proveedor</td>
+                    <td>@c.VendedorOnline</td>
+                    <td>@c.FechaCompra.ToString("dd/MM/yyyy")</td>
+                    <td>$@c.CostoTotal.ToString("N2")</td>
+                    <td>@c.TrackingProveedor</td>
+
+                    <td>
+                        @switch (c.EstadoCompra ?? "Creada")
+                        {
+                            case "Creada":
+                                <span class="badge bg-secondary">Creada</span>
+                                break;
+                            case "Confirmada":
+                                <span class="badge bg-success">Confirmada</span>
+                                break;
+                            case "Cancelada":
+                                <span class="badge bg-danger">Cancelada</span>
+                                break;
+                            case "Reembolsada":
+                                <span class="badge bg-warning text-dark">Reembolsada</span>
+                                break;
+                            case "Parcial":
+                                <span class="badge bg-info text-dark">Parcial</span>
+                                break;
+                            default:
+                                <span class="badge bg-dark">@c.EstadoCompra</span>
+                                break;
+                        }
+                    </td>
+
+                    <td>
+                        <a class="btn btn-sm btn-info"
+                           asp-controller="Items"
+                           asp-action="Index"
+                           asp-route-compraId="@c.CompraID">
+                            📦 Items
+                        </a>
+
+                        <a class="btn btn-sm btn-warning"
+                           asp-action="Edit"
+                           asp-route-id="@c.CompraID">
+                            ✏️ Editar
+                        </a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="8" class="text-center text-muted">
+                    No hay compras registradas.
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
