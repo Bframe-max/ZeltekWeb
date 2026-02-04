@@ -1,0 +1,94 @@
+﻿@model List<ZeltekWeb.Models.GastoListViewModel>
+
+<h3>🧾 Gastos Operativos</h3>
+
+
+@{
+    var resumen = ViewBag.Resumen as ZeltekWeb.Models.GastosResumenViewModel;
+}
+
+
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Total Gastos</h6>
+                <h3 class="text-danger">
+                    $@resumen?.TotalGastos.ToString("N2")
+                </h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Cantidad de Gastos</h6>
+                <h3>
+                    @resumen?.CantidadGastos
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<form method="get" class="row mb-3">
+    <div class="col">
+        <input type="date" name="desde" class="form-control" />
+    </div>
+    <div class="col">
+        <input type="date" name="hasta" class="form-control" />
+    </div>
+    <div class="col">
+        <button class="btn btn-primary">Filtrar</button>
+    </div>
+</form>
+
+<a href="/Gastos/Create" class="btn btn-danger mb-3">
+    ➕ Nuevo Gasto
+</a>
+
+
+<table class="table table-striped align-middle mt-3">
+    <thead>
+        <tr>
+            <th>Fecha</th>
+            <th>Descripción</th>
+            <th>Categoría</th>
+            <th class="text-end">Monto</th>
+            <th class="text-center">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var g in Model)
+        {
+            <tr>
+                <td>@g.FechaGasto.ToShortDateString()</td>
+                <td>@g.Descripcion</td>
+                <td>@g.CategoriaGasto</td>
+                <td class="text-end">$@g.Monto</td>
+                <td class="text-center">
+                    <a asp-action="Edit"
+                       asp-route-id="@g.GastoID"
+                       class="btn btn-sm btn-warning me-1">
+                        ✏️ Editar
+                    </a>
+
+                    <form asp-action="Delete"
+                          asp-route-id="@g.GastoID"
+                          method="post"
+                          style="display:inline"
+                          onsubmit="return confirm('¿Eliminar este gasto?');">
+                        <button class="btn btn-sm btn-danger">
+                            🗑 Eliminar
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+

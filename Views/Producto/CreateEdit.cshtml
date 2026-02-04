@@ -1,0 +1,71 @@
+﻿@model ZeltekWeb.Models.ProductoCreateEditViewModel
+
+@{
+    var esEdicion = Model.ProductoID > 0;
+    ViewData["Title"] = esEdicion ? "Editar Producto" : "Nuevo Producto";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="@(esEdicion ? "Edit" : "Create")" method="post">
+
+    @if (esEdicion)
+    {
+        <input type="hidden" asp-for="ProductoID" />
+    }
+
+    <div class="mb-3">
+        <label asp-for="Nombre" class="form-label"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Descripcion" class="form-label"></label>
+        <textarea asp-for="Descripcion" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Marca</label>
+        <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="form-select">
+            <option value="">-- Seleccione --</option>
+        </select>
+        <span asp-validation-for="MarcaID" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="form-select">
+            <option value="">-- Sin categoría --</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Modelo" class="form-label"></label>
+        <input asp-for="Modelo" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="CostoReferencia" class="form-label"></label>
+        <input asp-for="CostoReferencia" class="form-control" />
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="EsUnico" class="form-check-input" />
+        <label asp-for="EsUnico" class="form-check-label">
+            Producto con serial (Laptop / iPhone)
+        </label>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        💾 Guardar
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

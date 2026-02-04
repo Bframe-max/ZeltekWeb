@@ -1,0 +1,35 @@
+﻿@model ZeltekWeb.Models.VentaCreateViewModel
+
+<h3>💵 Registrar Venta</h3>
+
+<form method="post">
+    <input type="hidden" asp-for="ItemID" />
+
+    <div class="mb-3">
+        <label>Producto</label>
+        <input class="form-control" value="@Model.Producto" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label>Serie</label>
+        <input class="form-control" value="@Model.NumeroSerie" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label>Precio Venta</label>
+        <input asp-for="PrecioUnitario
+" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Método de Pago</label>
+        <select asp-for="MetodoPago" class="form-select">
+            <option>Efectivo</option>
+            <option>Transferencia</option>
+            <option>Zelle</option>
+        </select>
+    </div>
+
+    <button class="btn btn-success">Confirmar Venta</button>
+    <a href="/Inventario" class="btn btn-secondary">Cancelar</a>
+</form>

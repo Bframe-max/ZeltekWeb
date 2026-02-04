@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - Zeltek</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+</head>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/Dashboard">⚡ Zeltek</a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarZeltek">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarZeltek">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Producto" asp-action="Index">📦 Productos</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Compras" asp-action="Index">🛒 Compras</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Inventario" asp-action="Index">📦 Inventario</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Ventas" asp-action="Index">💵 Ventas</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="Garantías">🛡️ Garantías</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Reportes" asp-action="Index">📈 Reportes</a>
+                    </li>
+                </ul>
+
+                <span class="navbar-text me-3 text-white">
+                    👤 @Context.Session.GetString("Usuario")
+                </span>
+
+                <a class="btn btn-outline-light btn-sm" href="/Login/Logout">
+                    Salir
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        @RenderBody()
+    </div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+
+    @RenderSection("Scripts", required: false)
+
+</body>
+</html>

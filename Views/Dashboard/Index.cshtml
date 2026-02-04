@@ -1,0 +1,65 @@
+﻿@model ZeltekWeb.Models.DashboardViewModel
+
+<h2 class="mb-4">📊 Dashboard Zeltek</h2>
+
+<div class="row g-4">
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Capital Invertido</h6>
+                <h4>$@Model.CapitalInvertido</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Valor Inventario</h6>
+                <h4>$@Model.ValorInventario</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Ventas del Mes</h6>
+                <h4>$@Model.VentasMes</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Ganancia del Mes</h6>
+                <h4 class="text-success">$@Model.GananciaMes</h4>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<div class="row g-4 mt-3">
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Garantías Activas</h6>
+                <h4>@Model.GarantiasActivas</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow">
+            <div class="card-body">
+                <h6>Equipos en Camino</h6>
+                <h4>@Model.EquiposEnCamino</h4>
+            </div>
+        </div>
+    </div>
+
+</div>

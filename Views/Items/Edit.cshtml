@@ -1,0 +1,42 @@
+﻿@model ZeltekWeb.Models.ItemEditViewModel
+
+<h3>✏️ Editar Item</h3>
+
+<form method="post">
+
+    <input type="hidden" asp-for="ItemID" />
+    <input type="hidden" asp-for="CompraID" />
+
+    <div class="mb-3">
+        <label class="form-label">Producto</label>
+        <input class="form-control" value="@Model.Producto" disabled />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Número de Serie</label>
+        <input asp-for="NumeroSerie" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Costo Compra</label>
+        <input asp-for="CostoCompra" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Precio Venta</label>
+        <input asp-for="PrecioVenta" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Estado</label>
+        <select asp-for="Estado" class="form-select">
+            <option>En Camino</option>
+            <option>En Stock</option>
+            <option>Vendido</option>
+        </select>
+    </div>
+
+    <button class="btn btn-success">Guardar Cambios</button>
+    <a href="/Items?compraId=@Model.CompraID" class="btn btn-secondary">Cancelar</a>
+
+</form>

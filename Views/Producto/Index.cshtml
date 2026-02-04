@@ -1,0 +1,43 @@
+﻿@model List<ZeltekWeb.Models.ProductoViewModel>
+
+<h2>📦 Productos Zeltek</h2>
+
+<a asp-action="Create" class="btn btn-primary mb-3">➕ Nuevo Producto</a>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Marca</th>
+            <th>Categoría</th>
+            <th>Tipo</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr>
+                <td>@p.ProductoID</td>
+                <td>@p.Nombre</td>
+                <td>@p.Marca</td>
+                <td>@p.Categoria</td>
+                <td>@(p.EsUnico ? "📱 Con Serial" : "📦 Accesorio")</td>
+                <td>
+                    <a asp-action="Edit"
+                       asp-route-id="@p.ProductoID"
+                       class="btn btn-warning btn-sm">✏️ Editar</a>
+
+                    <a asp-action="Delete"
+                       asp-route-id="@p.ProductoID"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('¿Seguro que desea eliminar este producto?');">
+                        🗑️ Eliminar
+                    </a>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,104 @@
+﻿@model List<ZeltekWeb.Models.VentaListViewModel>
+
+<h2>💰 Ventas</h2>
+
+
+@{
+    var r = (ZeltekWeb.Models.VentasResumenViewModel)ViewBag.Resumen;
+}
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6>Total Ventas</h6>
+                <h4>$@r.TotalVentas</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6>Total Costo</h6>
+                <h4>$@r.TotalCosto</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6>Ganancia</h6>
+                <h4 class="text-success">$@r.GananciaTotal</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6>Ventas</h6>
+                <h4>@r.CantidadVentas</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label>Desde</label>
+        <input type="date" name="desde" class="form-control"
+               value="@ViewBag.Desde" />
+    </div>
+
+    <div class="col-md-3">
+        <label>Hasta</label>
+        <input type="date" name="hasta" class="form-control"
+               value="@ViewBag.Hasta" />
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100">
+            🔍 Filtrar
+        </button>
+    </div>
+
+    <div class="col-md-3 d-flex align-items-end">
+        <a href="/Ventas" class="btn btn-secondary w-100">
+            ❌ Limpiar
+        </a>
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Fecha</th>
+            <th>Producto</th>
+            <th>Serie</th>
+            <th>Costo</th>
+            <th>Precio</th>
+            <th>Ganancia</th>
+            <th>Método Pago</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var v in Model)
+        {
+            <tr>
+                <td>@v.VentaID</td>
+                <td>@v.FechaVenta.ToShortDateString()</td>
+                <td>@v.Producto</td>
+                <td>@(v.NumeroSerie ?? "—")</td>
+                <td>$@v.Costo</td>
+                <td>$@v.PrecioVenta</td>
+                <td class="fw-bold text-success">
+                    $@v.Ganancia
+                </td>
+                <td>@v.MetodoPago</td>
+            </tr>
+        }
+    </tbody>
+</table>

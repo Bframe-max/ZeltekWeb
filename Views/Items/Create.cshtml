@@ -1,0 +1,47 @@
+﻿@model ZeltekWeb.Models.ItemViewModel
+@{
+    var productos = ViewBag.Productos as List<ZeltekWeb.Models.ProductoSelectViewModel>;
+}
+
+<h3>Agregar Item a Compra #@Model.CompraID</h3>
+
+<form method="post">
+
+    <input type="hidden" asp-for="CompraID" />
+
+    <!-- PRODUCTO -->
+    <div class="mb-3">
+        <label class="form-label">Producto</label>
+        <select asp-for="ProductoID" class="form-select" required>
+            <option value="">-- Seleccione un producto --</option>
+            @foreach (var p in productos!)
+            {
+                <option value="@p.ProductoID">
+                    @p.Nombre
+                </option>
+            }
+        </select>
+    </div>
+
+    <!-- NUMERO DE SERIE -->
+    <div class="mb-3">
+        <label class="form-label">Número de Serie (opcional)</label>
+        <input asp-for="NumeroSerie" class="form-control" />
+    </div>
+
+    <!-- COSTO -->
+    <div class="mb-3">
+        <label class="form-label">Costo Compra</label>
+        <input asp-for="CostoCompra" class="form-control" />
+    </div>
+
+    <!-- PRECIO -->
+    <div class="mb-3">
+        <label class="form-label">Precio Sugerido</label>
+        <input asp-for="PrecioVenta" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">Guardar Item</button>
+    <a href="/Compras" class="btn btn-secondary">Volver</a>
+
+</form>

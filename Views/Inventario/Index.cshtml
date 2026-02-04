@@ -1,0 +1,41 @@
+﻿@model List<ZeltekWeb.Models.InventarioViewModel>
+
+<h3>📦 Inventario</h3>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Serie</th>
+            <th>Costo</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model)
+        {
+            <tr>
+                <td>@i.Producto</td>
+                <td>@(i.NumeroSerie ?? "—")</td>
+                <td>$@i.CostoCompra</td>
+                <td>$@i.PrecioVenta</td>
+                <td>
+                    <span class="badge bg-@(i.Estado == "Vendido" ? "danger" : "success")">
+                        @i.Estado
+                    </span>
+                </td>
+                <td>
+                    @if (i.Estado == "En Stock")
+                    {
+                        <a class="btn btn-sm btn-success"
+                           href="/Ventas/Create?itemId=@i.ItemID">
+                            💰 Vender
+                        </a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,43 @@
+﻿@model List<ZeltekWeb.Models.ItemListViewModel>
+
+<h3>📦 Items de la Compra #@ViewBag.CompraID</h3>
+
+<a class="btn btn-success mb-3"
+   href="/Items/Create?compraId=@ViewBag.CompraID">
+    ➕ Agregar Item
+</a>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Serie</th>
+            <th>Costo</th>
+            <th>Precio</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model)
+        {
+            <tr>
+                <td>@i.Producto</td>
+                <td>@(i.NumeroSerie ?? "—")</td>
+                <td>$@i.CostoCompra</td>
+                <td>$@i.PrecioVenta</td>
+                <td>@i.Estado</td>
+                <td>
+                    <a class="btn btn-sm btn-warning"
+                       href="/Items/Edit/@i.ItemID">
+                        ✏️ Editar
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+    
+
+<a href="/Compras" class="btn btn-secondary">⬅ Volver a Compras</a>

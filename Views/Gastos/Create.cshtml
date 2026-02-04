@@ -1,0 +1,38 @@
+﻿@model ZeltekWeb.Models.GastoCreateViewModel
+
+<h2>➕ Agregar Gasto Operativo</h2>
+
+<form method="post">
+    <div class="row">
+
+        <div class="col-md-3 mb-3">
+            <label asp-for="FechaGasto"></label>
+            <input asp-for="FechaGasto" type="date" class="form-control" />
+        </div>
+
+        <div class="col-md-5 mb-3">
+            <label asp-for="Descripcion"></label>
+            <input asp-for="Descripcion" class="form-control" />
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <label asp-for="CategoriaGasto"></label>
+            <select asp-for="CategoriaGasto" class="form-select">
+                <option value="">-- Seleccionar --</option>
+                @foreach (var c in ViewBag.Categorias)
+                {
+                    <option value="@c">@c</option>
+                }
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label asp-for="Monto"></label>
+            <input asp-for="Monto" class="form-control" />
+        </div>
+
+    </div>
+
+    <button class="btn btn-success">💾 Guardar Gasto</button>
+    <a href="/Gastos" class="btn btn-secondary">Cancelar</a>
+</form>

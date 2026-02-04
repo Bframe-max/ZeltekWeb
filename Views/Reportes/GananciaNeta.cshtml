@@ -1,0 +1,168 @@
+﻿@model ZeltekWeb.Models.ReporteGananciaNetaViewModel
+
+<h2 class="mb-4">📊 Reporte de Ganancia Neta</h2>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-3">
+        <label>Desde</label>
+        <input type="date" name="desde" class="form-control"
+               value="@Model.Desde?.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <div class="col-md-3">
+        <label>Hasta</label>
+        <input type="date" name="hasta" class="form-control"
+               value="@Model.Hasta?.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <div class="col-md-3 align-self-end">
+        <button class="btn btn-primary">
+            📊 Calcular
+        </button>
+    </div>
+</form>
+
+<!-- RESUMEN -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Ventas</strong>
+            <h4>$@Model.TotalVentas</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Costo Productos</strong>
+            <h4>$@Model.TotalCosto</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Gastos Operativos</strong>
+            <h4 class="text-danger">$@Model.TotalGastos</h4>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card p-3">
+            <strong>Ganancia Neta</strong>
+            <h4 class="@(Model.GananciaNeta >= 0 ? "text-success" : "text-danger")">
+                $@Model.GananciaNeta
+            </h4>
+        </div>
+    </div>
+</div>
+
+<!-- GRAFICA -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="mb-3">📈 Análisis Financiero </h5>
+        <canvas id="graficaGanancia" height="120"></canvas>
+    </div>
+</div>
+
+<!-- CHART JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    fetch('/Reportes/GraficaGanancia?desde=@Model.Desde?.ToString("yyyy-MM-dd")&hasta=@Model.Hasta?.ToString("yyyy-MM-dd")')
+        .then(res => res.json())
+        .then(data => {
+
+            const ctx = document.getElementById('graficaGanancia').getContext('2d');
+
+            new Chart(ctx, {
+                data: {
+                    labels: data.labels,
+        datasets: [
+            {
+                type: 'bar',
+                label: 'Ventas',
+                data: data.ventas,
+                backgroundColor: '#0d6efd',
+                borderRadius: 6,
+                yAxisID: 'y'
+            },
+            {
+                type: 'bar',
+                label: 'Gastos',
+                data: data.gastos,
+                backgroundColor: '#dc3545',
+                borderRadius: 6,
+                yAxisID: 'y'
+            },
+            {
+                type: 'line',
+                label: 'Ganancia Neta',
+                data: data.ganancia,
+                borderColor: '#198754',
+                backgroundColor: '#198754',
+                tension: 0.35,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                fill: false,
+                yAxisID: 'y1'
+            }
+        ]
+    },
+    options: {
+        responsive: true,
+        interaction: {
+            mode: 'index',
+            intersect: false
+        },
+        plugins: {
+            legend: {
+                position: 'top',
+                labels: {
+                    usePointStyle: true
+                }
+            },
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        return `${context.dataset.label}: $${context.parsed.y.toLocaleString()}`;
+                    }
+                }
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: '#f1f1f1'
+                },
+                title: {
+                    display: true,
+                    text: 'Ventas / Gastos ($)'
+                },
+                ticks: {
+                    callback: value => '$' + value.toLocaleString()
+                }
+            },
+            y1: {
+                beginAtZero: true,
+                position: 'right',
+                grid: {
+                    drawOnChartArea: false
+                },
+                title: {
+                    display: true,
+                    text: 'Ganancia ($)'
+                },
+                ticks: {
+                    callback: value => '$' + value.toLocaleString()
+                }
+            }
+        }
+                }
+            });
+        });
+</script>
+
+
+
+
+

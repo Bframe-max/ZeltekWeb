@@ -1,0 +1,30 @@
+﻿@model ZeltekWeb.Models.GastoEditViewModel
+
+<h3>✏️ Editar Gasto</h3>
+
+<form method="post">
+    <input type="hidden" asp-for="GastoID" />
+
+    <div class="mb-3">
+        <label>Fecha</label>
+        <input asp-for="FechaGasto" type="date" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Descripción</label>
+        <input asp-for="Descripcion" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Categoría</label>
+        <input asp-for="CategoriaGasto" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label>Monto</label>
+        <input asp-for="Monto" class="form-control" />
+    </div>
+
+    <button class="btn btn-success">Guardar</button>
+    <a href="/Gastos" class="btn btn-secondary">Cancelar</a>
+</form>
