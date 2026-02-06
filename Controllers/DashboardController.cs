@@ -1,11 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Models;
-using ZeltekWeb.Filters;
 
 namespace ZeltekWeb.Controllers
 {
-    [AuthFilter]
+    [Authorize] // 🔐 Autenticación por cookies
     public class DashboardController : Controller
     {
         private readonly IConfiguration _config;
@@ -25,7 +25,11 @@ namespace ZeltekWeb.Controllers
 
             // 1️⃣ Capital invertido
             model.CapitalInvertido = ExecuteScalarDecimal(con, @"
-                SELECT ISNULL(SUM(CostoCompra + CostoReparacion + CostoEnvio),0)
+                SELECT ISNULL(SUM(
+                    ISNULL(CostoCompra,0) +
+                    ISNULL(CostoReparacion,0) +
+                    ISNULL(CostoEnvio,0)
+                ),0)
                 FROM ItemInventario
                 WHERE Estado = 'En Stock'
             ");
@@ -48,7 +52,9 @@ namespace ZeltekWeb.Controllers
             model.GananciaMes = ExecuteScalarDecimal(con, @"
                 SELECT ISNULL(SUM(
                     dv.PrecioUnitario -
-                    (i.CostoCompra + ISNULL(i.CostoReparacion,0) + ISNULL(i.CostoEnvio,0))
+                    (ISNULL(i.CostoCompra,0) +
+                     ISNULL(i.CostoReparacion,0) +
+                     ISNULL(i.CostoEnvio,0))
                 ),0)
                 FROM DetalleVenta dv
                 JOIN ItemInventario i ON dv.ItemID = i.ItemID
@@ -67,16 +73,19 @@ namespace ZeltekWeb.Controllers
 
             // 6️⃣ Equipos en camino
             model.EquiposEnCamino = ExecuteScalarInt(con, @"
-    SELECT COUNT(*)
-    FROM ItemInventario i
-    JOIN Compra c ON i.CompraID = c.CompraID
-    JOIN Envio e ON c.EnvioID = e.EnvioID
-    WHERE e.FechaRecibidoNicaragua IS NULL
-");
-
+                SELECT COUNT(*)
+                FROM ItemInventario i
+                JOIN Compra c ON i.CompraID = c.CompraID
+                JOIN Envio e ON c.EnvioID = e.EnvioID
+                WHERE e.FechaRecibidoNicaragua IS NULL
+            ");
 
             return View(model);
         }
+
+        // ========================
+        // Helpers
+        // ========================
 
         private decimal ExecuteScalarDecimal(SqlConnection con, string sql)
         {

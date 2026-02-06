@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Filters;
@@ -6,7 +7,7 @@ using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
 {
-    [AuthFilter]
+    [Authorize]
     public class ComprasController : Controller
     {
         private readonly IConfiguration _config;

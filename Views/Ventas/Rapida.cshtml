@@ -1,0 +1,53 @@
+﻿@model ZeltekWeb.Models.VentaRapidaViewModel
+
+<h2>⚡ Venta Rápida</h2>
+
+<form method="post">
+
+    <h5>👤 Cliente</h5>
+    <div class="mb-2">
+        <input asp-for="NombreCliente" class="form-control"
+               placeholder="Nombre del cliente" />
+    </div>
+
+    <div class="mb-2">
+        <input asp-for="Telefono" class="form-control"
+               placeholder="Teléfono" />
+    </div>
+
+    <div class="mb-3">
+        <select asp-for="TipoCliente" class="form-select">
+            <option>Regular</option>
+            <option>Revendedor</option>
+        </select>
+    </div>
+
+    <h5>📦 Producto</h5>
+    <div class="mb-2">
+        <input asp-for="NumeroSerie" class="form-control"
+               placeholder="Número de serie (si aplica)" />
+    </div>
+
+    <div class="mb-2">
+        <input asp-for="PrecioUnitario" class="form-control"
+               placeholder="Precio de venta" />
+    </div>
+
+    <div class="mb-2">
+        <input asp-for="GarantiaMeses" class="form-control"
+               placeholder="Garantía (meses)" />
+    </div>
+
+    <div class="mb-3">
+        <select asp-for="MetodoPago" class="form-select">
+            <option>Efectivo</option>
+            <option>Transferencia</option>
+            <option>Zelle</option>
+        </select>
+    </div>
+
+    <button class="btn btn-success w-100">
+        ✅ Registrar Venta
+    </button>
+
+</form>

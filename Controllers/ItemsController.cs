@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ZeltekWeb.Models;
 using ZeltekWeb.Filters;
+using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
 {
-    [AuthFilter]
+    [Authorize]
     public class ItemsController : Controller
     {
         private readonly IConfiguration _config;

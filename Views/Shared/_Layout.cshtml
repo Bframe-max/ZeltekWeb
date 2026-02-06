@@ -7,17 +7,17 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-
 </head>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 
 <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/Dashboard">⚡ Zeltek</a>
+
+            <!-- LOGO -->
+            <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
+                ⚡ Zeltek
+            </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                     data-bs-target="#navbarZeltek">
@@ -48,7 +48,7 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link" href="Garantías">🛡️ Garantías</a>
+                        <a class="nav-link" asp-controller="Garantias" asp-action="Index">🛡️ Garantías</a>
                     </li>
 
                     <li class="nav-item">
@@ -56,11 +56,15 @@
                     </li>
                 </ul>
 
+                <!-- USUARIO DESDE CLAIM -->
                 <span class="navbar-text me-3 text-white">
-                    👤 @Context.Session.GetString("Usuario")
+                    👤 @User.Identity?.Name
                 </span>
 
-                <a class="btn btn-outline-light btn-sm" href="/Login/Logout">
+                <!-- LOGOUT CORRECTO -->
+                <a class="btn btn-outline-light btn-sm"
+                   asp-controller="Auth"
+                   asp-action="Logout">
                     Salir
                 </a>
             </div>
@@ -72,8 +76,6 @@
     </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
-
     @RenderSection("Scripts", required: false)
 
 </body>

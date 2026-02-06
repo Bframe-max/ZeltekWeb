@@ -1,9 +1,8 @@
-namespace Zeltekweb.Models
+namespace ZeltekWeb.Models
 {
     public class ErrorViewModel
     {
         public string? RequestId { get; set; }
-
         public bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
     }
 }

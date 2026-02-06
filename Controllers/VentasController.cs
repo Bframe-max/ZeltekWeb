@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Filters;
 using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
 {
-    [AuthFilter]
+    [Authorize]
     public class VentasController : Controller
     {
         private readonly IConfiguration _config;
@@ -29,7 +30,7 @@ namespace ZeltekWeb.Controllers
             con.Open();
 
             // =========================
-            // RESUMEN FINANCIERO
+            // RESUMEN
             // =========================
             var sqlResumen = @"
                 SELECT
@@ -39,8 +40,7 @@ namespace ZeltekWeb.Controllers
                 FROM Venta v
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                WHERE 1 = 1
-            ";
+                WHERE 1 = 1";
 
             if (desde.HasValue)
                 sqlResumen += " AND v.FechaVenta >= @Desde";
@@ -67,7 +67,7 @@ namespace ZeltekWeb.Controllers
             }
 
             // =========================
-            // LISTADO DE VENTAS
+            // LISTADO
             // =========================
             var sql = @"
                 SELECT
@@ -83,8 +83,7 @@ namespace ZeltekWeb.Controllers
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE 1 = 1
-            ";
+                WHERE 1 = 1";
 
             if (desde.HasValue)
                 sql += " AND v.FechaVenta >= @Desde";
@@ -167,7 +166,7 @@ namespace ZeltekWeb.Controllers
         }
 
         // =========================
-        // GUARDAR VENTA
+        // GUARDAR VENTA (CON CLIENTE)
         // =========================
         [HttpPost]
         public IActionResult Create(VentaCreateViewModel model)
@@ -183,7 +182,48 @@ namespace ZeltekWeb.Controllers
 
             try
             {
-                // 1️⃣ Crear Venta
+                // =========================
+                // CLIENTE: BUSCAR O CREAR
+                // =========================
+                int clienteId;
+
+                var sqlBuscarCliente = @"
+                    SELECT ClienteID
+                    FROM Cliente
+                    WHERE Cedula = @Cedula AND IsDeleted = 0";
+
+                using (var cmdBuscar = new SqlCommand(sqlBuscarCliente, con, tx))
+                {
+                    cmdBuscar.Parameters.AddWithValue("@Cedula", model.Cedula);
+
+                    var result = cmdBuscar.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        clienteId = (int)result;
+                    }
+                    else
+                    {
+                        var sqlCrearCliente = @"
+                            INSERT INTO Cliente
+                            (Cedula, NombreCompleto, Telefono, TipoCliente, CreationDate)
+                            OUTPUT INSERTED.ClienteID
+                            VALUES
+                            (@Cedula, @Nombre, @Telefono, @TipoCliente, GETDATE())";
+
+                        using var cmdCrear = new SqlCommand(sqlCrearCliente, con, tx);
+                        cmdCrear.Parameters.AddWithValue("@Cedula", model.Cedula);
+                        cmdCrear.Parameters.AddWithValue("@Nombre", model.NombreCompleto ?? "Cliente");
+                        cmdCrear.Parameters.AddWithValue("@Telefono", model.Telefono ?? "");
+                        cmdCrear.Parameters.AddWithValue("@TipoCliente", model.TipoCliente);
+
+                        clienteId = (int)cmdCrear.ExecuteScalar();
+                    }
+                }
+
+                // =========================
+                // CREAR VENTA
+                // =========================
                 var sqlVenta = @"
                     INSERT INTO Venta
                     (ClienteID, FechaVenta, TotalVenta, MetodoPago)
@@ -194,14 +234,16 @@ namespace ZeltekWeb.Controllers
                 int ventaId;
                 using (var cmdVenta = new SqlCommand(sqlVenta, con, tx))
                 {
-                    cmdVenta.Parameters.AddWithValue("@ClienteID", (object?)model.ClienteID ?? DBNull.Value);
+                    cmdVenta.Parameters.AddWithValue("@ClienteID", clienteId);
                     cmdVenta.Parameters.AddWithValue("@TotalVenta", model.PrecioUnitario);
                     cmdVenta.Parameters.AddWithValue("@MetodoPago", model.MetodoPago ?? "Efectivo");
 
                     ventaId = (int)cmdVenta.ExecuteScalar();
                 }
 
-                // 2️⃣ DetalleVenta
+                // =========================
+                // DETALLE VENTA
+                // =========================
                 var sqlDetalle = @"
                     INSERT INTO DetalleVenta
                     (VentaID, ItemID, PrecioUnitario, GarantiaMeses, ProductoID)
@@ -209,7 +251,7 @@ namespace ZeltekWeb.Controllers
                         @VentaID,
                         i.ItemID,
                         @Precio,
-                        0,
+                        @Garantia,
                         i.ProductoID
                     FROM ItemInventario i
                     WHERE i.ItemID = @ItemID";
@@ -219,10 +261,13 @@ namespace ZeltekWeb.Controllers
                     cmdDetalle.Parameters.AddWithValue("@VentaID", ventaId);
                     cmdDetalle.Parameters.AddWithValue("@ItemID", model.ItemID);
                     cmdDetalle.Parameters.AddWithValue("@Precio", model.PrecioUnitario);
+                    cmdDetalle.Parameters.AddWithValue("@Garantia", model.GarantiaMeses);
                     cmdDetalle.ExecuteNonQuery();
                 }
 
-                // 3️⃣ Marcar Item como Vendido
+                // =========================
+                // ITEM → VENDIDO
+                // =========================
                 var sqlUpdate = @"
                     UPDATE ItemInventario
                     SET Estado = 'Vendido'
@@ -242,6 +287,71 @@ namespace ZeltekWeb.Controllers
                 tx.Rollback();
                 throw;
             }
+
+
+
+
         }
+
+
+
+        public IActionResult Rapida()
+        {
+            return View(new VentaRapidaViewModel());
+        }
+
+
+
+
+        [HttpPost]
+        public IActionResult Rapida(VentaRapidaViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var cadena = _config.GetConnectionString("ZeltekDB");
+
+            using SqlConnection con = new SqlConnection(cadena);
+            con.Open();
+
+            using SqlCommand cmd = new SqlCommand("sp_RegistrarVenta", con);
+            cmd.CommandType = System.Data.CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue("@NombreCliente", model.NombreCliente);
+            cmd.Parameters.AddWithValue("@Telefono", model.Telefono);
+            cmd.Parameters.AddWithValue("@TipoCliente", model.TipoCliente);
+
+            cmd.Parameters.AddWithValue("@FechaVenta", model.FechaVenta);
+            cmd.Parameters.AddWithValue("@MetodoPago", model.MetodoPago);
+
+            cmd.Parameters.AddWithValue("@NumeroSerie",
+                string.IsNullOrWhiteSpace(model.NumeroSerie)
+                    ? DBNull.Value
+                    : model.NumeroSerie);
+
+            cmd.Parameters.AddWithValue("@ProductoID",
+                model.ProductoID.HasValue
+                    ? model.ProductoID
+                    : DBNull.Value);
+
+            cmd.Parameters.AddWithValue("@PrecioUnitario", model.PrecioUnitario);
+            cmd.Parameters.AddWithValue("@GarantiaMeses", model.GarantiaMeses);
+
+            try
+            {
+                cmd.ExecuteNonQuery();
+                return RedirectToAction("Index");
+            }
+            catch (SqlException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(model);
+            }
+        }
+
+
+
+
+
     }
 }
