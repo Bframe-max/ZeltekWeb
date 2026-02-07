@@ -4,79 +4,191 @@
     <meta charset="utf-8" />
     <title>@ViewData["Title"] - Zeltek</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* =========================================
+                   ESTILOS MODO OSCURO (IMEI CHECKER STYLE)
+                   ========================================= */
+        :root {
+            --bg-body: #151521; /* Fondo principal muy oscuro */
+            --bg-card: #1e1e2d; /* Fondo tarjetas y sidebar */
+            --text-primary: #ffffff; /* Texto blanco */
+            --text-secondary: #92929f; /* Texto gris suave */
+            --accent-color: #5646ff; /* Morado Neón */
+            --accent-hover: #4032c9;
+            --border-color: #2d2d3f; /* Bordes sutiles */
+        }
+
+        body {
+            background-color: var(--bg-body) !important;
+            color: var(--text-primary) !important;
+            font-family: system-ui, -apple-system, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* --- WRAPPER (EFECTO SIDEBAR) --- */
+        #wrapper {
+            display: flex;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        #sidebar-wrapper {
+            min-width: 260px;
+            max-width: 260px;
+            background-color: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            min-height: 100vh;
+            transition: margin 0.3s ease;
+        }
+
+        /* CLASE MÁGICA: Esto oculta el menú cuando activas el botón */
+        #wrapper.toggled #sidebar-wrapper {
+            margin-left: -260px;
+        }
+
+        /* --- MENÚ LATERAL --- */
+        .sidebar-heading {
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--bg-card);
+        }
+
+        .list-group-item {
+            background-color: transparent !important;
+            color: var(--text-secondary) !important;
+            border: none;
+            padding: 12px 20px;
+            font-weight: 500;
+        }
+
+            .list-group-item:hover {
+                background-color: rgba(86, 70, 255, 0.1) !important;
+                color: #fff !important;
+                border-left: 3px solid var(--accent-color);
+            }
+
+        /* --- TARJETAS --- */
+        .card {
+            background-color: var(--bg-card) !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        h1, h2, h3, h4, h5, th {
+            color: var(--text-primary) !important;
+        }
+
+        /* --- TABLAS Y FORMULARIOS --- */
+        .table {
+            --bs-table-bg: transparent;
+            color: var(--text-secondary);
+        }
+
+            .table td, .table th {
+                border-bottom: 1px solid var(--border-color);
+            }
+
+        .form-control {
+            background-color: #13131b !important;
+            border: 1px solid var(--border-color) !important;
+            color: #fff !important;
+        }
+
+            .form-control:focus {
+                border-color: var(--accent-color) !important;
+                box-shadow: 0 0 0 0.25rem rgba(86, 70, 255, 0.25);
+            }
+
+        /* Badge arreglos */
+        .badge.bg-light {
+            background-color: #2d2d3f !important;
+            color: #fff !important;
+            border: none !important;
+        }
+    </style>
 </head>
 
 <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
+    <div class="d-flex" id="wrapper">
 
-            <!-- LOGO -->
-            <a class="navbar-brand" asp-controller="Dashboard" asp-action="Index">
-                ⚡ Zeltek
-            </a>
+        <div id="sidebar-wrapper">
+            <div class="sidebar-heading fw-bold d-flex align-items-center gap-2">
+                ⚡ Zeltek <span class="badge bg-primary" style="font-size:0.6rem">v2.0</span>
+            </div>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarZeltek">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+            <div class="list-group list-group-flush p-3">
+                <small class="text-uppercase text-secondary fw-bold mb-2 ps-2" style="font-size:0.7rem;">Principal</small>
 
-            <div class="collapse navbar-collapse" id="navbarZeltek">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <a asp-controller="Dashboard" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+                <a asp-controller="Ventas" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cash-stack me-2"></i> Ventas
+                </a>
+                <a asp-controller="Inventario" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-box-seam me-2"></i> Inventario
+                </a>
 
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Dashboard" asp-action="Index">📊 Dashboard</a>
-                    </li>
+                <small class="text-uppercase text-secondary fw-bold mt-4 mb-2 ps-2" style="font-size:0.7rem;">Administración</small>
 
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Producto" asp-action="Index">📦 Productos</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Compras" asp-action="Index">🛒 Compras</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Inventario" asp-action="Index">📦 Inventario</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Ventas" asp-action="Index">💵 Ventas</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Garantias" asp-action="Index">🛡️ Garantías</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link" asp-controller="Reportes" asp-action="Index">📈 Reportes</a>
-                    </li>
-                </ul>
-
-                <!-- USUARIO DESDE CLAIM -->
-                <span class="navbar-text me-3 text-white">
-                    👤 @User.Identity?.Name
-                </span>
-
-                <!-- LOGOUT CORRECTO -->
-                <a class="btn btn-outline-light btn-sm"
-                   asp-controller="Auth"
-                   asp-action="Logout">
-                    Salir
+                <a asp-controller="Producto" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-tags me-2"></i> Productos
+                </a>
+                <a asp-controller="Compras" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-cart me-2"></i> Compras
+                </a>
+                <a asp-controller="Garantias" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-shield-check me-2"></i> Garantías
+                </a>
+                <a asp-controller="Reportes" asp-action="Index" class="list-group-item list-group-item-action">
+                    <i class="bi bi-graph-up me-2"></i> Reportes
                 </a>
             </div>
         </div>
-    </nav>
+        <div id="page-content-wrapper" style="width: 100%;">
 
-    <div class="container mt-4">
-        @RenderBody()
+            <nav class="navbar navbar-expand-lg navbar-dark bg-transparent border-bottom py-3 px-4" style="border-color: var(--border-color) !important;">
+                <div class="d-flex align-items-center w-100">
+                    <button class="btn btn-outline-secondary border-0 text-white" id="menu-toggle">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+
+                    <div class="ms-auto d-flex align-items-center gap-3">
+                        <span class="text-white d-none d-md-block">
+                            👋 Hola, <strong>@User.Identity?.Name</strong>
+                        </span>
+                        <a asp-controller="Auth" asp-action="Logout" class="btn btn-sm btn-danger px-3">
+                            Salir
+                        </a>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="container-fluid px-4 py-4">
+                @RenderBody()
+            </div>
+        </div>
     </div>
 
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @RenderSection("Scripts", required: false)
 
+    <script>
+        // Lógica para ocultar/mostrar menú
+        var el = document.getElementById("wrapper");
+        var toggleButton = document.getElementById("menu-toggle");
+
+        toggleButton.onclick = function () {
+            el.classList.toggle("toggled");
+        };
+    </script>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

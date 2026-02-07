@@ -1,22 +1,117 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+:root {
+    /* --- PALETA PREMIUM DARK --- */
+    --bg-body: #151521; /* Fondo principal */
+    --bg-card: #1e1e2d; /* Fondo de tarjetas y sidebar */
+    --text-primary: #ffffff;
+    --text-secondary: #92929f;
+    --accent-color: #5646ff; /* Morado/Azul Neón */
+    --accent-hover: #4032c9;
+    --border-color: #2d2d3f;
 }
 
 body {
-  margin-bottom: 60px;
+    background-color: var(--bg-body);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    overflow-x: hidden; /* Evita scroll horizontal al animar sidebar */
 }
+
+/* --- TARJETAS (CARDS) --- */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+}
+
+.card-title, h1, h2, h3, h4, h5 {
+    color: var(--text-primary);
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* --- SIDEBAR (BARRA LATERAL) --- */
+#wrapper {
+    display: flex;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
+#sidebar-wrapper {
+    width: 260px;
+    background-color: var(--bg-card);
+    border-right: 1px solid var(--border-color);
+    min-height: 100vh;
+    transition: margin 0.3s ease;
+}
+
+/* Estilo de los links del menú */
+.list-group-item {
+    background-color: transparent;
+    color: var(--text-secondary);
+    border: none;
+    padding: 12px 20px;
+    margin-bottom: 5px;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+    .list-group-item:hover {
+        background-color: rgba(86, 70, 255, 0.1); /* Morado transparente */
+        color: var(--text-primary);
+        transform: translateX(5px); /* Pequeño movimiento a la derecha */
+    }
+
+.sidebar-heading {
+    padding: 1.5rem 1.25rem;
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Lógica para ocultar sidebar */
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: -260px;
+}
+
+/* --- TABLAS Y FORMULARIOS --- */
+.table {
+    color: var(--text-secondary);
+    --bs-table-bg: transparent;
+}
+
+    .table thead th {
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table td, .table th {
+        border-bottom: 1px solid var(--border-color);
+    }
+
+.form-control {
+    background-color: #13131b;
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+}
+
+    .form-control:focus {
+        background-color: #13131b;
+        color: var(--text-primary);
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.25rem rgba(86, 70, 255, 0.25);
+    }
+
+/* Botones */
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+    .btn-primary:hover {
+        background-color: var(--accent-hover);
+        border-color: var(--accent-hover);
+    }

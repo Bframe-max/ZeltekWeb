@@ -1,38 +1,64 @@
-﻿<h2 class="mb-4">📊 Reportes</h2>
+﻿@{
+    ViewData["Title"] = "Reportes";
+}
+
+<style>
+    /* Efecto Hover para levantar la tarjeta */
+    .hover-card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
+        /* Asegura que el fondo sea el correcto del tema */
+        background-color: var(--bg-card);
+    }
+
+        .hover-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 .5rem 1rem rgba(0,0,0,0.4) !important; /* Sombra más fuerte para modo oscuro */
+        }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-white">📊 Panel de Reportes</h2>
+</div>
 
 <div class="row g-4">
 
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h5>📈 Ganancia Neta</h5>
-                <p>Ventas - Costos - Gastos</p>
-                <a href="/Reportes/GananciaNeta" class="btn btn-primary">
-                    Ver Reporte
+        <div class="card h-100 hover-card border-start border-4 border-success">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">📈</div>
+                <h5 class="card-title fw-bold text-success">Ganancia Neta</h5>
+                <p class="card-text text-secondary small">Cálculo de utilidad final (Ventas - Costos - Gastos).</p>
+
+                <a asp-controller="Reportes" asp-action="GananciaNeta" class="btn btn-outline-success w-100 mt-2 fw-bold">
+                    Ver Reporte de Ganancias
                 </a>
             </div>
         </div>
     </div>
 
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h5>💰 Ventas</h5>
-                <p>Detalle de ventas por fecha</p>
-                <a href="/Ventas" class="btn btn-success">
-                    Ver Ventas
+        <div class="card h-100 hover-card border-start border-4 border-primary">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">💰</div>
+                <h5 class="card-title fw-bold text-primary">Reporte de Ventas</h5>
+                <p class="card-text text-secondary small">Historial detallado de todas las ventas por fecha.</p>
+
+                <a asp-controller="Ventas" asp-action="Index" class="btn btn-outline-primary w-100 mt-2 fw-bold">
+                    Consultar Ventas
                 </a>
             </div>
         </div>
     </div>
 
     <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-body text-center">
-                <h5>📉 Gastos Operativos</h5>
-                <p>Control de gastos del negocio</p>
-                <a href="/Gastos" class="btn btn-danger">
-                    Ver Gastos
+        <div class="card h-100 hover-card border-start border-4 border-danger">
+            <div class="card-body text-center p-4">
+                <div class="display-4 mb-3">📉</div>
+                <h5 class="card-title fw-bold text-danger">Gastos Operativos</h5>
+                <p class="card-text text-secondary small">Control de salidas de dinero y pagos operativos.</p>
+
+                <a asp-controller="Gastos" asp-action="Index" class="btn btn-outline-danger w-100 mt-2 fw-bold">
+                    Gestionar Gastos
                 </a>
             </div>
         </div>

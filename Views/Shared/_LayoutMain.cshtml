@@ -1,0 +1,36 @@
+﻿<body class="dark-body">
+
+    <link rel="stylesheet" href="~/css/zeltek-dark.css" />
+
+
+    <div id="sidebar" class="sidebar">
+        <div class="sidebar-header">
+            ⚡ <span>Zeltek</span>
+            <button id="toggleSidebar" class="btn btn-sm text-light">☰</button>
+        </div>
+
+        <div class="sidebar-user">
+            👤 admin2
+        </div>
+
+        <nav class="sidebar-menu">
+            <a asp-controller="Dashboard" asp-action="Index">📊 <span>Dashboard</span></a>
+            <a asp-controller="Producto" asp-action="Index">📦 <span>Productos</span></a>
+            <a asp-controller="Compras" asp-action="Index">🛒 <span>Compras</span></a>
+            <a asp-controller="Inventario" asp-action="Index">📦 <span>Inventario</span></a>
+            <a asp-controller="Ventas" asp-action="Index">💵 <span>Ventas</span></a>
+            <a asp-controller="Garantias" asp-action="Index">🛡️ <span>Garantías</span></a>
+            <a asp-controller="Reportes" asp-action="Index">📈 <span>Reportes</span></a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/Auth/Logout" class="logout">🚪 <span>Salir</span></a>
+        </div>
+    </div>
+
+    <div id="content" class="content">
+        @RenderBody()
+    </div>
+
+    <script src="~/js/sidebar.js"></script>
+</body>

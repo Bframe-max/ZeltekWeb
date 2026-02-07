@@ -1,113 +1,122 @@
 ﻿@model List<ZeltekWeb.Models.VentaListViewModel>
 
-<h2>💰 Ventas</h2>
-<a href="/Inventario"
-   class="btn btn-success mb-3">
-    ➕ Nueva Venta
-</a>
-
-<a href="/Ventas/Rapida" class="btn btn-success mb-3">
-    ⚡ Venta Rápida
-</a>
-
-
-
 @{
+    ViewData["Title"] = "Ventas";
     var r = (ZeltekWeb.Models.VentasResumenViewModel)ViewBag.Resumen;
+    if (r == null) { r = new ZeltekWeb.Models.VentasResumenViewModel(); }
+
+    var hoy = DateTime.Now;
+    var primerDiaMes = new DateTime(hoy.Year, hoy.Month, 1);
+
+    string? fechaDesde = ViewBag.Desde as string;
+    if (string.IsNullOrEmpty(fechaDesde)) { fechaDesde = primerDiaMes.ToString("yyyy-MM-dd"); }
+
+    string? fechaHasta = ViewBag.Hasta as string;
+    if (string.IsNullOrEmpty(fechaHasta)) { fechaHasta = hoy.ToString("yyyy-MM-dd"); }
 }
 
-<div class="row mb-4">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-white">💰 Historial de Ventas</h2>
+</div>
+
+<div class="row g-3 mb-4">
     <div class="col-md-3">
-        <div class="card shadow-sm">
+        <div class="card h-100 border-start border-4 border-primary">
             <div class="card-body">
-                <h6>Total Ventas</h6>
-                <h4>$@r.TotalVentas</h4>
+                <h6 class="text-secondary text-uppercase small fw-bold">Total Ventas</h6>
+                <h3 class="fw-bold text-white mb-0">$@r.TotalVentas</h3>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card shadow-sm">
+        <div class="card h-100 border-start border-4 border-secondary">
             <div class="card-body">
-                <h6>Total Costo</h6>
-                <h4>$@r.TotalCosto</h4>
+                <h6 class="text-secondary text-uppercase small fw-bold">Costo Mercadería</h6>
+                <h3 class="fw-bold text-white mb-0">$@r.TotalCosto</h3>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card shadow-sm">
+        <div class="card h-100 border-start border-4 border-success">
             <div class="card-body">
-                <h6>Ganancia</h6>
-                <h4 class="text-success">$@r.GananciaTotal</h4>
+                <h6 class="text-success text-uppercase small fw-bold">Ganancia Neta</h6>
+                <h3 class="fw-bold text-success mb-0">$@r.GananciaTotal</h3>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="card shadow-sm">
+        <div class="card h-100 border-start border-4 border-warning">
             <div class="card-body">
-                <h6>Ventas</h6>
-                <h4>@r.CantidadVentas</h4>
+                <h6 class="text-secondary text-uppercase small fw-bold">Items Vendidos</h6>
+                <h3 class="fw-bold text-white mb-0">@r.CantidadVentas</h3>
             </div>
         </div>
     </div>
 </div>
 
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-3">
-        <label>Desde</label>
-        <input type="date" name="desde" class="form-control"
-               value="@ViewBag.Desde" />
-    </div>
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Desde</label>
+                <input type="date" name="desde" class="form-control" value="@fechaDesde" />
+            </div>
 
-    <div class="col-md-3">
-        <label>Hasta</label>
-        <input type="date" name="hasta" class="form-control"
-               value="@ViewBag.Hasta" />
-    </div>
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-secondary">Hasta</label>
+                <input type="date" name="hasta" class="form-control" value="@fechaHasta" />
+            </div>
 
-    <div class="col-md-3 d-flex align-items-end">
-        <button class="btn btn-primary w-100">
-            🔍 Filtrar
-        </button>
-    </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100 fw-bold">🔍 Filtrar</button>
+            </div>
 
-    <div class="col-md-3 d-flex align-items-end">
-        <a href="/Ventas" class="btn btn-secondary w-100">
-            ❌ Limpiar
-        </a>
+            <div class="col-md-2">
+                <a asp-controller="Ventas" asp-action="Index" class="btn btn-outline-secondary w-100">❌ Limpiar</a>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Fecha</th>
-            <th>Producto</th>
-            <th>Serie</th>
-            <th>Costo</th>
-            <th>Precio</th>
-            <th>Ganancia</th>
-            <th>Método Pago</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var v in Model)
-        {
-            <tr>
-                <td>@v.VentaID</td>
-                <td>@v.FechaVenta.ToShortDateString()</td>
-                <td>@v.Producto</td>
-                <td>@(v.NumeroSerie ?? "—")</td>
-                <td>$@v.Costo</td>
-                <td>$@v.PrecioVenta</td>
-                <td class="fw-bold text-success">
-                    $@v.Ganancia
-                </td>
-                <td>@v.MetodoPago</td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-3 text-white">ID</th>
+                        <th class="text-white">Fecha</th>
+                        <th class="text-white">Producto</th>
+                        <th class="text-white">Serie</th>
+                        <th class="text-white">Costo</th>
+                        <th class="text-white">Precio</th>
+                        <th class="text-white">Ganancia</th>
+                        <th class="text-white">Método</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model)
+                    {
+                        <tr>
+                            <td class="ps-3 fw-bold text-secondary">#@v.VentaID</td>
+                            <td class="text-secondary">@v.FechaVenta.ToShortDateString()</td>
+                            <td class="fw-bold text-white">@v.Producto</td>
+                            <td><span class="badge bg-secondary bg-opacity-10 text-white border border-secondary">@(v.NumeroSerie ?? "—")</span></td>
+                            <td class="text-secondary">$@v.Costo</td>
+                            <td class="text-white">$@v.PrecioVenta</td>
+                            <td class="fw-bold text-success">+$@v.Ganancia</td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary">@v.MetodoPago</span></td>
+                        </tr>
+                    }
+                    @if (!Model.Any())
+                    {
+                        <tr><td colspan="8" class="text-center py-4 text-secondary">No hay ventas registradas.</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

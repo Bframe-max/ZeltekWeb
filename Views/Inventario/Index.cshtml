@@ -1,41 +1,128 @@
 ﻿@model List<ZeltekWeb.Models.InventarioViewModel>
 
-<h3>📦 Inventario</h3>
+@{
+    ViewData["Title"] = "Inventario";
+}
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Serie</th>
-            <th>Costo</th>
-            <th>Precio</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var i in Model)
-        {
-            <tr>
-                <td>@i.Producto</td>
-                <td>@(i.NumeroSerie ?? "—")</td>
-                <td>$@i.CostoCompra</td>
-                <td>$@i.PrecioVenta</td>
-                <td>
-                    <span class="badge bg-@(i.Estado == "Vendido" ? "danger" : "success")">
-                        @i.Estado
-                    </span>
-                </td>
-                <td>
-                    @if (i.Estado == "En Stock")
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-white">📦 Inventario</h2>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body py-3">
+        <form method="get" action="/Inventario/Index" class="row g-2 align-items-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary"
+                          style="border-color: var(--border-color);">🔍</span>
+
+                    <input type="text" name="buscar" class="form-control border-start-0"
+                           placeholder="Buscar por Número de Serie o Producto..."
+                           value="@ViewData["BusquedaActual"]">
+                </div>
+            </div>
+            <div class="col-md-2">
+                @if (!string.IsNullOrEmpty(ViewData["BusquedaActual"] as string))
+                {
+                    <a asp-controller="Inventario" asp-action="Index" class="btn btn-outline-secondary w-100 fw-bold">
+                        ❌ Limpiar
+                    </a>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary w-100 fw-bold">Buscar</button>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-4 text-white">Producto</th>
+                        <th class="text-white">Serie</th>
+                        <th class="text-white">Costo</th>
+                        <th class="text-white">Precio</th>
+                        <th class="text-white">Estado</th>
+                        <th class="text-end pe-4 text-white">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in Model)
                     {
-                        <a class="btn btn-sm btn-success"
-                           href="/Ventas/Create?itemId=@i.ItemID">
-                            💰 Vender
-                        </a>
+                        // Estilos dinámicos para Dark Mode
+                        bool esVendido = i.Estado == "Vendido";
+
+                        // Si está vendido, bajamos la opacidad al 50% para que no distraiga
+                        string claseFila = esVendido ? "opacity-50" : "";
+
+                        // Si está en stock, texto blanco brillante. Si no, gris.
+                        string claseTexto = esVendido ? "text-secondary" : "fw-bold text-white";
+
+                        <tr class="@claseFila">
+
+                            <td class="ps-4">
+                                <div class="d-flex flex-column">
+                                    <span class="@claseTexto fs-6">@i.Producto</span>
+                                    @if (!string.IsNullOrEmpty(i.Especificaciones))
+                                    {
+                                        <small class="text-secondary mt-1" style="font-size: 0.75rem;">
+                                            ⚙️ @i.Especificaciones
+                                        </small>
+                                    }
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge bg-dark text-secondary border border-secondary font-monospace">
+                                    @(i.NumeroSerie ?? "—")
+                                </span>
+                            </td>
+
+                            <td class="text-secondary">$@i.CostoCompra</td>
+
+                            <td class="@claseTexto">$@i.PrecioVenta</td>
+
+                            <td>
+                                @if (esVendido)
+                                {
+                                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill border border-danger border-opacity-10">
+                                        🔴 Vendido
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill border border-success border-opacity-10">
+                                        🟢 En Stock
+                                    </span>
+                                }
+                            </td>
+
+                            <td class="text-end pe-4">
+                                @if (!esVendido)
+                                {
+                                    <a class="btn btn-sm btn-success fw-bold shadow-sm"
+                                       href="/Ventas/Create?itemId=@i.ItemID">
+                                        💰 Vender
+                                    </a>
+                                }
+                            </td>
+                        </tr>
                     }
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                    @if (Model.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-secondary">
+                                No se encontraron productos con ese criterio.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
