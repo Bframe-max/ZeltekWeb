@@ -1,0 +1,74 @@
+﻿@model List<ZeltekWeb.Models.CompraListViewModel>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+        <thead style="border-bottom: 1px solid var(--border-color);">
+            <tr>
+                <th class="ps-4 text-white">ID / Fecha</th>
+                <th class="text-white">Tienda & Producto</th>
+                <th class="text-white">Tracking</th>
+                <th class="text-white">Total</th>
+                <th class="text-center text-white">Estado</th>
+                <th class="text-end pe-4 text-white">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                bool esRecibido = item.Estado == "Recibido";
+                <tr class="@(esRecibido ? "opacity-75" : "")">
+
+                    <td class="ps-4">
+                        <div class="d-flex flex-column">
+                            <span class="text-secondary small fw-bold">#@item.CompraID</span>
+                            <small class="text-white">@item.Fecha.ToString("dd/MM")</small>
+                        </div>
+                    </td>
+
+                    <td>
+                        <div class="d-flex flex-column">
+                            <span class="fw-bold text-white">@item.Vendedor</span>
+                            <small class="text-info">
+                                <i class="bi bi-box-seam"></i> @item.CantidadItems un. • @item.ProductoPrincipal
+                            </small>
+                        </div>
+                    </td>
+
+                    <td>
+                        <span class="badge bg-dark text-secondary border border-secondary font-monospace">
+                            @(string.IsNullOrEmpty(item.Tracking) ? "-" : item.Tracking)
+                        </span>
+                    </td>
+
+                    <td class="fw-bold text-white">$@item.Total.ToString("N2")</td>
+
+                    <td class="text-center">
+                        @if (esRecibido)
+                        {
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-10 px-3">✅ Recibido</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-10 px-3">✈️ @item.Estado</span>
+                        }
+                    </td>
+
+                    <td class="text-end pe-4">
+                        <div class="btn-group">
+                            <a asp-action="Edit" asp-route-id="@item.CompraID" class="btn btn-sm btn-outline-warning" title="Actualizar Tracking">
+                                <i class="bi bi-pencil-fill"></i>
+                            </a>
+                            <a asp-action="Details" asp-route-id="@item.CompraID" class="btn btn-sm btn-outline-info" title="Ver Detalle">
+                                <i class="bi bi-eye-fill"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="6" class="text-center py-4 text-secondary">No hay registros en esta sección.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>

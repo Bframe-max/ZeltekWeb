@@ -1,0 +1,200 @@
+﻿@model ZeltekWeb.Models.CompraDetalleViewModel
+@{
+    ViewData["Title"] = "Recibir Pedido #" + Model.CompraID;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a asp-action="Index" class="text-decoration-none text-secondary mb-2 d-block"><i class="bi bi-arrow-left"></i> Volver</a>
+        <h2 class="fw-bold text-white">📦 Recibir Pedido #@Model.CompraID</h2>
+    </div>
+</div>
+
+<div class="card bg-card border-0 mb-4 shadow-sm">
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-4 border-end border-secondary">
+                <small class="text-secondary fw-bold">PROVEEDOR</small>
+                <h5 class="text-white mb-0">@Model.Vendedor</h5>
+            </div>
+            <div class="col-md-4 border-end border-secondary">
+                <small class="text-secondary fw-bold">TRACKING</small>
+                <h5 class="text-white mb-0 font-monospace">@Model.Tracking</h5>
+            </div>
+            <div class="col-md-4">
+                <small class="text-secondary fw-bold">FECHA</small>
+                <h5 class="text-white mb-0">@Model.Fecha.ToString("dd/MM/yyyy")</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-card border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="border-bottom: 1px solid var(--border-color);">
+                <tr>
+                    <th class="ps-4 text-white">Producto</th>
+                    <th class="text-white">Costo Base</th>
+                    <th class="text-white">Estado</th>
+                    <th class="text-end pe-4 text-white">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    bool enCamino = item.Estado == "En Camino";
+                    <tr>
+                        <td class="ps-4">
+                            <span class="text-white fw-bold">@item.ProductoNombre</span>
+                        </td>
+                        <td class="text-info fw-bold">$@item.Costo.ToString("N2")</td>
+                        <td>
+                            @if (enCamino)
+                            {
+                                <span class="badge bg-info text-dark">✈️ En Tránsito</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">
+                                    ✅ S/N: @item.NumeroSerie
+                                </span>
+                            }
+                        </td>
+                        <td class="text-end pe-4">
+                            @if (enCamino)
+                            {
+                                <button type="button" class="btn btn-primary btn-sm fw-bold px-3 shadow-sm"
+                                        onclick="abrirModalRecibir(@item.ItemID, '@item.ProductoNombre')">
+                                    📥 Recibir
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-outline-secondary disabled">Completado</button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRecibir" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-dark text-white border border-secondary shadow-lg">
+
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold text-white" id="modalTitulo">Recibir Producto</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form asp-action="RecibirItem" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="itemId" id="inputItemId" />
+                    <input type="hidden" name="compraIdRetorno" value="@Model.CompraID" />
+
+                    <div class="mb-4 p-3 rounded border border-secondary d-flex align-items-center" style="background-color: #2b3035;">
+                        <div class="form-check form-switch m-0 fs-5">
+                            <input class="form-check-input" type="checkbox" id="checkAccesorio" name="esAccesorio" value="true" onchange="toggleAccesorio()" style="cursor: pointer;">
+                            <label class="form-check-label fw-bold text-info ps-3" for="checkAccesorio" style="cursor: pointer; padding-top: 2px;">
+                                🔌 Es un Accesorio / Lote (Sin detalles técnicos)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div id="seccionTecnica">
+                        <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary pb-2">📋 DETALLES TÉCNICOS</h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">Número de Serie (S/N)</label>
+                                <input type="text" name="serieReal" id="inputSerie"
+                                       class="form-control bg-black text-white border-secondary fw-bold"
+                                       placeholder="Escanea aquí..." />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small text-secondary">Condición Estética</label>
+                                <select name="condicion" class="form-select bg-black text-white border-secondary">
+                                    <option value="Grado A">✅ Grado A (Excelente)</option>
+                                    <option value="Grado B">⚠️ Grado B (Leves Rayones)</option>
+                                    <option value="Grado C">❌ Grado C (Desgaste visible)</option>
+                                    <option value="Nuevo">🌟 Nuevo / Sellado</option>
+                                    <option value="Open Box">📦 Open Box</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-secondary">Procesador (CPU)</label>
+                            <input type="text" name="procesador" class="form-control bg-black text-white border-secondary"
+                                   placeholder="Ej: Intel Core i5-1135G7 2.40GHz" />
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">Memoria RAM (GB)</label>
+                                <input type="number" name="ram" class="form-control bg-black text-white border-secondary" placeholder="Ej: 8, 16..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">Almacenamiento (GB)</label>
+                                <input type="number" name="almacenamiento" class="form-control bg-black text-white border-secondary" placeholder="Ej: 256, 512..." />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small text-secondary">Salud Batería</label>
+                                <input type="text" name="bateria" class="form-control bg-black text-white border-secondary" placeholder="Ej: 95% o Normal" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <h6 class="text-secondary small fw-bold mb-3 border-bottom border-secondary pb-2 mt-4">💰 COSTOS ADICIONALES</h6>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small text-secondary">Costo de Envío / Casillero ($)</label>
+                            <input type="number" step="0.01" name="costoEnvio" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small text-secondary">Costo Reparación / Extras ($)</label>
+                            <input type="number" step="0.01" name="costoReparacion" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold px-4">Confirmar y Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function abrirModalRecibir(id, nombre) {
+        document.getElementById('inputItemId').value = id;
+        document.getElementById('modalTitulo').innerText = 'Recibir: ' + nombre;
+
+        // Resetear
+        document.getElementById('checkAccesorio').checked = false;
+        document.getElementById('inputSerie').value = '';
+        toggleAccesorio();
+
+        var myModal = new bootstrap.Modal(document.getElementById('modalRecibir'));
+        myModal.show();
+    }
+
+    function toggleAccesorio() {
+        var esAccesorio = document.getElementById('checkAccesorio').checked;
+        var seccionTecnica = document.getElementById('seccionTecnica');
+        var inputSerie = document.getElementById('inputSerie');
+
+        if (esAccesorio) {
+            seccionTecnica.style.display = 'none';
+            inputSerie.removeAttribute('required');
+        } else {
+            seccionTecnica.style.display = 'block';
+            inputSerie.setAttribute('required', 'required');
+        }
+    }
+</script>

@@ -1,33 +1,65 @@
-﻿@model ZeltekWeb.Models.CompraViewModel
+﻿@model ZeltekWeb.Models.CompraCreateViewModel
 
-<h2>🆕 Nueva Compra</h2>
+@{
+    ViewData["Title"] = "Nueva Compra";
+}
 
-<form asp-action="Create" method="post">
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card bg-card border-0 shadow-lg mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                <h4 class="text-white fw-bold mb-0">🛒 Registrar Compra eBay</h4>
+            </div>
+            <div class="card-body p-4">
 
-    <div class="mb-3">
-        <label class="form-label">Proveedor</label>
-        <select asp-for="ProveedorID"
-                asp-items="ViewBag.Proveedores"
-                class="form-select">
-            <option value="">-- Seleccione proveedor --</option>
-        </select>
+                <form asp-action="Create" method="post">
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Vendedor</label>
+                            <input asp-for="Vendedor" class="form-control bg-dark text-white border-secondary" placeholder="Ej: eBay: techsale78" />
+                            <span asp-validation-for="Vendedor" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Tracking</label>
+                            <input asp-for="TrackingProveedor" class="form-control bg-dark text-white border-secondary" placeholder="Ej: 1Z999..." />
+                            <span asp-validation-for="TrackingProveedor" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Fecha</label>
+                        <input asp-for="FechaCompra" type="date" class="form-control bg-dark text-white border-secondary" />
+                    </div>
+
+                    <hr class="border-secondary my-4" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">Producto</label>
+                        <select asp-for="ProductoID" asp-items="ViewBag.Productos" class="form-select bg-dark text-white border-secondary">
+                            <option value="">-- Selecciona --</option>
+                        </select>
+                        <span asp-validation-for="ProductoID" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Cantidad</label>
+                            <input asp-for="Cantidad" type="number" class="form-control bg-dark text-white border-secondary" min="1" value="1" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Costo Unitario ($)</label>
+                            <input asp-for="CostoPorUnidad" type="number" step="0.01" class="form-control bg-dark text-white border-secondary" />
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold py-2">💾 Guardar Compra</button>
+                        <a asp-controller="Inventario" asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Vendedor Online</label>
-        <input asp-for="VendedorOnline" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Fecha de Compra</label>
-        <input asp-for="FechaCompra" type="date" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Tracking</label>
-        <input asp-for="TrackingProveedor" class="form-control" />
-    </div>
-
-    <button type="submit" class="btn btn-success">💾 Guardar</button>
-    <a href="/Compras" class="btn btn-secondary">Cancelar</a>
-</form>
+</div>
