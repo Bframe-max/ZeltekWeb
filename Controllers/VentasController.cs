@@ -19,6 +19,12 @@ namespace ZeltekWeb.Controllers
         // =========================
         // LISTADO + RESUMEN + FILTRO
         // =========================
+        // =========================
+        // LISTADO + RESUMEN + FILTRO
+        // =========================
+        // =========================
+        // LISTADO + RESUMEN + FILTRO (CORREGIDO HORA NICARAGUA)
+        // =========================
         public IActionResult Index(DateTime? desde, DateTime? hasta)
         {
             var lista = new List<VentaListViewModel>();
@@ -30,10 +36,10 @@ namespace ZeltekWeb.Controllers
             con.Open();
 
             // =========================
-            // RESUMEN
+            // 1. RESUMEN
             // =========================
             var sqlResumen = @"
-                SELECT
+                SELECT 
                     COUNT(*) AS CantidadVentas,
                     SUM(d.PrecioUnitario) AS TotalVentas,
                     SUM(i.CostoCompra) AS TotalCosto
@@ -42,24 +48,19 @@ namespace ZeltekWeb.Controllers
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
                 WHERE 1 = 1";
 
-            if (desde.HasValue)
-                sqlResumen += " AND v.FechaVenta >= @Desde";
-
-            if (hasta.HasValue)
-                sqlResumen += " AND v.FechaVenta <= @Hasta";
+            // CORRECCIÓN: Filtramos usando la hora de Nicaragua, no la del servidor
+            if (desde.HasValue) sqlResumen += " AND DATEADD(HOUR, -6, v.FechaVenta) >= @Desde";
+            if (hasta.HasValue) sqlResumen += " AND DATEADD(HOUR, -6, v.FechaVenta) <= @Hasta";
 
             using (var cmdResumen = new SqlCommand(sqlResumen, con))
             {
-                if (desde.HasValue)
-                    cmdResumen.Parameters.AddWithValue("@Desde", desde.Value.Date);
-
-                if (hasta.HasValue)
-                    cmdResumen.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
+                if (desde.HasValue) cmdResumen.Parameters.AddWithValue("@Desde", desde.Value.Date);
+                if (hasta.HasValue) cmdResumen.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
 
                 using var dr = cmdResumen.ExecuteReader();
                 if (dr.Read())
                 {
-                    resumen.CantidadVentas = dr.GetInt32(0);
+                    resumen.CantidadVentas = dr.IsDBNull(0) ? 0 : dr.GetInt32(0);
                     resumen.TotalVentas = dr.IsDBNull(1) ? 0 : dr.GetDecimal(1);
                     resumen.TotalCosto = dr.IsDBNull(2) ? 0 : dr.GetDecimal(2);
                     resumen.GananciaTotal = resumen.TotalVentas - resumen.TotalCosto;
@@ -67,39 +68,46 @@ namespace ZeltekWeb.Controllers
             }
 
             // =========================
-            // LISTADO
+            // 2. LISTADO DETALLADO
             // =========================
             var sql = @"
-                SELECT
-                    v.VentaID,
-                    v.FechaVenta,
-                    p.Nombre AS Producto,
-                    i.NumeroSerie,
-                    i.CostoCompra,
-                    d.PrecioUnitario,
-                    (d.PrecioUnitario - i.CostoCompra) AS Ganancia,
-                    v.MetodoPago
+                SELECT 
+                    v.VentaID,                  -- 0
+                    
+                    -- CORRECCIÓN IMPORTANTE: Restamos 6 horas para ver hora real Managua
+                    DATEADD(HOUR, -6, v.FechaVenta) AS FechaVenta, -- 1
+
+                    p.Nombre AS Producto,       -- 2
+                    i.NumeroSerie,              -- 3
+                    i.CostoCompra,              -- 4
+                    d.PrecioUnitario,           -- 5
+                    (d.PrecioUnitario - i.CostoCompra) AS Ganancia, -- 6
+                    v.MetodoPago,               -- 7
+                    c.NombreCompleto AS Cliente, -- 8
+                    
+                    CONCAT(
+                        ISNULL(i.Procesador, ''), ' • ', 
+                        ISNULL(i.RAM_GB, 0), 'GB • ', 
+                        ISNULL(i.Almacenamiento_GB, 0), 'GB'
+                    ) AS Especificaciones       -- 9
+
                 FROM Venta v
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                INNER JOIN Cliente c ON v.ClienteID = c.ClienteID
                 WHERE 1 = 1";
 
-            if (desde.HasValue)
-                sql += " AND v.FechaVenta >= @Desde";
-
-            if (hasta.HasValue)
-                sql += " AND v.FechaVenta <= @Hasta";
+            // Aplicamos el filtro también sobre la hora corregida
+            if (desde.HasValue) sql += " AND DATEADD(HOUR, -6, v.FechaVenta) >= @Desde";
+            if (hasta.HasValue) sql += " AND DATEADD(HOUR, -6, v.FechaVenta) <= @Hasta";
 
             sql += " ORDER BY v.FechaVenta DESC";
 
             using (var cmd = new SqlCommand(sql, con))
             {
-                if (desde.HasValue)
-                    cmd.Parameters.AddWithValue("@Desde", desde.Value.Date);
-
-                if (hasta.HasValue)
-                    cmd.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
+                if (desde.HasValue) cmd.Parameters.AddWithValue("@Desde", desde.Value.Date);
+                if (hasta.HasValue) cmd.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
 
                 using var dr = cmd.ExecuteReader();
                 while (dr.Read())
@@ -107,13 +115,15 @@ namespace ZeltekWeb.Controllers
                     lista.Add(new VentaListViewModel
                     {
                         VentaID = dr.GetInt32(0),
-                        FechaVenta = dr.GetDateTime(1),
+                        FechaVenta = dr.GetDateTime(1), // Aquí ya viene con la hora correcta
                         Producto = dr.GetString(2),
-                        NumeroSerie = dr.IsDBNull(3) ? null : dr.GetString(3),
+                        NumeroSerie = dr.IsDBNull(3) ? "-" : dr.GetString(3),
                         Costo = dr.GetDecimal(4),
                         PrecioVenta = dr.GetDecimal(5),
                         Ganancia = dr.GetDecimal(6),
-                        MetodoPago = dr.IsDBNull(7) ? "-" : dr.GetString(7)
+                        MetodoPago = dr.IsDBNull(7) ? "-" : dr.GetString(7),
+                        Cliente = dr.IsDBNull(8) ? "Cliente General" : dr.GetString(8),
+                        Especificaciones = dr.IsDBNull(9) ? "" : dr.GetString(9)
                     });
                 }
             }

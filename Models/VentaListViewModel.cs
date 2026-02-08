@@ -16,5 +16,10 @@
         public decimal Ganancia { get; set; }
 
         public string MetodoPago { get; set; } = "";
+
+        // --- AGREGA ESTAS DOS LÍNEAS ---
+        public string Especificaciones { get; set; }
+        public string Cliente { get; set; }
+        // -------------------------------
     }
 }

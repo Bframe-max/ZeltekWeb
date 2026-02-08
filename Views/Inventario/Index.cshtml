@@ -2,127 +2,101 @@
 
 @{
     ViewData["Title"] = "Inventario";
+
+    // Separamos los datos en 3 listas aquí mismo
+    var enStock = Model.Where(x => x.Estado != "En Camino" && x.Estado != "Vendido").ToList();
+    var enCamino = Model.Where(x => x.Estado == "En Camino").ToList();
+    var vendidos = Model.Where(x => x.Estado == "Vendido").ToList();
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">📦 Inventario</h2>
+    <h2 class="fw-bold text-white">📦 Gestión de Inventario</h2>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 bg-card border-0">
     <div class="card-body py-3">
         <form method="get" action="/Inventario/Index" class="row g-2 align-items-center">
             <div class="col-md-10">
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 text-secondary"
-                          style="border-color: var(--border-color);">🔍</span>
-
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color: var(--border-color);">🔍</span>
                     <input type="text" name="buscar" class="form-control border-start-0"
-                           placeholder="Buscar por Número de Serie o Producto..."
+                           placeholder="Buscar por Serie, Producto..."
                            value="@ViewData["BusquedaActual"]">
                 </div>
             </div>
             <div class="col-md-2">
-                @if (!string.IsNullOrEmpty(ViewData["BusquedaActual"] as string))
-                {
-                    <a asp-controller="Inventario" asp-action="Index" class="btn btn-outline-secondary w-100 fw-bold">
-                        ❌ Limpiar
-                    </a>
-                }
-                else
-                {
-                    <button type="submit" class="btn btn-primary w-100 fw-bold">Buscar</button>
-                }
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Buscar</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="border-bottom: 1px solid var(--border-color);">
-                    <tr>
-                        <th class="ps-4 text-white">Producto</th>
-                        <th class="text-white">Serie</th>
-                        <th class="text-white">Costo</th>
-                        <th class="text-white">Precio</th>
-                        <th class="text-white">Estado</th>
-                        <th class="text-end pe-4 text-white">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var i in Model)
-                    {
-                        // Estilos dinámicos para Dark Mode
-                        bool esVendido = i.Estado == "Vendido";
+<ul class="nav nav-tabs border-bottom-0 mb-3" id="inventoryTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active fw-bold px-4" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stock" type="button" role="tab">
+            📦 En Bodega <span class="badge bg-primary ms-2">@enStock.Count</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold px-4 text-info" id="camino-tab" data-bs-toggle="tab" data-bs-target="#camino" type="button" role="tab">
+            ✈️ En Tránsito <span class="badge bg-info text-dark ms-2">@enCamino.Count</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold px-4 text-secondary" id="vendidos-tab" data-bs-toggle="tab" data-bs-target="#vendidos" type="button" role="tab">
+            🔴 Historial Vendidos
+        </button>
+    </li>
+</ul>
 
-                        // Si está vendido, bajamos la opacidad al 50% para que no distraiga
-                        string claseFila = esVendido ? "opacity-50" : "";
+<div class="tab-content" id="inventoryTabsContent">
 
-                        // Si está en stock, texto blanco brillante. Si no, gris.
-                        string claseTexto = esVendido ? "text-secondary" : "fw-bold text-white";
+    <div class="tab-pane fade show active" id="stock" role="tabpanel">
+        <div class="card bg-card border-0">
+            <div class="card-body p-0">
+                @await Html.PartialAsync("_TablaInventario", enStock)
+            </div>
+        </div>
+    </div>
 
-                        <tr class="@claseFila">
+    <div class="tab-pane fade" id="camino" role="tabpanel">
+        <div class="card bg-card border-0 border-top border-4 border-info">
+            <div class="card-body p-0">
+                @await Html.PartialAsync("_TablaInventario", enCamino)
+            </div>
+        </div>
+    </div>
 
-                            <td class="ps-4">
-                                <div class="d-flex flex-column">
-                                    <span class="@claseTexto fs-6">@i.Producto</span>
-                                    @if (!string.IsNullOrEmpty(i.Especificaciones))
-                                    {
-                                        <small class="text-secondary mt-1" style="font-size: 0.75rem;">
-                                            ⚙️ @i.Especificaciones
-                                        </small>
-                                    }
-                                </div>
-                            </td>
-
-                            <td>
-                                <span class="badge bg-dark text-secondary border border-secondary font-monospace">
-                                    @(i.NumeroSerie ?? "—")
-                                </span>
-                            </td>
-
-                            <td class="text-secondary">$@i.CostoCompra</td>
-
-                            <td class="@claseTexto">$@i.PrecioVenta</td>
-
-                            <td>
-                                @if (esVendido)
-                                {
-                                    <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-1 rounded-pill border border-danger border-opacity-10">
-                                        🔴 Vendido
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-success bg-opacity-10 text-success px-3 py-1 rounded-pill border border-success border-opacity-10">
-                                        🟢 En Stock
-                                    </span>
-                                }
-                            </td>
-
-                            <td class="text-end pe-4">
-                                @if (!esVendido)
-                                {
-                                    <a class="btn btn-sm btn-success fw-bold shadow-sm"
-                                       href="/Ventas/Create?itemId=@i.ItemID">
-                                        💰 Vender
-                                    </a>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    @if (Model.Count == 0)
-                    {
-                        <tr>
-                            <td colspan="6" class="text-center py-4 text-secondary">
-                                No se encontraron productos con ese criterio.
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+    <div class="tab-pane fade" id="vendidos" role="tabpanel">
+        <div class="card bg-card border-0">
+            <div class="card-body p-0">
+                @await Html.PartialAsync("_TablaInventario", vendidos)
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+    .nav-tabs .nav-link {
+        color: #8a8a9e;
+        border: none;
+        background: transparent;
+        border-bottom: 3px solid transparent;
+    }
+
+        .nav-tabs .nav-link:hover {
+            color: #fff;
+            border-color: transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            background-color: transparent !important;
+            color: #fff !important;
+            border-bottom: 3px solid #5646ff !important; /* Línea morada activa */
+        }
+    /* El tab de tránsito activo se pone azulito */
+    #camino-tab.active {
+        border-bottom: 3px solid #0dcaf0 !important;
+        color: #0dcaf0 !important;
+    }
+</style>

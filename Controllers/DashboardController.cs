@@ -5,7 +5,7 @@ using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
 {
-    [Authorize] // 🔐 Autenticación por cookies
+    [Authorize]
     public class DashboardController : Controller
     {
         private readonly IConfiguration _config;
@@ -18,85 +18,30 @@ namespace ZeltekWeb.Controllers
         public IActionResult Index()
         {
             var model = new DashboardViewModel();
-            var cadena = _config.GetConnectionString("ZeltekDB");
+            string connectionString = _config.GetConnectionString("ZeltekDB");
 
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                // Usamos la nueva vista operativa
+                string sql = "SELECT * FROM vw_DashboardOperativo";
 
-            // 1️⃣ Capital invertido
-            model.CapitalInvertido = ExecuteScalarDecimal(con, @"
-                SELECT ISNULL(SUM(
-                    ISNULL(CostoCompra,0) +
-                    ISNULL(CostoReparacion,0) +
-                    ISNULL(CostoEnvio,0)
-                ),0)
-                FROM ItemInventario
-                WHERE Estado = 'En Stock'
-            ");
-
-            // 2️⃣ Valor inventario
-            model.ValorInventario = ExecuteScalarDecimal(con, @"
-                SELECT ISNULL(SUM(PrecioVenta),0)
-                FROM ItemInventario
-                WHERE Estado = 'En Stock'
-            ");
-
-            // 3️⃣ Ventas del mes
-            model.VentasMes = ExecuteScalarDecimal(con, @"
-                SELECT ISNULL(SUM(TotalVenta),0)
-                FROM Venta
-                WHERE FORMAT(FechaVenta,'yyyy-MM') = FORMAT(GETDATE(),'yyyy-MM')
-            ");
-
-            // 4️⃣ Ganancia del mes
-            model.GananciaMes = ExecuteScalarDecimal(con, @"
-                SELECT ISNULL(SUM(
-                    dv.PrecioUnitario -
-                    (ISNULL(i.CostoCompra,0) +
-                     ISNULL(i.CostoReparacion,0) +
-                     ISNULL(i.CostoEnvio,0))
-                ),0)
-                FROM DetalleVenta dv
-                JOIN ItemInventario i ON dv.ItemID = i.ItemID
-                JOIN Venta v ON dv.VentaID = v.VentaID
-                WHERE FORMAT(v.FechaVenta,'yyyy-MM') = FORMAT(GETDATE(),'yyyy-MM')
-            ");
-
-            // 5️⃣ Garantías activas
-            model.GarantiasActivas = ExecuteScalarInt(con, @"
-                SELECT COUNT(*)
-                FROM DetalleVenta dv
-                JOIN Venta v ON dv.VentaID = v.VentaID
-                WHERE dv.GarantiaMeses > 0
-                AND DATEADD(month, dv.GarantiaMeses, v.FechaVenta) >= GETDATE()
-            ");
-
-            // 6️⃣ Equipos en camino
-            model.EquiposEnCamino = ExecuteScalarInt(con, @"
-                SELECT COUNT(*)
-                FROM ItemInventario i
-                JOIN Compra c ON i.CompraID = c.CompraID
-                JOIN Envio e ON c.EnvioID = e.EnvioID
-                WHERE e.FechaRecibidoNicaragua IS NULL
-            ");
-
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model.ValorInventario = dr.GetDecimal(dr.GetOrdinal("ValorInventario"));
+                            model.EnCamino = dr.GetDecimal(dr.GetOrdinal("EnCamino"));
+                            model.PorCobrar = dr.GetDecimal(dr.GetOrdinal("PorCobrar"));
+                            model.CantidadVendidos = dr.GetInt32(dr.GetOrdinal("CantidadVendidos"));
+                            model.GananciaTotal = dr.GetDecimal(dr.GetOrdinal("GananciaTotal"));
+                        }
+                    }
+                }
+            }
             return View(model);
-        }
-
-        // ========================
-        // Helpers
-        // ========================
-
-        private decimal ExecuteScalarDecimal(SqlConnection con, string sql)
-        {
-            using var cmd = new SqlCommand(sql, con);
-            return Convert.ToDecimal(cmd.ExecuteScalar());
-        }
-
-        private int ExecuteScalarInt(SqlConnection con, string sql)
-        {
-            using var cmd = new SqlCommand(sql, con);
-            return Convert.ToInt32(cmd.ExecuteScalar());
         }
     }
 }
