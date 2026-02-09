@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ZeltekWeb.Models;
-using System.Linq;
+using ZeltekWeb.Models; // Importante
+using System.Data;
 
 namespace ZeltekWeb.Controllers
 {
@@ -16,96 +16,77 @@ namespace ZeltekWeb.Controllers
             _config = config;
         }
 
-        // =========================
-        // LISTADO INVENTARIO
-        // =========================
-        public IActionResult Index(string buscar)
+        // Modificación: Agregamos el parámetro 'filtro'
+        // Modificación: Agregamos lógica para "Transito"
+        public IActionResult Index(string buscar, string filtro = "Stock")
         {
-            var lista = new List<InventarioViewModel>();
-            var cadena = _config.GetConnectionString("ZeltekDB");
+            var lista = new List<ItemInventarioViewModel>();
+            string cadena = _config.GetConnectionString("ZeltekDB");
 
             using (SqlConnection con = new SqlConnection(cadena))
             {
                 con.Open();
 
-                // CORRECCIÓN: Los datos técnicos están en 'i' (ItemInventario), no en 'p' (Producto)
-                // Y usamos los nombres reales de tus columnas: RAM_GB, Almacenamiento_GB
-                string sql = @"
+                // 1. Lógica del filtro de Estados
+                // "Stock" -> En Stock
+                // "Vendido" -> Vendido
+                // "Transito" -> Todo lo que viene viajando (creado en Compras)
+
+                string condicionEstado = "i.Estado = 'En Stock'"; // Default
+
+                if (filtro == "Vendido")
+                    condicionEstado = "i.Estado = 'Vendido'";
+                else if (filtro == "Transito")
+                    condicionEstado = "i.Estado IN ('En Camino', 'En Transito', 'En Miami', 'En Aduana')";
+
+                string sql = $@"
                     SELECT 
                         i.ItemID,
-                        p.Nombre AS Producto,
+                        p.Nombre,
                         i.NumeroSerie,
-                        i.CostoCompra,
-                        i.PrecioVenta,
                         i.Estado,
-                        i.Procesador,         -- Índice 6 (Viene de ItemInventario)
-                        i.RAM_GB,             -- Índice 7 (Viene de ItemInventario)
-                        i.Almacenamiento_GB   -- Índice 8 (Viene de ItemInventario)
+                        -- Calculamos costo acumulado
+                        (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0)) as CostoTotal,
+                        i.PrecioVenta,
+                        i.Procesador,
+                        ISNULL(i.RAM_GB, 0),
+                        ISNULL(i.Almacenamiento_GB, 0)
                     FROM ItemInventario i
-                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID";
-
-                if (!string.IsNullOrEmpty(buscar))
-                {
-                    sql += " WHERE p.Nombre LIKE @buscar OR i.NumeroSerie LIKE @buscar";
-                }
-
-                sql += " ORDER BY i.ItemID DESC";
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    WHERE {condicionEstado}
+                    AND (@Buscar IS NULL 
+                         OR p.Nombre LIKE '%' + @Buscar + '%' 
+                         OR i.NumeroSerie LIKE '%' + @Buscar + '%')
+                    ORDER BY i.ItemID DESC";
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
-                    if (!string.IsNullOrEmpty(buscar))
-                    {
-                        cmd.Parameters.AddWithValue("@buscar", "%" + buscar + "%");
-                    }
+                    cmd.Parameters.AddWithValue("@Buscar", string.IsNullOrEmpty(buscar) ? DBNull.Value : buscar);
 
                     using (SqlDataReader dr = cmd.ExecuteReader())
                     {
                         while (dr.Read())
                         {
-                            lista.Add(new InventarioViewModel
+                            lista.Add(new ItemInventarioViewModel
                             {
                                 ItemID = dr.GetInt32(0),
-                                Producto = dr.GetString(1),
-                                NumeroSerie = dr.IsDBNull(2) ? null : dr.GetString(2),
-                                CostoCompra = dr.GetDecimal(3),
-                                PrecioVenta = dr.GetDecimal(4),
-                                Estado = dr.GetString(5),
-
-                                // Construimos las especificaciones
-                                // Usamos .ToString() para asegurar que funcione si la RAM es número o texto
-                                Especificaciones = ConstruirSpecs(
-                                    dr.IsDBNull(6) ? "" : dr.GetValue(6).ToString(), // Procesador
-                                    dr.IsDBNull(7) ? "" : dr.GetValue(7).ToString(), // RAM_GB
-                                    dr.IsDBNull(8) ? "" : dr.GetValue(8).ToString()  // Almacenamiento_GB
-                                )
+                                ProductoNombre = dr.GetString(1),
+                                NumeroSerie = dr.IsDBNull(2) ? "S/N" : dr.GetString(2),
+                                Estado = dr.GetString(3),
+                                CostoTotal = dr.GetDecimal(4),
+                                PrecioVenta = dr.GetDecimal(5),
+                                Procesador = dr.IsDBNull(6) ? "" : dr.GetString(6),
+                                RAM_GB = dr.GetInt32(7),
+                                Almacenamiento_GB = dr.GetInt32(8)
                             });
                         }
                     }
                 }
             }
 
-            // Ordenamos visualmente: Stock primero
-            var listaOrdenada = lista.OrderBy(x => x.Estado == "Vendido").ToList();
-
-            ViewData["BusquedaActual"] = buscar;
-            return View(listaOrdenada);
-        }
-
-        // Método auxiliar para formatear bonito
-        private string ConstruirSpecs(string proc, string ram, string disco)
-        {
-            var partes = new List<string>();
-
-            if (!string.IsNullOrEmpty(proc)) partes.Add(proc);
-
-            // Si el valor ya trae "GB" no lo repetimos, si es solo un número "16", le pegamos "GB"
-            if (!string.IsNullOrEmpty(ram))
-                partes.Add(ram.ToUpper().Contains("GB") ? ram : ram + "GB");
-
-            if (!string.IsNullOrEmpty(disco))
-                partes.Add(disco.ToUpper().Contains("GB") || disco.ToUpper().Contains("TB") ? disco : disco + "GB");
-
-            return string.Join(" • ", partes);
+            ViewData["Busqueda"] = buscar;
+            ViewData["FiltroActual"] = filtro;
+            return View(lista);
         }
     }
 }

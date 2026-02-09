@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ZeltekWeb.Filters;
-using ZeltekWeb.Models;
+using System.Data;
+using System.Text.RegularExpressions;
+using ZeltekWeb.Models; // Asegúrate de tener esto para VentaListViewModel
 
 namespace ZeltekWeb.Controllers
 {
@@ -16,352 +17,228 @@ namespace ZeltekWeb.Controllers
             _config = config;
         }
 
-        // =========================
-        // LISTADO + RESUMEN + FILTRO
-        // =========================
-        // =========================
-        // LISTADO + RESUMEN + FILTRO
-        // =========================
-        // =========================
-        // LISTADO + RESUMEN + FILTRO (CORREGIDO HORA NICARAGUA)
-        // =========================
-        public IActionResult Index(DateTime? desde, DateTime? hasta)
+
+        public IActionResult Index(string buscar, DateTime? fechaInicio, DateTime? fechaFin)
         {
             var lista = new List<VentaListViewModel>();
-            var resumen = new VentasResumenViewModel();
+            string cadena = _config.GetConnectionString("ZeltekDB");
 
-            var cadena = _config.GetConnectionString("ZeltekDB");
-
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
-
-            // =========================
-            // 1. RESUMEN
-            // =========================
-            var sqlResumen = @"
-                SELECT 
-                    COUNT(*) AS CantidadVentas,
-                    SUM(d.PrecioUnitario) AS TotalVentas,
-                    SUM(i.CostoCompra) AS TotalCosto
-                FROM Venta v
-                INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                WHERE 1 = 1";
-
-            // CORRECCIÓN: Filtramos usando la hora de Nicaragua, no la del servidor
-            if (desde.HasValue) sqlResumen += " AND DATEADD(HOUR, -6, v.FechaVenta) >= @Desde";
-            if (hasta.HasValue) sqlResumen += " AND DATEADD(HOUR, -6, v.FechaVenta) <= @Hasta";
-
-            using (var cmdResumen = new SqlCommand(sqlResumen, con))
+            using (SqlConnection con = new SqlConnection(cadena))
             {
-                if (desde.HasValue) cmdResumen.Parameters.AddWithValue("@Desde", desde.Value.Date);
-                if (hasta.HasValue) cmdResumen.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
+                con.Open();
+                string sql = @"
+                    SELECT 
+                        VentaID, FechaVenta, Cliente, TipoCliente, 
+                        Producto, NumeroSerie, Especificaciones, 
+                        CostoTotal, PrecioVenta, Ganancia, MetodoPago
+                    FROM vw_ReporteVentas
+                    WHERE (@Buscar IS NULL 
+                           OR Cliente LIKE '%' + @Buscar + '%' 
+                           OR Producto LIKE '%' + @Buscar + '%'
+                           OR NumeroSerie LIKE '%' + @Buscar + '%')
+                    AND (@FInicio IS NULL OR CAST(FechaVenta AS DATE) >= @FInicio)
+                    AND (@FFin IS NULL OR CAST(FechaVenta AS DATE) <= @FFin)
+                    ORDER BY FechaVenta DESC";
 
-                using var dr = cmdResumen.ExecuteReader();
-                if (dr.Read())
+                using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
-                    resumen.CantidadVentas = dr.IsDBNull(0) ? 0 : dr.GetInt32(0);
-                    resumen.TotalVentas = dr.IsDBNull(1) ? 0 : dr.GetDecimal(1);
-                    resumen.TotalCosto = dr.IsDBNull(2) ? 0 : dr.GetDecimal(2);
-                    resumen.GananciaTotal = resumen.TotalVentas - resumen.TotalCosto;
-                }
-            }
+                    cmd.Parameters.AddWithValue("@Buscar", string.IsNullOrEmpty(buscar) ? DBNull.Value : buscar);
+                    cmd.Parameters.AddWithValue("@FInicio", fechaInicio ?? (object)DBNull.Value);
+                    cmd.Parameters.AddWithValue("@FFin", fechaFin ?? (object)DBNull.Value);
 
-            // =========================
-            // 2. LISTADO DETALLADO
-            // =========================
-            var sql = @"
-                SELECT 
-                    v.VentaID,                  -- 0
-                    
-                    -- CORRECCIÓN IMPORTANTE: Restamos 6 horas para ver hora real Managua
-                    DATEADD(HOUR, -6, v.FechaVenta) AS FechaVenta, -- 1
-
-                    p.Nombre AS Producto,       -- 2
-                    i.NumeroSerie,              -- 3
-                    i.CostoCompra,              -- 4
-                    d.PrecioUnitario,           -- 5
-                    (d.PrecioUnitario - i.CostoCompra) AS Ganancia, -- 6
-                    v.MetodoPago,               -- 7
-                    c.NombreCompleto AS Cliente, -- 8
-                    
-                    CONCAT(
-                        ISNULL(i.Procesador, ''), ' • ', 
-                        ISNULL(i.RAM_GB, 0), 'GB • ', 
-                        ISNULL(i.Almacenamiento_GB, 0), 'GB'
-                    ) AS Especificaciones       -- 9
-
-                FROM Venta v
-                INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                INNER JOIN Cliente c ON v.ClienteID = c.ClienteID
-                WHERE 1 = 1";
-
-            // Aplicamos el filtro también sobre la hora corregida
-            if (desde.HasValue) sql += " AND DATEADD(HOUR, -6, v.FechaVenta) >= @Desde";
-            if (hasta.HasValue) sql += " AND DATEADD(HOUR, -6, v.FechaVenta) <= @Hasta";
-
-            sql += " ORDER BY v.FechaVenta DESC";
-
-            using (var cmd = new SqlCommand(sql, con))
-            {
-                if (desde.HasValue) cmd.Parameters.AddWithValue("@Desde", desde.Value.Date);
-                if (hasta.HasValue) cmd.Parameters.AddWithValue("@Hasta", hasta.Value.Date.AddDays(1).AddSeconds(-1));
-
-                using var dr = cmd.ExecuteReader();
-                while (dr.Read())
-                {
-                    lista.Add(new VentaListViewModel
+                    using (SqlDataReader dr = cmd.ExecuteReader())
                     {
-                        VentaID = dr.GetInt32(0),
-                        FechaVenta = dr.GetDateTime(1), // Aquí ya viene con la hora correcta
-                        Producto = dr.GetString(2),
-                        NumeroSerie = dr.IsDBNull(3) ? "-" : dr.GetString(3),
-                        Costo = dr.GetDecimal(4),
-                        PrecioVenta = dr.GetDecimal(5),
-                        Ganancia = dr.GetDecimal(6),
-                        MetodoPago = dr.IsDBNull(7) ? "-" : dr.GetString(7),
-                        Cliente = dr.IsDBNull(8) ? "Cliente General" : dr.GetString(8),
-                        Especificaciones = dr.IsDBNull(9) ? "" : dr.GetString(9)
-                    });
+                        while (dr.Read())
+                        {
+                            lista.Add(new VentaListViewModel
+                            {
+                                VentaID = dr.GetInt32(0),
+                                FechaVenta = dr.GetDateTime(1),
+                                Cliente = dr.GetString(2),
+                                TipoCliente = dr.GetString(3),
+                                Producto = dr.GetString(4),
+                                NumeroSerie = dr.GetString(5),
+                                Especificaciones = dr.GetString(6),
+                                Costo = dr.GetDecimal(7),
+                                PrecioVenta = dr.GetDecimal(8),
+                                Ganancia = dr.GetDecimal(9),
+                                MetodoPago = dr.GetString(10)
+                            });
+                        }
+                    }
                 }
             }
 
-            ViewBag.Resumen = resumen;
-            ViewBag.Desde = desde?.ToString("yyyy-MM-dd");
-            ViewBag.Hasta = hasta?.ToString("yyyy-MM-dd");
+            // Totales
+            ViewBag.TotalVendido = lista.Sum(x => x.PrecioVenta);
+            ViewBag.TotalGanancia = lista.Sum(x => x.Ganancia);
+            ViewBag.TotalEquipos = lista.Count;
+
+            // Filtros visuales
+            ViewData["Busqueda"] = buscar;
+            ViewData["FechaInicio"] = fechaInicio?.ToString("yyyy-MM-dd");
+            ViewData["FechaFin"] = fechaFin?.ToString("yyyy-MM-dd");
 
             return View(lista);
         }
-
-        // =========================
-        // FORMULARIO REGISTRAR VENTA
-        // =========================
-        public IActionResult Create(int itemId)
-        {
-            var cadena = _config.GetConnectionString("ZeltekDB");
-
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
-
-            var sql = @"
-                SELECT 
-                    i.ItemID,
-                    p.Nombre,
-                    i.NumeroSerie,
-                    i.PrecioVenta
-                FROM ItemInventario i
-                INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE i.ItemID = @ItemID
-                  AND i.Estado = 'En Stock'";
-
-            using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@ItemID", itemId);
-
-            using SqlDataReader dr = cmd.ExecuteReader();
-            if (!dr.Read())
-                return NotFound();
-
-            var model = new VentaCreateViewModel
-            {
-                ItemID = dr.GetInt32(0),
-                Producto = dr.GetString(1),
-                NumeroSerie = dr.IsDBNull(2) ? null : dr.GetString(2),
-                PrecioUnitario = dr.GetDecimal(3),
-                MetodoPago = "Efectivo"
-            };
-
-            return View(model);
-        }
-
-        // =========================
-        // GUARDAR VENTA (CON CLIENTE)
-        // =========================
+        // ==========================================
+        // 1. REGISTRAR VENTA RÁPIDA (POST)
+        // ==========================================
         [HttpPost]
-        public IActionResult Create(VentaCreateViewModel model)
+        public IActionResult CrearVentaRapida(
+            int itemId,
+            decimal precioFinal,
+            string metodoPago,
+            string clienteNombre,
+            string clienteCedula,
+            string clienteCelular,
+            int garantiaMeses,
+            string notas,
+            string tipoVenta,
+            int clienteIdExistente = 0
+        )
         {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var cadena = _config.GetConnectionString("ZeltekDB");
-
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
-            using var tx = con.BeginTransaction();
-
-            try
+            string cadena = _config.GetConnectionString("ZeltekDB");
+            using (SqlConnection con = new SqlConnection(cadena))
             {
-                // =========================
-                // CLIENTE: BUSCAR O CREAR
-                // =========================
-                int clienteId;
-
-                var sqlBuscarCliente = @"
-                    SELECT ClienteID
-                    FROM Cliente
-                    WHERE Cedula = @Cedula AND IsDeleted = 0";
-
-                using (var cmdBuscar = new SqlCommand(sqlBuscarCliente, con, tx))
+                con.Open();
+                using (SqlTransaction tx = con.BeginTransaction())
                 {
-                    cmdBuscar.Parameters.AddWithValue("@Cedula", model.Cedula);
-
-                    var result = cmdBuscar.ExecuteScalar();
-
-                    if (result != null)
+                    try
                     {
-                        clienteId = (int)result;
+                        // A. DETERMINAR EL ID DEL CLIENTE
+                        int clienteId = clienteIdExistente;
+                        string celularLimpio = "";
+
+                        if (!string.IsNullOrEmpty(clienteCelular))
+                        {
+                            celularLimpio = Regex.Replace(clienteCelular, "[^0-9]", "");
+                            if (celularLimpio.Length > 8) celularLimpio = celularLimpio.Substring(0, 8);
+                        }
+
+                        if (clienteId == 0)
+                        {
+                            // 1. Buscar por Cédula
+                            if (!string.IsNullOrEmpty(clienteCedula))
+                            {
+                                string sqlBuscar = "SELECT ClienteID FROM Cliente WHERE Cedula = @Cedula AND IsDeleted = 0";
+                                using (SqlCommand cmd = new SqlCommand(sqlBuscar, con, tx))
+                                {
+                                    cmd.Parameters.AddWithValue("@Cedula", clienteCedula);
+                                    var result = cmd.ExecuteScalar();
+                                    if (result != null) clienteId = (int)result;
+                                }
+                            }
+
+                            // 2. Crear Cliente Nuevo
+                            if (clienteId == 0)
+                            {
+                                string sqlCrear = @"
+                                    INSERT INTO Cliente (NombreCompleto, Cedula, Telefono, TipoCliente, CreationDate, CreatedBy, IsDeleted)
+                                    OUTPUT INSERTED.ClienteID
+                                    VALUES (@Nombre, @Cedula, @Telefono, @Tipo, GETDATE(), @Usuario, 0)";
+
+                                using (SqlCommand cmd = new SqlCommand(sqlCrear, con, tx))
+                                {
+                                    cmd.Parameters.AddWithValue("@Nombre", string.IsNullOrEmpty(clienteNombre) ? "Consumidor Final" : clienteNombre);
+                                    cmd.Parameters.AddWithValue("@Cedula", string.IsNullOrEmpty(clienteCedula) ? DBNull.Value : (object)clienteCedula);
+                                    cmd.Parameters.AddWithValue("@Telefono", string.IsNullOrEmpty(celularLimpio) ? "22222222" : celularLimpio);
+                                    cmd.Parameters.AddWithValue("@Tipo", tipoVenta ?? "Regular");
+                                    cmd.Parameters.AddWithValue("@Usuario", User.Identity.Name ?? "Sistema");
+                                    clienteId = (int)cmd.ExecuteScalar();
+                                }
+                            }
+                        }
+
+                        // B. CREAR VENTA
+                        string sqlVenta = @"
+                            INSERT INTO Venta (ClienteID, FechaVenta, TotalVenta, MetodoPago, GarantiaMeses, NotasVenta, CreatedBy, TipoVenta)
+                            OUTPUT INSERTED.VentaID
+                            VALUES (@ClienteID, GETDATE(), @Total, @Metodo, @Garantia, @Notas, @Usuario, @Tipo)";
+
+                        int ventaId;
+                        using (SqlCommand cmd = new SqlCommand(sqlVenta, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@ClienteID", clienteId);
+                            cmd.Parameters.AddWithValue("@Total", precioFinal);
+                            cmd.Parameters.AddWithValue("@Metodo", metodoPago);
+                            cmd.Parameters.AddWithValue("@Garantia", garantiaMeses);
+                            cmd.Parameters.AddWithValue("@Notas", notas ?? (object)DBNull.Value);
+                            cmd.Parameters.AddWithValue("@Usuario", User.Identity.Name ?? "Sistema");
+                            cmd.Parameters.AddWithValue("@Tipo", tipoVenta ?? "Regular");
+                            ventaId = (int)cmd.ExecuteScalar();
+                        }
+
+                        // C. CREAR DETALLE
+                        string sqlDetalle = "INSERT INTO DetalleVenta (VentaID, ItemID, PrecioUnitario) VALUES (@VentaID, @ItemID, @Precio)";
+                        using (SqlCommand cmd = new SqlCommand(sqlDetalle, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@VentaID", ventaId);
+                            cmd.Parameters.AddWithValue("@ItemID", itemId);
+                            cmd.Parameters.AddWithValue("@Precio", precioFinal);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        // D. ACTUALIZAR INVENTARIO
+                        string sqlUpdateItem = "UPDATE ItemInventario SET Estado = 'Vendido' WHERE ItemID = @ItemID";
+                        using (SqlCommand cmd = new SqlCommand(sqlUpdateItem, con, tx))
+                        {
+                            cmd.Parameters.AddWithValue("@ItemID", itemId);
+                            cmd.ExecuteNonQuery();
+                        }
+
+                        tx.Commit();
+                        return RedirectToAction("Index", "Inventario");
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        var sqlCrearCliente = @"
-                            INSERT INTO Cliente
-                            (Cedula, NombreCompleto, Telefono, TipoCliente, CreationDate)
-                            OUTPUT INSERTED.ClienteID
-                            VALUES
-                            (@Cedula, @Nombre, @Telefono, @TipoCliente, GETDATE())";
-
-                        using var cmdCrear = new SqlCommand(sqlCrearCliente, con, tx);
-                        cmdCrear.Parameters.AddWithValue("@Cedula", model.Cedula);
-                        cmdCrear.Parameters.AddWithValue("@Nombre", model.NombreCompleto ?? "Cliente");
-                        cmdCrear.Parameters.AddWithValue("@Telefono", model.Telefono ?? "");
-                        cmdCrear.Parameters.AddWithValue("@TipoCliente", model.TipoCliente);
-
-                        clienteId = (int)cmdCrear.ExecuteScalar();
+                        tx.Rollback();
+                        throw new Exception("Error SQL: " + ex.Message);
                     }
                 }
-
-                // =========================
-                // CREAR VENTA
-                // =========================
-                var sqlVenta = @"
-                    INSERT INTO Venta
-                    (ClienteID, FechaVenta, TotalVenta, MetodoPago)
-                    OUTPUT INSERTED.VentaID
-                    VALUES
-                    (@ClienteID, GETDATE(), @TotalVenta, @MetodoPago)";
-
-                int ventaId;
-                using (var cmdVenta = new SqlCommand(sqlVenta, con, tx))
-                {
-                    cmdVenta.Parameters.AddWithValue("@ClienteID", clienteId);
-                    cmdVenta.Parameters.AddWithValue("@TotalVenta", model.PrecioUnitario);
-                    cmdVenta.Parameters.AddWithValue("@MetodoPago", model.MetodoPago ?? "Efectivo");
-
-                    ventaId = (int)cmdVenta.ExecuteScalar();
-                }
-
-                // =========================
-                // DETALLE VENTA
-                // =========================
-                var sqlDetalle = @"
-                    INSERT INTO DetalleVenta
-                    (VentaID, ItemID, PrecioUnitario, GarantiaMeses, ProductoID)
-                    SELECT
-                        @VentaID,
-                        i.ItemID,
-                        @Precio,
-                        @Garantia,
-                        i.ProductoID
-                    FROM ItemInventario i
-                    WHERE i.ItemID = @ItemID";
-
-                using (var cmdDetalle = new SqlCommand(sqlDetalle, con, tx))
-                {
-                    cmdDetalle.Parameters.AddWithValue("@VentaID", ventaId);
-                    cmdDetalle.Parameters.AddWithValue("@ItemID", model.ItemID);
-                    cmdDetalle.Parameters.AddWithValue("@Precio", model.PrecioUnitario);
-                    cmdDetalle.Parameters.AddWithValue("@Garantia", model.GarantiaMeses);
-                    cmdDetalle.ExecuteNonQuery();
-                }
-
-                // =========================
-                // ITEM → VENDIDO
-                // =========================
-                var sqlUpdate = @"
-                    UPDATE ItemInventario
-                    SET Estado = 'Vendido'
-                    WHERE ItemID = @ItemID";
-
-                using (var cmdUpdate = new SqlCommand(sqlUpdate, con, tx))
-                {
-                    cmdUpdate.Parameters.AddWithValue("@ItemID", model.ItemID);
-                    cmdUpdate.ExecuteNonQuery();
-                }
-
-                tx.Commit();
-                return RedirectToAction("Index");
             }
-            catch
-            {
-                tx.Rollback();
-                throw;
-            }
-
-
-
-
         }
 
-
-
-        public IActionResult Rapida()
+        // ==========================================
+        // 2. API: BUSCAR CLIENTES (GET)
+        // ==========================================
+        [HttpGet]
+        public IActionResult BuscarClientes(string termino)
         {
-            return View(new VentaRapidaViewModel());
-        }
+            var resultados = new List<object>();
+            string cadena = _config.GetConnectionString("ZeltekDB");
 
-
-
-
-        [HttpPost]
-        public IActionResult Rapida(VentaRapidaViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return View(model);
-
-            var cadena = _config.GetConnectionString("ZeltekDB");
-
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
-
-            using SqlCommand cmd = new SqlCommand("sp_RegistrarVenta", con);
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.AddWithValue("@NombreCliente", model.NombreCliente);
-            cmd.Parameters.AddWithValue("@Telefono", model.Telefono);
-            cmd.Parameters.AddWithValue("@TipoCliente", model.TipoCliente);
-
-            cmd.Parameters.AddWithValue("@FechaVenta", model.FechaVenta);
-            cmd.Parameters.AddWithValue("@MetodoPago", model.MetodoPago);
-
-            cmd.Parameters.AddWithValue("@NumeroSerie",
-                string.IsNullOrWhiteSpace(model.NumeroSerie)
-                    ? DBNull.Value
-                    : model.NumeroSerie);
-
-            cmd.Parameters.AddWithValue("@ProductoID",
-                model.ProductoID.HasValue
-                    ? model.ProductoID
-                    : DBNull.Value);
-
-            cmd.Parameters.AddWithValue("@PrecioUnitario", model.PrecioUnitario);
-            cmd.Parameters.AddWithValue("@GarantiaMeses", model.GarantiaMeses);
-
-            try
+            using (SqlConnection con = new SqlConnection(cadena))
             {
-                cmd.ExecuteNonQuery();
-                return RedirectToAction("Index");
+                con.Open();
+                string sql = @"
+                    SELECT TOP 5 
+                        c.ClienteID, c.NombreCompleto, c.Cedula, c.Telefono,
+                        (SELECT TOP 1 FORMAT(FechaVenta, 'dd/MM/yyyy') FROM Venta WHERE ClienteID = c.ClienteID ORDER BY FechaVenta DESC) as UltimaCompra
+                    FROM Cliente c
+                    WHERE (c.NombreCompleto LIKE '%' + @Term + '%' OR c.Cedula LIKE '%' + @Term + '%')
+                    AND c.IsDeleted = 0";
+
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@Term", termino);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            resultados.Add(new
+                            {
+                                id = dr.GetInt32(0),
+                                nombre = dr.GetString(1),
+                                cedula = dr.IsDBNull(2) ? "" : dr.GetString(2),
+                                telefono = dr.IsDBNull(3) ? "" : dr.GetString(3),
+                                ultima = dr.IsDBNull(4) ? "Nuevo" : dr.GetString(4)
+                            });
+                        }
+                    }
+                }
             }
-            catch (SqlException ex)
-            {
-                ModelState.AddModelError("", ex.Message);
-                return View(model);
-            }
+            return Json(resultados);
         }
-
-
-
-
-
     }
 }

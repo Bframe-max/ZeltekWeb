@@ -1,27 +1,23 @@
-﻿@model List<ZeltekWeb.Models.InventarioViewModel>
+﻿@model List<ZeltekWeb.Models.ItemInventarioViewModel>
 
 @{
-    ViewData["Title"] = "Inventario";
-
-    // Separamos los datos en 3 listas aquí mismo
-    var enStock = Model.Where(x => x.Estado != "En Camino" && x.Estado != "Vendido").ToList();
-    var enCamino = Model.Where(x => x.Estado == "En Camino").ToList();
-    var vendidos = Model.Where(x => x.Estado == "Vendido").ToList();
+    ViewData["Title"] = "Gestión de Inventario";
+    string filtro = ViewData["FiltroActual"] as string ?? "Stock";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-4">
     <h2 class="fw-bold text-white">📦 Gestión de Inventario</h2>
 </div>
 
 <div class="card mb-4 bg-card border-0">
     <div class="card-body py-3">
-        <form method="get" action="/Inventario/Index" class="row g-2 align-items-center">
+        <form method="get" class="row g-2 align-items-center">
+            <input type="hidden" name="filtro" value="@filtro" />
             <div class="col-md-10">
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color: var(--border-color);">🔍</span>
-                    <input type="text" name="buscar" class="form-control border-start-0"
-                           placeholder="Buscar por Serie, Producto..."
-                           value="@ViewData["BusquedaActual"]">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary">🔍</span>
+                    <input type="text" name="buscar" class="form-control border-start-0 text-white bg-dark"
+                           placeholder="Buscar por Serie, Producto..." value="@ViewData["Busqueda"]">
                 </div>
             </div>
             <div class="col-md-2">
@@ -31,52 +27,252 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs border-bottom-0 mb-3" id="inventoryTabs" role="tablist">
-    <li class="nav-item" role="presentation">
-        <button class="nav-link active fw-bold px-4" id="stock-tab" data-bs-toggle="tab" data-bs-target="#stock" type="button" role="tab">
-            📦 En Bodega <span class="badge bg-primary ms-2">@enStock.Count</span>
-        </button>
+<ul class="nav nav-tabs border-bottom-0 mb-3">
+    <li class="nav-item">
+        <a class="nav-link fw-bold px-4 @(filtro == "Stock" ? "active" : "")" href="/Inventario/Index?filtro=Stock">
+            📦 En Bodega
+            @if (filtro == "Stock")
+            {
+                <span class="badge bg-success ms-2">@Model.Count</span>
+            }
+        </a>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold px-4 text-info" id="camino-tab" data-bs-toggle="tab" data-bs-target="#camino" type="button" role="tab">
-            ✈️ En Tránsito <span class="badge bg-info text-dark ms-2">@enCamino.Count</span>
-        </button>
+    <li class="nav-item">
+        <a class="nav-link fw-bold px-4 @(filtro == "Transito" ? "active" : "")" href="/Inventario/Index?filtro=Transito">
+            ✈️ En Tránsito
+            @if (filtro == "Transito")
+            {
+                <span class="badge bg-info ms-2">@Model.Count</span>
+            }
+        </a>
     </li>
-    <li class="nav-item" role="presentation">
-        <button class="nav-link fw-bold px-4 text-secondary" id="vendidos-tab" data-bs-toggle="tab" data-bs-target="#vendidos" type="button" role="tab">
-            🔴 Historial Vendidos
-        </button>
+    <li class="nav-item">
+        <a class="nav-link fw-bold px-4 @(filtro == "Vendido" ? "active" : "")" href="/Inventario/Index?filtro=Vendido">
+            🔴 Historial
+            @if (filtro == "Vendido")
+            {
+                <span class="badge bg-danger ms-2">@Model.Count</span>
+            }
+        </a>
     </li>
 </ul>
 
-<div class="tab-content" id="inventoryTabsContent">
+<div class="card bg-card border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="border-bottom: 1px solid var(--border-color);">
+                <tr>
+                    <th class="ps-4 text-white">Producto</th>
+                    <th class="text-white">Serie / ID</th>
+                    <th class="text-white">Costo Real</th>
+                    <th class="text-white">Precio Venta</th>
+                    <th class="text-center text-white">Estado</th>
+                    <th class="text-end pe-4 text-white">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in Model)
+                {
+                    bool esVendido = i.Estado == "Vendido";
+                    bool esTransito = filtro == "Transito";
 
-    <div class="tab-pane fade show active" id="stock" role="tabpanel">
-        <div class="card bg-card border-0">
-            <div class="card-body p-0">
-                @await Html.PartialAsync("_TablaInventario", enStock)
-            </div>
-        </div>
+                    <tr class="@(esVendido ? "opacity-75" : "")">
+                        <td class="ps-4">
+                            <div class="d-flex flex-column">
+                                <span class="fw-bold text-white">@i.ProductoNombre</span>
+                                <small class="text-secondary" style="font-size: 0.75rem;">
+                                    @if (!string.IsNullOrEmpty(i.Procesador))
+                                    {
+                                        <span>@i.Procesador • </span>
+                                    }
+                                    @if (i.RAM_GB > 0)
+                                    {
+                                        <span>@i.RAM_GB GB • </span>
+                                    }
+                                    @if (i.Almacenamiento_GB > 0)
+                                    {
+                                        <span>@i.Almacenamiento_GB GB</span>
+                                    }
+                                </small>
+                            </div>
+                        </td>
+
+                        <td>
+                            @if (esTransito)
+                            {
+                                <span class="badge bg-dark text-info border border-info font-monospace">En Viaje</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary border border-secondary font-monospace">@i.NumeroSerie</span>
+                            }
+                        </td>
+
+                        <td class="text-secondary text-opacity-50">$@i.CostoTotal.ToString("N2")</td>
+
+                        <td class="fw-bold text-success fs-5">
+                            @if (i.PrecioVenta > 0)
+                            {
+                                <span>$@i.PrecioVenta.ToString("N2")</span>
+                            }
+                            else
+                            {
+
+                                <span>-</span>
+                            }
+                        </td>
+
+                        <td class="text-center">
+                            @if (esVendido)
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">Vendido</span>
+                            }
+                            else if (esTransito)
+                            {
+                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3">✈️ @i.Estado</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3">En Stock</span>
+                            }
+                        </td>
+
+                        <td class="text-end pe-4">
+                            @if (filtro == "Stock")
+                            {
+                                <button type="button" class="btn btn-success fw-bold shadow-sm px-4"
+                                        onclick="abrirModalVenta(@i.ItemID, '@i.ProductoNombre', '@i.NumeroSerie', @i.PrecioVenta)">
+                                    💰 Vender
+                                </button>
+                            }
+                            else if (esTransito)
+                            {
+                                <small class="text-info fst-italic me-3">Esperando llegada...</small>
+                            }
+                            else
+                            {
+                                <small class="text-secondary fst-italic me-3">Completado</small>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-secondary">
+                            <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
+                            No hay registros en esta sección.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <div class="tab-pane fade" id="camino" role="tabpanel">
-        <div class="card bg-card border-0 border-top border-4 border-info">
-            <div class="card-body p-0">
-                @await Html.PartialAsync("_TablaInventario", enCamino)
-            </div>
-        </div>
-    </div>
+<div class="modal fade" id="modalVenta" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary shadow-lg">
 
-    <div class="tab-pane fade" id="vendidos" role="tabpanel">
-        <div class="card bg-card border-0">
-            <div class="card-body p-0">
-                @await Html.PartialAsync("_TablaInventario", vendidos)
+            <div class="modal-header border-secondary bg-success bg-opacity-10">
+                <div>
+                    <h5 class="modal-title fw-bold text-white">💰 Registrar Venta</h5>
+                    <small class="text-success" id="lblProductoVenta">Producto</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
+
+            <form asp-controller="Ventas" asp-action="CrearVentaRapida" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="itemId" id="ventaItemID" />
+                    <input type="hidden" name="clienteIdExistente" id="clienteIdExistente" value="0" />
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">Tipo de Venta / Cliente</label>
+                        <select name="tipoVenta" id="selectTipoVenta" class="form-select bg-black text-white border-secondary fw-bold">
+                            <option value="Publico">👤 Cliente Normal (Precio Público)</option>
+                            <option value="Revendedor">🤝 Revendedor / Frecuente (Precio Especial)</option>
+                        </select>
+                        <div class="form-text text-muted small" style="font-size: 0.7rem;">Selecciona "Revendedor" para diferenciarlo en tus reportes.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Precio Final de Venta ($)</label>
+                        <div class="input-group input-group-lg">
+                            <span class="input-group-text bg-black border-secondary text-success fw-bold">$</span>
+                            <input type="number" step="0.01" name="precioFinal" id="ventaPrecio"
+                                   class="form-control bg-black text-white border-secondary fw-bold fs-4" required />
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary" />
+
+                    <div class="position-relative mb-3">
+                        <label class="form-label text-warning small fw-bold">🔍 Buscar Cliente Registrado</label>
+                        <div class="input-group">
+                            <input type="text" id="buscadorCliente" class="form-control bg-dark text-white border-secondary"
+                                   placeholder="Escribe Nombre o Cédula..." autocomplete="off" onkeyup="buscarCliente()" />
+                            <button type="button" class="btn btn-outline-secondary" onclick="limpiarCliente()">Limpiar</button>
+                        </div>
+                        <ul id="listaResultados" class="list-group position-absolute w-100 shadow-lg"
+                            style="z-index: 1000; display: none;"></ul>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-7">
+                            <label class="form-label text-secondary small">Nombre Completo</label>
+                            <input type="text" name="clienteNombre" id="inputNombre" class="form-control bg-black text-white border-secondary" placeholder="Ej: Juan Pérez" required />
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label text-secondary small">Cédula / ID</label>
+                            <input type="text" name="clienteCedula" id="inputCedula" class="form-control bg-black text-white border-secondary" placeholder="001-..." />
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Celular</label>
+                            <input type="text" name="clienteCelular" id="inputCelular" class="form-control bg-black text-white border-secondary" placeholder="8888-8888" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small">Garantía</label>
+                            <select name="garantiaMeses" class="form-select bg-black text-white border-secondary">
+                                <option value="1">1 Mes (Básica)</option>
+                                <option value="3" selected>3 Meses (Estándar)</option>
+                                <option value="4">4 Meses (Especial)</option>
+                                <option value="6">6 Meses (Extendida)</option>
+                                <option value="12">12 Meses (Premium)</option>
+                                <option value="0">Sin Garantía</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small">Método de Pago</label>
+                        <select name="metodoPago" class="form-select bg-black text-white border-secondary">
+                            <option value="Efectivo">💵 Efectivo</option>
+                            <option value="Transferencia">🏦 Transferencia / BAC</option>
+                            <option value="Tarjeta">💳 Tarjeta / POS</option>
+                            <option value="Credex">📑 Credex / Financiamiento</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <input type="text" name="notas" class="form-control form-control-sm bg-black text-white border-secondary" placeholder="Notas internas..." />
+                    </div>
+
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success fw-bold w-50">✅ Confirmar Venta</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <style>
+    /* Estilos para Tabs Oscuros */
     .nav-tabs .nav-link {
         color: #8a8a9e;
         border: none;
@@ -86,17 +282,166 @@
 
         .nav-tabs .nav-link:hover {
             color: #fff;
-            border-color: transparent;
         }
 
         .nav-tabs .nav-link.active {
             background-color: transparent !important;
             color: #fff !important;
-            border-bottom: 3px solid #5646ff !important; /* Línea morada activa */
+            border-bottom-color: #0dcaf0 !important;
         }
-    /* El tab de tránsito activo se pone azulito */
-    #camino-tab.active {
-        border-bottom: 3px solid #0dcaf0 !important;
-        color: #0dcaf0 !important;
+
+            .nav-tabs .nav-link.active[href*="Stock"] {
+                border-bottom-color: #198754 !important;
+            }
+
+            .nav-tabs .nav-link.active[href*="Transito"] {
+                border-bottom-color: #0dcaf0 !important;
+            }
+
+            .nav-tabs .nav-link.active[href*="Vendido"] {
+                border-bottom-color: #dc3545 !important;
+            }
+</style>
+
+<script>
+    function abrirModalVenta(id, nombre, serie, precio) {
+        // Resetear formulario
+        limpiarCliente();
+        document.getElementById('ventaItemID').value = id;
+        document.getElementById('lblProductoVenta').innerText = nombre + ' (' + serie + ')';
+        document.getElementById('ventaPrecio').value = precio;
+
+        var myModal = new bootstrap.Modal(document.getElementById('modalVenta'));
+        myModal.show();
     }
+
+    // --- LÓGICA DEL BUSCADOR DE CLIENTES ---
+    // --- LÓGICA DEL BUSCADOR DE CLIENTES (MEJORADA) ---
+    function buscarCliente() {
+        let termino = document.getElementById('buscadorCliente').value;
+        let lista = document.getElementById('listaResultados');
+
+        if (termino.length < 2) {
+            lista.style.display = 'none';
+            return;
+        }
+
+        fetch(`/Ventas/BuscarClientes?termino=${termino}`)
+            .then(response => response.json())
+            .then(data => {
+                lista.innerHTML = '';
+                if (data.length > 0) {
+                    lista.style.display = 'block';
+                    data.forEach(cliente => {
+                        let item = document.createElement('li');
+                        // Usamos la clase CSS nueva 'resultado-item'
+                        item.className = 'resultado-item d-flex justify-content-between align-items-center';
+
+                        // Diseño: Izquierda (Nombre/Cedula) - Derecha (Badge Fecha)
+                        item.innerHTML = `
+                            <div>
+                                <div class="fw-bold fs-6">${cliente.nombre}</div>
+                                <div class="small d-flex align-items-center">
+                                    <i class="bi bi-person-vcard me-1"></i>
+                                    ${cliente.cedula || 'Sin ID'}
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 rounded-pill">
+                                    Última: ${cliente.ultima}
+                                </span>
+                            </div>
+                        `;
+
+                        item.onclick = function() { seleccionarCliente(cliente); };
+                        lista.appendChild(item);
+                    });
+                } else {
+                    // Mensaje opcional si no encuentra nada
+                    lista.innerHTML = '<li class="p-3 text-center text-secondary small">No se encontraron clientes.</li>';
+                    lista.style.display = 'block';
+                }
+            })
+            .catch(err => {
+                console.error("Error buscando cliente:", err);
+            });
+    }
+
+    function seleccionarCliente(cliente) {
+        // Rellenar campos
+        document.getElementById('inputNombre').value = cliente.nombre;
+        document.getElementById('inputCedula').value = cliente.cedula;
+        document.getElementById('inputCelular').value = cliente.telefono;
+        document.getElementById('clienteIdExistente').value = cliente.id;
+
+        // Bloquear campos
+        document.getElementById('inputNombre').readOnly = true;
+        document.getElementById('inputCedula').readOnly = true;
+        document.getElementById('inputCelular').readOnly = true;
+
+        // Limpiar buscador
+        document.getElementById('listaResultados').style.display = 'none';
+        document.getElementById('buscadorCliente').value = '';
+        document.getElementById('buscadorCliente').placeholder = "✅ Cliente Seleccionado: " + cliente.nombre;
+    }
+
+    function limpiarCliente() {
+        // Limpiar campos y permitir escribir
+        document.getElementById('inputNombre').value = '';
+        document.getElementById('inputCedula').value = '';
+        document.getElementById('inputCelular').value = '';
+        document.getElementById('clienteIdExistente').value = '0';
+
+        document.getElementById('inputNombre').readOnly = false;
+        document.getElementById('inputCedula').readOnly = false;
+        document.getElementById('inputCelular').readOnly = false;
+
+        document.getElementById('buscadorCliente').value = '';
+        document.getElementById('buscadorCliente').placeholder = "Escribe Nombre o Cédula...";
+        document.getElementById('listaResultados').style.display = 'none';
+    }
+</script>
+
+<style>
+    /* ... (Tus estilos de Tabs anteriores siguen aquí) ... */
+
+    /* NUEVO: Estilos para el Buscador de Clientes */
+    #listaResultados {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        z-index: 1050; /* Para que flote encima de todo */
+        width: 100%;
+        max-height: 250px;
+        overflow-y: auto;
+        background-color: #000 !important; /* Fondo negro puro */
+        border: 1px solid #495057;
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+
+    /* Cada elemento de la lista */
+    .resultado-item {
+        background-color: #212529; /* Gris oscuro */
+        border-bottom: 1px solid #373b3e;
+        color: white;
+        transition: all 0.2s;
+        padding: 10px 15px;
+    }
+
+        /* Al pasar el mouse */
+        .resultado-item:hover {
+            background-color: #198754 !important; /* Verde Zeltek al seleccionar */
+            color: white !important;
+            padding-left: 20px; /* Efecto de movimiento */
+        }
+
+        /* Texto pequeño dentro del item */
+        .resultado-item small {
+            color: #adb5bd;
+        }
+
+        .resultado-item:hover small {
+            color: #e9ecef; /* Se aclara al pasar el mouse */
+        }
 </style>

@@ -1,16 +1,19 @@
 ﻿namespace ZeltekWeb.Models
 {
-    public class InventarioViewModel
+    public class ItemInventarioViewModel
     {
         public int ItemID { get; set; }
-        public string Producto { get; set; } = "";
+        public string ProductoNombre { get; set; } // OJO: Antes se llamaba 'Producto', ahora 'ProductoNombre'
+        public string NumeroSerie { get; set; }
+        public string Estado { get; set; }
 
-        // 👇 ESTA ES LA NUEVA PROPIEDAD QUE FALTABA
-        public string Especificaciones { get; set; } = "";
-
-        public string? NumeroSerie { get; set; }
-        public decimal CostoCompra { get; set; }
+        // Costos y Precios
+        public decimal CostoTotal { get; set; }
         public decimal PrecioVenta { get; set; }
-        public string Estado { get; set; } = "";
+
+        // Especificaciones
+        public string Procesador { get; set; }
+        public int RAM_GB { get; set; }
+        public int Almacenamiento_GB { get; set; }
     }
 }

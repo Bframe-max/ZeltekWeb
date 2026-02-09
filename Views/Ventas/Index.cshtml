@@ -1,153 +1,157 @@
 ﻿@model List<ZeltekWeb.Models.VentaListViewModel>
 
 @{
-    ViewData["Title"] = "Historial de Ventas";
-    var r = (ZeltekWeb.Models.VentasResumenViewModel)ViewBag.Resumen;
-    if (r == null) { r = new ZeltekWeb.Models.VentasResumenViewModel(); }
-
-    var hoy = DateTime.Now;
-    var primerDiaMes = new DateTime(hoy.Year, hoy.Month, 1);
-
-    string? fechaDesde = ViewBag.Desde as string;
-    if (string.IsNullOrEmpty(fechaDesde)) { fechaDesde = primerDiaMes.ToString("yyyy-MM-dd"); }
-
-    string? fechaHasta = ViewBag.Hasta as string;
-    if (string.IsNullOrEmpty(fechaHasta)) { fechaHasta = hoy.ToString("yyyy-MM-dd"); }
+    ViewData["Title"] = "Reporte de Ventas";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">💰 Historial de Ventas</h2>
+    <h2 class="fw-bold text-white">📈 Reporte de Ventas</h2>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card h-100 border-start border-4 border-primary bg-card">
-            <div class="card-body">
-                <h6 class="text-secondary text-uppercase small fw-bold">Total Ventas</h6>
-                <h3 class="fw-bold text-white mb-0">$@r.TotalVentas.ToString("N2")</h3>
+<div class="row mb-4 g-3">
+
+    <div class="col-md-4">
+        <div class="card bg-dark border-secondary text-white shadow-sm h-100">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-secondary text-uppercase mb-1 small fw-bold">Total Facturado</h6>
+                    <h2 class="fw-bold text-white mb-0">$@ViewBag.TotalVendido.ToString("N0")</h2>
+                </div>
+                <div class="fs-1 text-primary"><i class="bi bi-cash-stack"></i></div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card h-100 border-start border-4 border-secondary bg-card">
-            <div class="card-body">
-                <h6 class="text-secondary text-uppercase small fw-bold">Costo Mercadería</h6>
-                <h3 class="fw-bold text-white mb-0">$@r.TotalCosto.ToString("N2")</h3>
+    <div class="col-md-4">
+        <div class="card bg-dark border-success text-white shadow-sm h-100" style="border-left: 5px solid #198754;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-success text-uppercase mb-1 small fw-bold">Ganancia Bruta</h6>
+                    <h2 class="fw-bold text-success mb-0">$@ViewBag.TotalGanancia.ToString("N0")</h2>
+                    <small class="text-secondary" style="font-size: 0.7rem;">(Venta - Costos Directos)</small>
+                </div>
+                <div class="fs-1 text-success"><i class="bi bi-graph-up-arrow"></i></div>
             </div>
         </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="card h-100 border-start border-4 border-success bg-card">
-            <div class="card-body">
-                <h6 class="text-success text-uppercase small fw-bold">Ganancia Neta</h6>
-                <h3 class="fw-bold text-success mb-0">+$@r.GananciaTotal.ToString("N2")</h3>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="card h-100 border-start border-4 border-warning bg-card">
-            <div class="card-body">
-                <h6 class="text-secondary text-uppercase small fw-bold">Items Vendidos</h6>
-                <h3 class="fw-bold text-white mb-0">@r.CantidadVentas</h3>
+    <div class="col-md-4">
+        <div class="card bg-dark border-info text-white shadow-sm h-100" style="border-left: 5px solid #0dcaf0;">
+            <div class="card-body d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-info text-uppercase mb-1 small fw-bold">Equipos Vendidos</h6>
+                    <h2 class="fw-bold text-info mb-0">@ViewBag.TotalEquipos</h2>
+                    <small class="text-secondary" style="font-size: 0.7rem;">Unidades en este periodo</small>
+                </div>
+                <div class="fs-1 text-info"><i class="bi bi-box-seam"></i></div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card mb-4 bg-card border-0">
+<div class="card bg-card border-0 mb-4">
     <div class="card-body py-3">
-        <form method="get" class="row g-2 align-items-end">
+        <form method="get" class="row g-3 align-items-end">
             <div class="col-md-4">
-                <label class="form-label small fw-bold text-secondary">Desde</label>
-                <input type="date" name="desde" class="form-control text-white bg-dark border-secondary" value="@fechaDesde" />
+                <label class="text-secondary small fw-bold">Buscar</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-secondary">🔍</span>
+                    <input type="text" name="buscar" class="form-control bg-dark text-white border-secondary"
+                           placeholder="Cliente, Serie, Producto..." value="@ViewData["Busqueda"]">
+                </div>
             </div>
-
-            <div class="col-md-4">
-                <label class="form-label small fw-bold text-secondary">Hasta</label>
-                <input type="date" name="hasta" class="form-control text-white bg-dark border-secondary" value="@fechaHasta" />
+            <div class="col-md-3">
+                <label class="text-secondary small fw-bold">Desde</label>
+                <input type="date" name="fechaInicio" class="form-control bg-dark text-white border-secondary"
+                       value="@ViewData["FechaInicio"]">
             </div>
-
+            <div class="col-md-3">
+                <label class="text-secondary small fw-bold">Hasta</label>
+                <input type="date" name="fechaFin" class="form-control bg-dark text-white border-secondary"
+                       value="@ViewData["FechaFin"]">
+            </div>
             <div class="col-md-2">
-                <button class="btn btn-primary w-100 fw-bold">🔍 Filtrar</button>
-            </div>
-
-            <div class="col-md-2">
-                <a asp-controller="Ventas" asp-action="Index" class="btn btn-outline-secondary w-100">❌ Limpiar</a>
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Filtrar</button>
             </div>
         </form>
     </div>
 </div>
 
-<div class="card bg-card border-0">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="border-bottom: 1px solid var(--border-color);">
+<div class="card bg-card border-0 shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead style="border-bottom: 1px solid #373b3e;">
+                <tr>
+                    <th class="ps-4 text-white">Fecha / ID</th>
+                    <th class="text-white">Cliente</th>
+                    <th class="text-white">Producto Vendido</th>
+                    <th class="text-end text-secondary">Costo Real</th>
+                    <th class="text-end text-white">Venta</th>
+                    <th class="text-end text-white pe-4">Ganancia Bruta</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var v in Model)
+                {
                     <tr>
-                        <th class="ps-3 text-secondary small">ID</th>
-                        <th class="text-white">Fecha</th>
-                        <th class="text-white">Producto / Specs</th>
-                        <th class="text-white">Cliente</th>
-                        <th class="text-white">Serie</th>
-                        <th class="text-white text-end">Venta</th>
-                        <th class="text-white text-end">Ganancia</th>
-                        <th class="text-white text-center">Método</th>
+                        <td class="ps-4">
+                            <div class="text-white fw-bold">@v.FechaVenta.ToString("dd/MM/yyyy")</div>
+                            <small class="text-secondary font-monospace">#@v.VentaID</small>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="text-white">@v.Cliente</span>
+                                @if (v.TipoCliente == "Revendedor")
+                                {
+                                    <span class="badge bg-warning text-dark border border-warning mt-1" style="width: fit-content; font-size: 0.65rem;">
+                                        🤝 Revendedor
+                                    </span>
+                                }
+                                else
+                                {
+                                    <small class="text-secondary" style="font-size: 0.75rem;">👤 Público</small>
+                                }
+                            </div>
+                        </td>
+
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span class="text-info fw-bold">@v.Producto</span>
+                                <small class="text-secondary" style="font-size: 0.75rem;">@v.Especificaciones</small>
+                                <small class="text-secondary font-monospace" style="font-size: 0.7rem;">S/N: @v.NumeroSerie</small>
+                            </div>
+                        </td>
+
+                        <td class="text-end text-secondary">
+                            $@v.Costo.ToString("N2")
+                        </td>
+
+                        <td class="text-end text-white fw-bold">
+                            $@v.PrecioVenta.ToString("N2")
+                        </td>
+
+                        <td class="text-end pe-4">
+                            @if (v.Ganancia > 0)
+                            {
+                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 fs-6">
+                                    +$@v.Ganancia.ToString("N2")
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">
+                                    $@v.Ganancia.ToString("N2")
+                                </span>
+                            }
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var v in Model)
-                    {
-                        <tr>
-                            <td class="ps-3 text-secondary small">#@v.VentaID</td>
-                            <td class="text-white">@v.FechaVenta.ToString("dd/MM")</td>
-
-                            <td>
-                                <div class="d-flex flex-column">
-                                    <span class="fw-bold text-white">@v.Producto</span>
-                                    @if (!string.IsNullOrEmpty(v.Especificaciones))
-                                    {
-                                        <small class="text-secondary" style="font-size: 0.75rem;">
-                                            ⚙️ @v.Especificaciones
-                                        </small>
-                                    }
-                                </div>
-                            </td>
-
-                            <td>
-                                <div class="d-flex align-items-center">
-                                    <div class="rounded-circle bg-primary bg-opacity-10 text-primary d-flex justify-content-center align-items-center me-2" style="width: 25px; height: 25px;">
-                                        <i class="bi bi-person-fill" style="font-size: 0.8rem;"></i>
-                                    </div>
-                                    <span class="text-white small fw-bold">@v.Cliente</span>
-                                </div>
-                            </td>
-
-                            <td>
-                                <span class="badge bg-dark text-secondary border border-secondary font-monospace">
-                                    @(v.NumeroSerie ?? "—")
-                                </span>
-                            </td>
-
-                            <td class="text-end fw-bold text-white">$@v.PrecioVenta.ToString("N2")</td>
-
-                            <td class="text-end fw-bold text-success">+$@v.Ganancia.ToString("N2")</td>
-
-                            <td class="text-center">
-                                <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
-                                    @v.MetodoPago
-                                </span>
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Any())
-                    {
-                        <tr><td colspan="8" class="text-center py-4 text-secondary">No hay ventas registradas en este período.</td></tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+                @if (Model.Count == 0)
+                {
+                    <tr><td colspan="6" class="text-center py-5 text-secondary">No hay ventas registradas en este periodo.</td></tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
