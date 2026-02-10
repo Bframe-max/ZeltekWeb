@@ -1,23 +1,66 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <title>@ViewData["Title"] - Zeltek</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --login-bg: #151521;
+            --login-bg-grad: linear-gradient(145deg, #151521 0%, #1a1a2e 50%, #151521 100%);
+            --login-card: #1e1e2d;
+            --login-input: #1b1b29;
+            --login-border: rgba(255,255,255,.08);
+            --login-focus: #0d6efd;
+            --login-text: #e4e6ef;
+            --login-muted: #a1a5b7;
+        }
+        body.login-page {
+            min-height: 100vh;
+            background: var(--login-bg);
+            background: var(--login-bg-grad);
+            color: var(--login-text);
+        }
+        .login-card {
+            background: var(--login-card);
+            border: 1px solid var(--login-border);
+            border-radius: 1rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,.4);
+        }
+        .login-input {
+            background: var(--login-input) !important;
+            border: 1px solid var(--login-border) !important;
+            color: #fff !important;
+        }
+        .login-input::placeholder { color: var(--login-muted); }
+        .login-input:focus {
+            border-color: var(--login-focus) !important;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+        }
+        .login-btn {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            border: none;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+        }
+        .login-btn:hover {
+            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(13, 110, 253, .4);
+        }
+        .form-check-input:checked { background-color: #0d6efd; }
+        .form-check-input:focus { border-color: #86b7fe; box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25); }
+        .link-accent { color: #6ea8fe; text-decoration: none; }
+        .link-accent:hover { color: #9ec5fe; }
+    </style>
 </head>
-<body class="bg-light">
-
-    <div class="container vh-100 d-flex justify-content-center align-items-center">
-        <div class="col-12 col-md-5 col-lg-4">
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    @RenderBody()
-                </div>
-            </div>
+<body class="login-page">
+    <div class="container min-vh-100 d-flex justify-content-center align-items-center py-5">
+        <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
+            @RenderBody()
         </div>
     </div>
-
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

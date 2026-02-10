@@ -9,6 +9,27 @@
     <p class="text-secondary small mb-0">El pulso del día — qué está pasando hoy</p>
 </div>
 
+<!-- Barra de búsqueda global (serie, nombre, tracking) -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-body py-4">
+        <form asp-controller="Dashboard" asp-action="Buscar" method="get" class="row justify-content-center">
+            <div class="col-12 col-lg-8 col-xl-6">
+                <div class="input-group input-group-lg rounded-pill overflow-hidden border border-secondary">
+                    <span class="input-group-text bg-dark border-0 text-secondary"><span class="fs-5">🔍</span></span>
+                    <input type="search"
+                           name="q"
+                           class="form-control bg-dark text-white border-0"
+                           placeholder="Buscar en todo: serie, nombre de producto, cliente, tracking…"
+                           value=""
+                           autocomplete="off" />
+                    <button type="submit" class="btn btn-primary px-4 rounded-0">Buscar</button>
+                </div>
+                <small class="text-secondary d-block text-center mt-2">Ventas · Compras · Inventario</small>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- A. Fila 1: El Pulso del Día (KPIs Diarios) -->
 <div class="card bg-card border-0 mb-4">
     <div class="card-header bg-transparent border-bottom border-secondary py-2">

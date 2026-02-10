@@ -1,4 +1,4 @@
-﻿namespace ZeltekWeb.Controllers;
+namespace ZeltekWeb.Controllers;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -72,9 +72,9 @@ public class AuthController : Controller
         return RedirectToAction("Login");
     }
 
-
-
-
-    
-
+    [HttpGet]
+    public IActionResult ForgotPassword()
+    {
+        return View();
+    }
 }

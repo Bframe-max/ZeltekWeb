@@ -78,12 +78,21 @@ namespace ZeltekWeb.Controllers
                     }
                 }
 
-                // Actividad reciente: últimas 5 transacciones (Ventas y Compras mezcladas por fecha)
+                // Actividad reciente: últimas 5 transacciones con descripción cliente/producto (JOIN)
                 var sqlActividad = @"
                     SELECT TOP 5 Tipo, Descripcion, Fecha, Monto FROM (
-                        SELECT 'Venta' AS Tipo, 'Venta #' + CAST(v.VentaID AS VARCHAR(20)) AS Descripcion, v.FechaVenta AS Fecha, v.TotalVenta AS Monto FROM Venta v
+                        SELECT 'Venta' AS Tipo,
+                               'Venta #' + CAST(v.VentaID AS VARCHAR(20)) + ' · ' + ISNULL(c.NombreCompleto, 'Sin cliente') AS Descripcion,
+                               v.FechaVenta AS Fecha,
+                               v.TotalVenta AS Monto
+                        FROM Venta v
+                        LEFT JOIN Cliente c ON v.ClienteID = c.ClienteID
                         UNION ALL
-                        SELECT 'Compra' AS Tipo, 'Compra #' + CAST(c.CompraID AS VARCHAR(20)) AS Descripcion, c.FechaCompra AS Fecha, c.CostoTotal AS Monto FROM Compra c
+                        SELECT 'Compra' AS Tipo,
+                               'Compra #' + CAST(comp.CompraID AS VARCHAR(20)) + ' · ' + ISNULL((SELECT TOP 1 p.Nombre FROM ItemInventario i INNER JOIN Producto p ON i.ProductoID = p.ProductoID WHERE i.CompraID = comp.CompraID), 'Varios') AS Descripcion,
+                               comp.FechaCompra AS Fecha,
+                               comp.CostoTotal AS Monto
+                        FROM Compra comp
                     ) u
                     ORDER BY Fecha DESC";
                 using (var cmd = new SqlCommand(sqlActividad, con))
@@ -99,6 +108,97 @@ namespace ZeltekWeb.Controllers
                             Monto = dr.GetDecimal(3)
                         });
                     }
+                }
+            }
+
+            return View(model);
+        }
+
+        /// <summary>
+        /// Búsqueda global por serie, nombre o tracking en Ventas, Compras e Inventario.
+        /// </summary>
+        [HttpGet]
+        public IActionResult Buscar(string q)
+        {
+            var model = new BusquedaGlobalViewModel { Query = q ?? "" };
+            if (string.IsNullOrWhiteSpace(model.Query))
+                return View(model);
+
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using (var con = new SqlConnection(cadena))
+            {
+                con.Open();
+                var buscar = model.Query.Trim();
+
+                // Ventas: por nombre cliente o por número de serie (ítem vendido)
+                var sqlVentas = @"
+                    SELECT DISTINCT v.VentaID, v.FechaVenta, v.TotalVenta, ISNULL(c.NombreCompleto, '') AS ClienteNombre
+                    FROM Venta v
+                    LEFT JOIN Cliente c ON v.ClienteID = c.ClienteID
+                    LEFT JOIN DetalleVenta d ON d.VentaID = v.VentaID
+                    LEFT JOIN ItemInventario i ON i.ItemID = d.ItemID
+                    WHERE c.NombreCompleto LIKE '%' + @Buscar + '%'
+                       OR i.NumeroSerie LIKE '%' + @Buscar + '%'";
+                using (var cmd = new SqlCommand(sqlVentas, con))
+                {
+                    cmd.Parameters.AddWithValue("@Buscar", buscar);
+                    using (var dr = cmd.ExecuteReader())
+                        while (dr.Read())
+                            model.Ventas.Add(new ResultadoBusquedaVenta
+                            {
+                                VentaID = dr.GetInt32(0),
+                                Fecha = dr.GetDateTime(1),
+                                Total = dr.GetDecimal(2),
+                                ClienteNombre = dr.IsDBNull(3) ? "" : dr.GetString(3)
+                            });
+                }
+
+                // Compras: por tracking, vendedor o nombre producto / serie
+                var sqlCompras = @"
+                    SELECT DISTINCT c.CompraID, c.FechaCompra, c.CostoTotal,
+                           ISNULL(c.TrackingProveedor, '') AS Tracking,
+                           ISNULL((SELECT TOP 1 p.Nombre FROM ItemInventario i INNER JOIN Producto p ON i.ProductoID = p.ProductoID WHERE i.CompraID = c.CompraID), '') AS ProductoPrincipal
+                    FROM Compra c
+                    LEFT JOIN ItemInventario i ON i.CompraID = c.CompraID
+                    LEFT JOIN Producto p ON i.ProductoID = p.ProductoID
+                    WHERE c.TrackingProveedor LIKE '%' + @Buscar + '%'
+                       OR c.VendedorOnline LIKE '%' + @Buscar + '%'
+                       OR p.Nombre LIKE '%' + @Buscar + '%'
+                       OR i.NumeroSerie LIKE '%' + @Buscar + '%'";
+                using (var cmd = new SqlCommand(sqlCompras, con))
+                {
+                    cmd.Parameters.AddWithValue("@Buscar", buscar);
+                    using (var dr = cmd.ExecuteReader())
+                        while (dr.Read())
+                            model.Compras.Add(new ResultadoBusquedaCompra
+                            {
+                                CompraID = dr.GetInt32(0),
+                                Fecha = dr.GetDateTime(1),
+                                Total = dr.GetDecimal(2),
+                                Tracking = dr.IsDBNull(3) ? "" : dr.GetString(3),
+                                ProductoPrincipal = dr.IsDBNull(4) ? "" : dr.GetString(4)
+                            });
+                }
+
+                // Inventario: por serie o nombre producto
+                var sqlInv = @"
+                    SELECT i.ItemID, p.Nombre, ISNULL(i.NumeroSerie, 'S/N'), i.Estado
+                    FROM ItemInventario i
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    WHERE i.NumeroSerie LIKE '%' + @Buscar + '%' OR p.Nombre LIKE '%' + @Buscar + '%'
+                    ORDER BY i.ItemID DESC";
+                using (var cmd = new SqlCommand(sqlInv, con))
+                {
+                    cmd.Parameters.AddWithValue("@Buscar", buscar);
+                    using (var dr = cmd.ExecuteReader())
+                        while (dr.Read())
+                            model.Inventario.Add(new ResultadoBusquedaInventario
+                            {
+                                ItemID = dr.GetInt32(0),
+                                ProductoNombre = dr.GetString(1),
+                                NumeroSerie = dr.IsDBNull(2) ? "S/N" : dr.GetString(2),
+                                Estado = dr.GetString(3)
+                            });
                 }
             }
 
