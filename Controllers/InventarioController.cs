@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Models; // Importante
@@ -87,6 +87,128 @@ namespace ZeltekWeb.Controllers
             ViewData["Busqueda"] = buscar;
             ViewData["FiltroActual"] = filtro;
             return View(lista);
+        }
+
+        /// <summary>
+        /// Marca una compra como recibida.
+        /// omitirRevision = true (producto nuevo): ítems pasan directo a 'En Stock'.
+        /// omitirRevision = false (usado): ítems pasan a 'Por Revisar' (mesa de calidad).
+        /// </summary>
+        [HttpPost]
+        public IActionResult RecibirCompra(int compraId, bool omitirRevision = false)
+        {
+            var nuevoEstado = omitirRevision ? "En Stock" : "Por Revisar";
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using (var con = new SqlConnection(cadena))
+            {
+                con.Open();
+                var sql = @"
+                    UPDATE ItemInventario
+                    SET Estado = @Estado
+                    WHERE CompraID = @CompraID
+                      AND Estado IN ('En Camino', 'En Transito', 'En Transito USA', 'En Miami', 'Viajando a NIC', 'En Aduana')";
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@CompraID", compraId);
+                    cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            return RedirectToAction("Index", "Compras");
+        }
+
+        /// <summary>
+        /// Mesa de calidad: lista de ítems en estado "Por Revisar".
+        /// </summary>
+        public IActionResult Calidad()
+        {
+            var lista = new List<ItemPorRevisarViewModel>();
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using (var con = new SqlConnection(cadena))
+            {
+                con.Open();
+                var sql = @"
+                    SELECT i.ItemID, p.Nombre, ISNULL(i.NumeroSerie, 'S/N')
+                    FROM ItemInventario i
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    WHERE i.Estado = 'Por Revisar'
+                    ORDER BY i.ItemID DESC";
+                using (var cmd = new SqlCommand(sql, con))
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(new ItemPorRevisarViewModel
+                        {
+                            ItemID = dr.GetInt32(0),
+                            ProductoNombre = dr.GetString(1),
+                            NumeroSerie = dr.GetString(2)
+                        });
+                    }
+                }
+            }
+            return View(lista);
+        }
+
+        /// <summary>
+        /// Formulario de inspección para un ítem (checklist y aprobar / enviar a reparación).
+        /// </summary>
+        [HttpGet]
+        public IActionResult Inspeccion(int id)
+        {
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using (var con = new SqlConnection(cadena))
+            {
+                con.Open();
+                var sql = "SELECT i.ItemID, p.Nombre, ISNULL(i.NumeroSerie, 'S/N') FROM ItemInventario i INNER JOIN Producto p ON i.ProductoID = p.ProductoID WHERE i.ItemID = @ID AND i.Estado = 'Por Revisar'";
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.Read()) return NotFound();
+                        var model = new InspeccionCalidadViewModel
+                        {
+                            ItemID = dr.GetInt32(0),
+                            ProductoNombre = dr.GetString(1),
+                            NumeroSerie = dr.GetString(2)
+                        };
+                        return View(model);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Guarda resultado de inspección: Aprobar → En Stock, o Enviar a Reparación → En Reparación.
+        /// </summary>
+        [HttpPost]
+        public IActionResult Inspeccion(int id, string resultado, InspeccionCalidadViewModel model)
+        {
+            if (model.ItemID != id) return BadRequest();
+            var nuevoEstado = string.Equals(resultado, "aprobar", StringComparison.OrdinalIgnoreCase) ? "En Stock" : "En Reparación";
+
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using (var con = new SqlConnection(cadena))
+            {
+                con.Open();
+                // Actualizar Estado y opcionalmente Condicion (cosmética), SaludBateria
+                var sql = @"
+                    UPDATE ItemInventario
+                    SET Estado = @Estado,
+                        Condicion = @Condicion,
+                        SaludBateria = @SaludBateria
+                    WHERE ItemID = @ID AND Estado = 'Por Revisar'";
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    cmd.Parameters.AddWithValue("@Estado", nuevoEstado);
+                    cmd.Parameters.AddWithValue("@Condicion", (object?)model.Condicion ?? DBNull.Value);
+                    cmd.Parameters.AddWithValue("@SaludBateria", model.SaludBateriaPorcentaje.HasValue ? model.SaludBateriaPorcentaje.Value.ToString() : (object)DBNull.Value);
+                    if (cmd.ExecuteNonQuery() == 0) return NotFound();
+                }
+            }
+            return RedirectToAction(nameof(Calidad));
         }
     }
 }

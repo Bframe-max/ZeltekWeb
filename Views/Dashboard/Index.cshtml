@@ -1,101 +1,175 @@
-﻿@model ZeltekWeb.Models.DashboardViewModel
+@model ZeltekWeb.Models.DashboardViewModel
 
 @{
-    ViewData["Title"] = "Dashboard Operativo";
+    ViewData["Title"] = "Inicio";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2 class="fw-bold text-white mb-0">⚡ Zeltek Dashboard</h2>
-        <p class="text-secondary small mb-0">Resumen de Activos y Operaciones</p>
+<div class="mb-4">
+    <h2 class="fw-bold text-white mb-0">🏠 Inicio</h2>
+    <p class="text-secondary small mb-0">El pulso del día — qué está pasando hoy</p>
+</div>
+
+<!-- A. Fila 1: El Pulso del Día (KPIs Diarios) -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-2">
+        <h6 class="text-white fw-bold mb-0">⚡ El Pulso del Día</h6>
     </div>
-    <div>
-        <span class="badge bg-dark border border-secondary text-secondary p-2">
-            Total Activos (Prod + Deuda): <span class="text-white fw-bold">$@Model.TotalActivos.ToString("N2")</span>
-        </span>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <div class="card bg-dark border border-success border-opacity-50 h-100">
+                    <div class="card-body">
+                        <small class="text-secondary text-uppercase fw-bold">Ventas de Hoy</small>
+                        <p class="text-success fw-bold mb-0 fs-4">$@Model.VentasHoy.ToString("N2")</p>
+                        <small class="text-muted">Para saber si ya salió para la comida</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <a asp-controller="Compras" asp-action="Index" class="text-decoration-none d-block h-100">
+                    <div class="card bg-dark border border-info border-opacity-50 h-100 hover-card-rápido">
+                        <div class="card-body">
+                            <small class="text-secondary text-uppercase fw-bold">En Camino (eBay)</small>
+                            <p class="text-info fw-bold mb-0 fs-4">@Model.EnCaminoCantidad Equipos</p>
+                            <small class="text-info">$@Model.EnCaminoMonto.ToString("N2") en vuelo →</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a asp-controller="Inventario" asp-action="Calidad" class="text-decoration-none d-block h-100">
+                    <div class="card bg-dark border border-warning border-opacity-50 h-100 hover-card-rápido">
+                        <div class="card-body">
+                            <small class="text-secondary text-uppercase fw-bold">Por Revisar</small>
+                            <p class="text-warning fw-bold mb-0 fs-4">@Model.PorRevisarCantidad Equipos</p>
+                            <small class="text-muted">Mesa de calidad →</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="text-decoration-none d-block h-100">
+                    <div class="card bg-dark border border-teal h-100 hover-card-rápido" style="border-color: #20c997 !important;">
+                        <div class="card-body">
+                            <small class="text-secondary text-uppercase fw-bold">En Bodega (Stock)</small>
+                            <p class="fw-bold mb-0 fs-4" style="color: #20c997;">@Model.StockCantidad Equipos</p>
+                            <small style="color: #20c997;">$@Model.StockValor.ToString("N2") valor total →</small>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="row g-3">
-
-    <div class="col-md-4">
-        <div class="card h-100 border-start border-4 border-primary bg-card hover-card">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="fs-3 text-primary me-3">📦</div>
-                    <div>
-                        <h6 class="text-secondary text-uppercase small fw-bold mb-0">En Bodega</h6>
-                        <small class="text-muted" style="font-size: 0.7rem;">Mercadería lista</small>
-                    </div>
-                </div>
-                <h3 class="fw-bold text-white mb-0">$@Model.ValorInventario.ToString("N2")</h3>
-            </div>
-        </div>
+<!-- C. Accesos Rápidos -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-2">
+        <h6 class="text-white fw-bold mb-0">⚡ Accesos Rápidos</h6>
     </div>
-
-    <div class="col-md-4">
-        <div class="card h-100 border-start border-4 border-info bg-card hover-card">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="fs-3 text-info me-3">✈️</div>
-                    <div>
-                        <h6 class="text-secondary text-uppercase small fw-bold mb-0">En Tránsito</h6>
-                        <small class="text-muted" style="font-size: 0.7rem;">Compras eBay</small>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="text-decoration-none d-block">
+                    <div class="card bg-success bg-opacity-10 border border-success border-opacity-50 h-100 hover-card-rápido">
+                        <div class="card-body text-center py-4">
+                            <div class="display-4 mb-2">🛒</div>
+                            <h5 class="text-white fw-bold mb-1">Nueva Venta</h5>
+                            <small class="text-success">Desde inventario</small>
+                        </div>
                     </div>
-                </div>
-                <h3 class="fw-bold text-white mb-0">$@Model.EnCamino.ToString("N2")</h3>
+                </a>
             </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card h-100 border-start border-4 border-danger bg-card hover-card">
-            <div class="card-body">
-                <div class="d-flex align-items-center mb-3">
-                    <div class="fs-3 text-danger me-3">📝</div>
-                    <div>
-                        <h6 class="text-secondary text-uppercase small fw-bold mb-0">Por Cobrar</h6>
-                        <small class="text-muted" style="font-size: 0.7rem;">Dinero en la calle</small>
+            <div class="col-md-4">
+                <a asp-controller="Compras" asp-action="Create" class="text-decoration-none d-block">
+                    <div class="card bg-primary bg-opacity-10 border border-primary border-opacity-50 h-100 hover-card-rápido">
+                        <div class="card-body text-center py-4">
+                            <div class="display-4 mb-2">➕</div>
+                            <h5 class="text-white fw-bold mb-1">Registrar Compra</h5>
+                            <small class="text-primary">eBay / importación</small>
+                        </div>
                     </div>
-                </div>
-                <h3 class="fw-bold text-white mb-0">$@Model.PorCobrar.ToString("N2")</h3>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a asp-controller="Gastos" asp-action="Create" class="text-decoration-none d-block">
+                    <div class="card bg-danger bg-opacity-10 border border-danger border-opacity-50 h-100 hover-card-rápido">
+                        <div class="card-body text-center py-4">
+                            <div class="display-4 mb-2">💸</div>
+                            <h5 class="text-white fw-bold mb-1">Registrar Gasto</h5>
+                            <small class="text-danger">Operativo</small>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card bg-card border-0 shadow-sm">
-            <div class="card-body d-flex justify-content-between align-items-center">
-
-                <div class="d-flex align-items-center">
-                    <div class="p-3 rounded-circle bg-success bg-opacity-10 me-3">
-                        <i class="bi bi-graph-up-arrow text-success fs-4"></i>
-                    </div>
-                    <div>
-                        <h6 class="text-white fw-bold mb-0">Rendimiento Total</h6>
-                        <small class="text-secondary">Ganancia Acumulada</small>
-                    </div>
-                </div>
-
-                <div class="text-end">
-                    <h4 class="text-success fw-bold mb-0">+$@Model.GananciaTotal.ToString("N2")</h4>
-                    <small class="text-muted">En @Model.CantidadVendidos ventas realizadas</small>
-                </div>
-
-            </div>
+<!-- Actividad Reciente -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h6 class="text-white fw-bold mb-0">📋 Actividad Reciente</h6>
+        <small class="text-secondary">Últimas 5 transacciones (Ventas y Compras)</small>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-4 text-white">Tipo</th>
+                        <th class="text-white">Descripción</th>
+                        <th class="text-white">Fecha</th>
+                        <th class="text-end pe-4 text-white">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.ActividadReciente)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                @if (a.Tipo == "Venta")
+                                {
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">💰 Venta</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">🛒 Compra</span>
+                                }
+                            </td>
+                            <td class="text-white">@a.Descripcion</td>
+                            <td class="text-secondary">@HaceTiempo(a.Fecha)</td>
+                            <td class="text-end fw-bold @(a.Tipo == "Venta" ? "text-success" : "text-info")">$@a.Monto.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
+        @if (Model.ActividadReciente.Count == 0)
+        {
+            <div class="text-center py-4 text-secondary small">Aún no hay actividad.</div>
+        }
     </div>
 </div>
 
 <style>
-    .hover-card {
-        transition: transform 0.2s;
+    .hover-card-rápido {
+        transition: transform 0.2s, box-shadow 0.2s;
     }
-
-        .hover-card:hover {
-            transform: translateY(-3px);
-            background-color: #232333 !important;
-        }
+    .hover-card-rápido:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
 </style>
+
+@functions {
+    static string HaceTiempo(DateTime fecha)
+    {
+        var diff = DateTime.Now - fecha;
+        if (diff.TotalMinutes < 1) return "Ahora";
+        if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
+        if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours} h";
+        if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} días";
+        return fecha.ToString("dd/MM/yy HH:mm");
+    }
+}

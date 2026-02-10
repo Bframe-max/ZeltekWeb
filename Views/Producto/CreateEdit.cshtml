@@ -1,68 +1,90 @@
-﻿@model ZeltekWeb.Models.ProductoCreateEditViewModel
+@model ZeltekWeb.Models.ProductoCreateEditViewModel
 
 @{
     var esEdicion = Model.ProductoID > 0;
     ViewData["Title"] = esEdicion ? "Editar Producto" : "Nuevo Producto";
 }
 
-<h2>@ViewData["Title"]</h2>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-card border-0 shadow-lg mt-4">
+            <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                <h4 class="text-white fw-bold mb-0">
+                    @(esEdicion ? "✏️ Editar Producto" : "📦 Nuevo Producto")
+                </h4>
+            </div>
+            <div class="card-body p-4">
 
-<form asp-action="@(esEdicion ? "Edit" : "Create")" method="post">
+                <form asp-action="@(esEdicion ? "Edit" : "Create")" asp-route-id="@(esEdicion ? Model.ProductoID : (int?)null)" method="post">
+                    @if (esEdicion)
+                    {
+                        <input type="hidden" asp-for="ProductoID" />
+                    }
 
-    @if (esEdicion)
-    {
-        <input type="hidden" asp-for="ProductoID" />
-    }
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <label asp-for="Nombre" class="form-label text-secondary small fw-bold"></label>
+                            <input asp-for="Nombre" class="form-control bg-dark text-white border-secondary" placeholder="Ej: MacBook Pro 14" />
+                            <span asp-validation-for="Nombre" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="Modelo" class="form-label text-secondary small fw-bold"></label>
+                            <input asp-for="Modelo" class="form-control bg-dark text-white border-secondary" placeholder="Ej: M3 Pro" />
+                        </div>
+                    </div>
 
-    <div class="mb-3">
-        <label asp-for="Nombre" class="form-label"></label>
-        <input asp-for="Nombre" class="form-control" />
-        <span asp-validation-for="Nombre" class="text-danger"></span>
+                    <div class="mb-3">
+                        <label asp-for="Descripcion" class="form-label text-secondary small fw-bold"></label>
+                        <textarea asp-for="Descripcion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Descripción opcional"></textarea>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Marca</label>
+                            <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="form-select bg-dark text-white border-secondary">
+                                <option value="">-- Seleccione --</option>
+                            </select>
+                            <span asp-validation-for="MarcaID" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-secondary small fw-bold">Categoría</label>
+                            <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="form-select bg-dark text-white border-secondary">
+                                <option value="">-- Sin categoría --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="CostoReferencia" class="form-label text-secondary small fw-bold"></label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
+                                <input asp-for="CostoReferencia" type="number" step="0.01" class="form-control bg-dark text-white border-secondary" placeholder="0.00" />
+                            </div>
+                        </div>
+                        <div class="col-md-6 d-flex align-items-end pb-2">
+                            <div class="form-check">
+                                <input asp-for="EsUnico" class="form-check-input" />
+                                <label asp-for="EsUnico" class="form-check-label text-secondary">
+                                    Producto con serial (Laptop / iPhone)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="border-secondary my-4" />
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary fw-bold py-2 px-4">
+                            <i class="bi bi-check-lg me-2"></i>Guardar
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="Descripcion" class="form-label"></label>
-        <textarea asp-for="Descripcion" class="form-control"></textarea>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Marca</label>
-        <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="form-select">
-            <option value="">-- Seleccione --</option>
-        </select>
-        <span asp-validation-for="MarcaID" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Categoría</label>
-        <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="form-select">
-            <option value="">-- Sin categoría --</option>
-        </select>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Modelo" class="form-label"></label>
-        <input asp-for="Modelo" class="form-control" />
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="CostoReferencia" class="form-label"></label>
-        <input asp-for="CostoReferencia" class="form-control" />
-    </div>
-
-    <div class="form-check mb-3">
-        <input asp-for="EsUnico" class="form-check-input" />
-        <label asp-for="EsUnico" class="form-check-label">
-            Producto con serial (Laptop / iPhone)
-        </label>
-    </div>
-
-    <button type="submit" class="btn btn-success">
-        💾 Guardar
-    </button>
-
-    <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-</form>
+</div>
 
 @section Scripts {
     @{

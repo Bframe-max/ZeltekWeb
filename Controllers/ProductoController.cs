@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
@@ -77,7 +77,7 @@ namespace ZeltekWeb.Controllers
             {
                 ViewBag.Marcas = ObtenerMarcas();
                 ViewBag.Categorias = ObtenerCategorias();
-                return View(model);
+                return View("CreateEdit", model);
             }
 
             var cadena = _config.GetConnectionString("ZeltekDB");
@@ -142,6 +142,45 @@ namespace ZeltekWeb.Controllers
             return View("CreateEdit", model);
         }
 
+        [HttpPost]
+        public IActionResult Edit(int id, ProductoCreateEditViewModel model)
+        {
+            if (model.ProductoID != id) return NotFound();
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Marcas = ObtenerMarcas();
+                ViewBag.Categorias = ObtenerCategorias();
+                return View("CreateEdit", model);
+            }
+
+            var cadena = _config.GetConnectionString("ZeltekDB");
+            using SqlConnection con = new SqlConnection(cadena);
+            con.Open();
+
+            var sql = @"
+                UPDATE Producto SET
+                    Nombre = @Nombre,
+                    Descripcion = @Descripcion,
+                    MarcaID = @MarcaID,
+                    Modelo = @Modelo,
+                    CategoriaID = @CategoriaID,
+                    EsUnico = @EsUnico,
+                    CostoReferencia = @Costo
+                WHERE ProductoID = @ID AND IsDeleted = 0";
+
+            using SqlCommand cmd = new SqlCommand(sql, con);
+            cmd.Parameters.AddWithValue("@ID", id);
+            cmd.Parameters.AddWithValue("@Nombre", model.Nombre);
+            cmd.Parameters.AddWithValue("@Descripcion", (object?)model.Descripcion ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@MarcaID", model.MarcaID);
+            cmd.Parameters.AddWithValue("@Modelo", (object?)model.Modelo ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@CategoriaID", (object?)model.CategoriaID ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@EsUnico", model.EsUnico);
+            cmd.Parameters.AddWithValue("@Costo", (object?)model.CostoReferencia ?? DBNull.Value);
+
+            cmd.ExecuteNonQuery();
+            return RedirectToAction("Index");
+        }
 
         // =========================
         // HELPERS

@@ -1,0 +1,113 @@
+@model ZeltekWeb.Models.InspeccionCalidadViewModel
+
+@{
+    ViewData["Title"] = "Inspección de Calidad";
+}
+
+<div class="mb-4">
+    <a asp-action="Calidad" class="btn btn-outline-secondary mb-2">← Volver a Mesa de Calidad</a>
+    <h2 class="text-white fw-bold mb-0">📋 Inspección de: @Model.ProductoNombre</h2>
+    <p class="text-secondary small mb-0">S/N: @Model.NumeroSerie</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card bg-card border-0 shadow-lg">
+            <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                <h5 class="text-white fw-bold mb-0">Checklist de Ingreso</h5>
+            </div>
+            <div class="card-body p-4">
+
+                <form asp-action="Inspeccion" asp-route-id="@Model.ItemID" method="post">
+                    <input type="hidden" asp-for="ItemID" />
+                    <input type="hidden" asp-for="ProductoNombre" />
+                    <input type="hidden" asp-for="NumeroSerie" />
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Cosmética</label>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" />
+                                <label class="form-check-label text-secondary" for="CondicionA">Grado A</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" />
+                                <label class="form-check-label text-secondary" for="CondicionB">Grado B</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" />
+                                <label class="form-check-label text-secondary" for="CondicionC">Grado C</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SaludBateriaPorcentaje" class="form-label text-secondary small fw-bold">Batería (%)</label>
+                        <input asp-for="SaludBateriaPorcentaje" type="number" min="0" max="100" class="form-control bg-dark text-white border-secondary w-25" placeholder="85" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Funciona todo</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="form-check">
+                                <input asp-for="PantallaOk" class="form-check-input" />
+                                <label asp-for="PantallaOk" class="form-check-label text-secondary">Pantalla</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="TecladoOk" class="form-check-input" />
+                                <label asp-for="TecladoOk" class="form-check-label text-secondary">Teclado</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="AudioOk" class="form-check-input" />
+                                <label asp-for="AudioOk" class="form-check-label text-secondary">Audio</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Checklist</label>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="form-check">
+                                <input asp-for="EncendioCorrectamente" class="form-check-input" />
+                                <label asp-for="EncendioCorrectamente" class="form-check-label text-secondary">Encendió correctamente</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="PantallaSinManchas" class="form-check-input" />
+                                <label asp-for="PantallaSinManchas" class="form-check-label text-secondary">Pantalla sin manchas</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="TecladoFuncional" class="form-check-input" />
+                                <label asp-for="TecladoFuncional" class="form-check-label text-secondary">Teclado funcional</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="CargadorIncluido" class="form-check-input" />
+                                <label asp-for="CargadorIncluido" class="form-check-label text-secondary">Cargador original incluido</label>
+                            </div>
+                            <div class="form-check">
+                                <input asp-for="LimpiezaRealizada" class="form-check-input" />
+                                <label asp-for="LimpiezaRealizada" class="form-check-label text-secondary">Limpieza realizada</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="NotasInspeccion" class="form-label text-secondary small fw-bold">Notas</label>
+                        <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Ej: Vino sucio, se limpió. Cargador genérico."></textarea>
+                    </div>
+
+                    <hr class="border-secondary my-4" />
+
+                    <div class="d-flex gap-3 flex-wrap">
+                        <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
+                            ✅ Aprobar y pasar a Stock
+                        </button>
+                        <button type="submit" name="resultado" value="reparacion" class="btn btn-warning btn-lg fw-bold">
+                            ⚠️ Enviar a Reparación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

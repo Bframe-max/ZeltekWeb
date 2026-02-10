@@ -1,0 +1,52 @@
+@model List<ZeltekWeb.Models.ItemPorRevisarViewModel>
+
+@{
+    ViewData["Title"] = "Mesa de Calidad";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold text-white mb-0">🕵️‍♂️ Recepción y Calidad</h2>
+        <p class="text-secondary small mb-0">Equipos en estado Por Revisar — checklist de ingreso</p>
+    </div>
+    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">← Volver al Inicio</a>
+</div>
+
+<div class="card bg-card border-0 border-start border-4 border-warning">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h5 class="text-white fw-bold mb-0">Control de Calidad</h5>
+        <small class="text-secondary">Selecciona un equipo para abrir el formulario de inspección.</small>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-4 text-white">Producto</th>
+                        <th class="text-white">Serie / ID</th>
+                        <th class="text-end pe-4 text-white">Acción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold text-white">@item.ProductoNombre</td>
+                            <td><span class="badge bg-dark text-info font-monospace">@item.NumeroSerie</span></td>
+                            <td class="text-end pe-4">
+                                <a asp-action="Inspeccion" asp-route-id="@item.ItemID" class="btn btn-sm btn-warning">📋 Inspeccionar</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.Count == 0)
+        {
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+                No hay equipos pendientes de revisión. En Compras, usa el botón «Recibir» en una compra en tránsito (sin marcar «Omitir Revisión») para que aparezcan aquí.
+            </div>
+        }
+    </div>
+</div>

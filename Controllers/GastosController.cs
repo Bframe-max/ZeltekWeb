@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Filters;
@@ -84,9 +84,37 @@ namespace ZeltekWeb.Controllers
                 }
             }
 
+            // -------- GASTOS POR CATEGORÍA (para gráfico) --------
+            var gastosPorCategoria = new List<GastoPorCategoriaViewModel>();
+            var sqlCategoria = @"
+                SELECT
+                    ISNULL(CategoriaGasto, 'Sin categoría') AS Categoria,
+                    SUM(Monto) AS Total
+                FROM GastoOperativo
+                WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
+                  AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
+                GROUP BY CategoriaGasto
+                ORDER BY SUM(Monto) DESC";
+
+            using (var cmdCat = new SqlCommand(sqlCategoria, con))
+            {
+                cmdCat.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
+                cmdCat.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
+                using var drCat = cmdCat.ExecuteReader();
+                while (drCat.Read())
+                {
+                    gastosPorCategoria.Add(new GastoPorCategoriaViewModel
+                    {
+                        Categoria = drCat.GetString(0),
+                        Total = drCat.GetDecimal(1)
+                    });
+                }
+            }
+
             ViewBag.Resumen = resumen;
             ViewBag.Desde = desde;
             ViewBag.Hasta = hasta;
+            ViewBag.GastosPorCategoria = gastosPorCategoria;
 
             return View(lista);
         }

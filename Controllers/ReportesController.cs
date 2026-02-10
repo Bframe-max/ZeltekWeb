@@ -1,22 +1,13 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ZeltekWeb.Filters;
 using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
 {
     [Authorize]
     public class ReportesController : Controller
-
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-
-
         private readonly IConfiguration _config;
 
         public ReportesController(IConfiguration config)
@@ -24,155 +15,185 @@ namespace ZeltekWeb.Controllers
             _config = config;
         }
 
-        public IActionResult GananciaNeta(DateTime? desde, DateTime? hasta)
+        /// <summary>
+        /// Dashboard de reportes: tendencia, top productos, inventario dormido, valor inventario.
+        /// </summary>
+        /// <param name="meses">6 o 12 meses para el gráfico de tendencia</param>
+        /// <param name="periodoGanancia">1, 3 o 12 meses para el cálculo de Ganancia Neta</param>
+        public IActionResult Index(int meses = 12, int periodoGanancia = 1)
         {
-            var model = new ReporteGananciaNetaViewModel
-            {
-                Desde = desde,
-                Hasta = hasta
-            };
+            if (meses != 6 && meses != 12) meses = 12;
+            if (periodoGanancia != 1 && periodoGanancia != 3 && periodoGanancia != 12) periodoGanancia = 1;
 
+            var model = new ReporteIndexViewModel { MesesTendencia = meses, PeriodoGananciaMeses = periodoGanancia };
             var cadena = _config.GetConnectionString("ZeltekDB");
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
 
-            // =========================
-            // VENTAS
-            // =========================
-            var sqlVentas = @"
-                SELECT
-                    COUNT(*) ,
-                    SUM(d.PrecioUnitario),
-                    SUM(i.CostoCompra)
-                FROM Venta v
-                INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                WHERE (@Desde IS NULL OR v.FechaVenta >= @Desde)
-                  AND (@Hasta IS NULL OR v.FechaVenta <= @Hasta)
-            ";
-
-            using (var cmd = new SqlCommand(sqlVentas, con))
+            using (var con = new SqlConnection(cadena))
             {
-                cmd.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
+                con.Open();
 
-                using var dr = cmd.ExecuteReader();
-                if (dr.Read())
+                // 1. Tendencia de crecimiento (últimos 6 o 12 meses)
+                var sqlTendencia = @"
+                    SELECT
+                        FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes,
+                        FORMAT(MIN(v.FechaVenta), 'MMM yy') AS MesLabel,
+                        SUM(d.PrecioUnitario) AS TotalVentas,
+                        COUNT(*) AS CantidadVentas
+                    FROM Venta v
+                    INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
+                    WHERE v.FechaVenta >= DATEADD(month, -@Meses, CAST(GETDATE() AS DATE))
+                    GROUP BY FORMAT(v.FechaVenta, 'yyyy-MM')
+                    ORDER BY FORMAT(v.FechaVenta, 'yyyy-MM')";
+
+                using (var cmd = new SqlCommand(sqlTendencia, con))
                 {
-                    model.CantidadVentas = dr.GetInt32(0);
-                    model.TotalVentas = dr.IsDBNull(1) ? 0 : dr.GetDecimal(1);
-                    model.TotalCosto = dr.IsDBNull(2) ? 0 : dr.GetDecimal(2);
+                    cmd.Parameters.AddWithValue("@Meses", meses);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            model.TendenciaMeses.Add(new ReporteTendenciaMensualViewModel
+                            {
+                                Mes = dr.GetString(0),
+                                MesLabel = dr.GetString(1),
+                                TotalVentas = dr.GetDecimal(2),
+                                CantidadVentas = dr.GetInt32(3)
+                            });
+                        }
+                    }
+                }
+
+                // 2. Top productos (más vendidos)
+                var sqlTop = @"
+                    SELECT
+                        p.Nombre AS ProductoNombre,
+                        COUNT(*) AS CantidadVentas,
+                        SUM(d.PrecioUnitario) AS TotalVendido
+                    FROM DetalleVenta d
+                    INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    GROUP BY p.ProductoID, p.Nombre
+                    ORDER BY COUNT(*) DESC";
+
+                using (var cmd = new SqlCommand(sqlTop, con))
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        model.TopProductos.Add(new ReporteTopProductoViewModel
+                        {
+                            ProductoNombre = dr.GetString(0),
+                            CantidadVentas = dr.GetInt32(1),
+                            TotalVendido = dr.GetDecimal(2)
+                        });
+                    }
+                }
+
+                // 2.5 Ganancia Neta desde vw_ResumenFinanciero (GananciaBruta - GastosOperativos = GananciaNeta)
+                var sqlResumenFinanciero = @"
+                    SELECT
+                        ISNULL(SUM(GananciaBruta), 0),
+                        ISNULL(SUM(GastosOperativos), 0)
+                    FROM vw_ResumenFinanciero
+                    WHERE DATEFROMPARTS(Anio, Mes, 1) >= DATEADD(month, -@PeriodoGanancia, CAST(GETDATE() AS DATE))";
+                using (var cmd = new SqlCommand(sqlResumenFinanciero, con))
+                {
+                    cmd.Parameters.AddWithValue("@PeriodoGanancia", periodoGanancia);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            model.GananciaBrutaVentas = dr.GetDecimal(0);
+                            model.TotalGastosOperativos = dr.GetDecimal(1);
+                        }
+                    }
+                }
+
+                // 3. Valor del inventario actual (items En Stock)
+                var sqlValor = @"
+                    SELECT SUM(i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0))
+                    FROM ItemInventario i
+                    WHERE i.Estado = 'En Stock'";
+
+                using (var cmd = new SqlCommand(sqlValor, con))
+                {
+                    var obj = cmd.ExecuteScalar();
+                    if (obj != null && obj != DBNull.Value)
+                        model.ValorInventarioActual = Convert.ToDecimal(obj);
+                }
+
+                // 4. Inventario dormido (> 60 días en stock, desde FechaCompra de la compra)
+                var sqlDormido = @"
+                    SELECT
+                        i.ItemID,
+                        p.Nombre AS ProductoNombre,
+                        ISNULL(i.NumeroSerie, '') AS NumeroSerie,
+                        DATEDIFF(day, c.FechaCompra, GETDATE()) AS DiasEnStock,
+                        (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0)) AS CostoTotal,
+                        i.PrecioVenta,
+                        i.Procesador,
+                        ISNULL(i.RAM_GB, 0) AS RAM_GB,
+                        ISNULL(i.Almacenamiento_GB, 0) AS Almacenamiento_GB
+                    FROM ItemInventario i
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    INNER JOIN Compra c ON i.CompraID = c.CompraID
+                    WHERE i.Estado = 'En Stock'
+                      AND DATEDIFF(day, c.FechaCompra, GETDATE()) >= 60
+                    ORDER BY DiasEnStock DESC";
+
+                using (var cmd = new SqlCommand(sqlDormido, con))
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        model.InventarioDormido.Add(new ReporteInventarioDormidoViewModel
+                        {
+                            ItemID = dr.GetInt32(0),
+                            ProductoNombre = dr.GetString(1),
+                            NumeroSerie = dr.GetString(2),
+                            DiasEnStock = dr.GetInt32(3),
+                            CostoTotal = dr.GetDecimal(4),
+                            PrecioVenta = dr.GetDecimal(5),
+                            Procesador = dr.IsDBNull(6) ? null : dr.GetString(6),
+                            RAM_GB = dr.GetInt32(7),
+                            Almacenamiento_GB = dr.GetInt32(8)
+                        });
+                    }
+                }
+
+                // 5. Top clientes revendedores desde vw_TopClientes (quién más compra)
+                var sqlTopRevendedores = @"
+                    SELECT
+                        Cliente,
+                        TipoCliente,
+                        CantidadCompras,
+                        TotalComprado,
+                        GananciaGenerada,
+                        UltimaCompra
+                    FROM vw_TopClientes
+                    WHERE LOWER(LTRIM(RTRIM(ISNULL(TipoCliente,'')))) = 'revendedor'
+                      AND Cliente IS NOT NULL AND LTRIM(RTRIM(Cliente)) <> ''
+                    ORDER BY TotalComprado DESC";
+
+                using (var cmd = new SqlCommand(sqlTopRevendedores, con))
+                using (var dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        model.TopRevendedores.Add(new TopRevendedorViewModel
+                        {
+                            NombreCliente = dr.GetString(0),
+                            TipoCliente = dr.IsDBNull(1) ? "" : dr.GetString(1),
+                            CantidadCompras = dr.GetInt32(2),
+                            TotalComprado = dr.GetDecimal(3),
+                            GananciaGenerada = dr.GetDecimal(4),
+                            UltimaCompra = dr.IsDBNull(5) ? null : dr.GetDateTime(5)
+                        });
+                    }
                 }
             }
-
-            // =========================
-            // GASTOS OPERATIVOS
-            // =========================
-            var sqlGastos = @"
-                SELECT
-                    COUNT(*),
-                    SUM(Monto)
-                FROM GastoOperativo
-                WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
-                  AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
-            ";
-
-            using (var cmd = new SqlCommand(sqlGastos, con))
-            {
-                cmd.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
-
-                using var dr = cmd.ExecuteReader();
-                if (dr.Read())
-                {
-                    model.CantidadGastos = dr.GetInt32(0);
-                    model.TotalGastos = dr.IsDBNull(1) ? 0 : dr.GetDecimal(1);
-                }
-            }
-
-            // =========================
-            // GANANCIA NETA
-            // =========================
-            model.GananciaNeta = model.TotalVentas - model.TotalCosto - model.TotalGastos;
 
             return View(model);
-
-
-
-
         }
-        public IActionResult GraficaGanancia(DateTime? desde, DateTime? hasta)
-        {
-            var lista = new List<ReporteGraficaMensualViewModel>();
-
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
-
-   
-
-
-            var sql = @"
-SELECT
-    v.Mes,
-    v.Ventas,
-    v.Costos,
-    ISNULL(g.Gastos, 0) AS Gastos,
-    (v.Ventas - v.Costos - ISNULL(g.Gastos, 0)) AS Ganancia
-FROM
-(
-    SELECT
-        FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes,
-        SUM(d.PrecioUnitario) AS Ventas,
-        SUM(i.CostoCompra) AS Costos
-    FROM Venta v
-    INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-    INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-    WHERE (@Desde IS NULL OR v.FechaVenta >= @Desde)
-      AND (@Hasta IS NULL OR v.FechaVenta <= @Hasta)
-    GROUP BY FORMAT(v.FechaVenta, 'yyyy-MM')
-) v
-LEFT JOIN
-(
-    SELECT
-        FORMAT(FechaGasto, 'yyyy-MM') AS Mes,
-        SUM(Monto) AS Gastos
-    FROM GastoOperativo
-    WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
-      AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
-    GROUP BY FORMAT(FechaGasto, 'yyyy-MM')
-) g ON v.Mes = g.Mes
-ORDER BY v.Mes";
-
-
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
-
-            using var dr = cmd.ExecuteReader();
-            while (dr.Read())
-            {
-                lista.Add(new ReporteGraficaMensualViewModel
-                {
-                    Mes = dr.GetString(0),
-                    Ventas = dr.IsDBNull(1) ? 0 : dr.GetDecimal(1),
-                    Costos = dr.IsDBNull(2) ? 0 : dr.GetDecimal(2),
-                    Gastos = dr.IsDBNull(3) ? 0 : dr.GetDecimal(3)
-                    // ❌ NO asignar Ganancia
-                });
-            }
-
-            return Json(new
-            {
-                labels = lista.Select(x => x.Mes),
-                ventas = lista.Select(x => x.Ventas),
-                gastos = lista.Select(x => x.Gastos),
-                ganancia = lista.Select(x => x.Ganancia)
-            });
-        }
-
-        
-
-
     }
 }

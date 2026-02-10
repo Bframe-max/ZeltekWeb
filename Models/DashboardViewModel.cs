@@ -1,16 +1,18 @@
-﻿namespace ZeltekWeb.Models
+namespace ZeltekWeb.Models
 {
+    /// <summary>
+    /// Dashboard principal operativo: pulso del día, stock, accesos rápidos, actividad reciente.
+    /// </summary>
     public class DashboardViewModel
     {
-        public decimal ValorInventario { get; set; }
-        public decimal EnCamino { get; set; }
-        public decimal PorCobrar { get; set; }
+        // A. El Pulso del Día (KPIs diarios)
+        public decimal VentasHoy { get; set; }
+        public int EnCaminoCantidad { get; set; }   // Equipos en camino (eBay)
+        public decimal EnCaminoMonto { get; set; }   // $ en vuelo
+        public int PorRevisarCantidad { get; set; } // Equipos por revisar
+        public int StockCantidad { get; set; }      // Ítems en bodega (Estado = 'En Stock')
+        public decimal StockValor { get; set; }     // Valor total en bodega (CostoCompra + gastos)
 
-        public int CantidadVendidos { get; set; }
-        public decimal GananciaTotal { get; set; }
-
-        // Un total simple de tus ACTIVOS (Mercadería + Deudas)
-        // OJO: No sumamos caja aquí porque no la estamos trayendo.
-        public decimal TotalActivos => ValorInventario + EnCamino + PorCobrar;
+        public List<ActividadRecienteViewModel> ActividadReciente { get; set; } = new();
     }
 }

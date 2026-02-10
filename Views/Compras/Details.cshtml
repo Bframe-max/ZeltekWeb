@@ -1,4 +1,4 @@
-﻿@model ZeltekWeb.Models.CompraDetalleViewModel
+@model ZeltekWeb.Models.CompraDetalleViewModel
 @{
     ViewData["Title"] = "Recibir Pedido #" + Model.CompraID;
 }
@@ -95,6 +95,16 @@
                     <input type="hidden" name="itemId" id="inputItemId" />
                     <input type="hidden" name="compraIdRetorno" value="@Model.CompraID" />
 
+                    <div class="mb-3 p-3 rounded border border-success border-opacity-50 d-flex align-items-center" style="background-color: rgba(25, 135, 84, 0.1);">
+                        <div class="form-check form-switch m-0 fs-5">
+                            <input class="form-check-input" type="checkbox" id="checkProductoNuevo" name="productoNuevo" value="true" style="cursor: pointer;">
+                            <label class="form-check-label fw-bold text-success ps-3" for="checkProductoNuevo" style="cursor: pointer; padding-top: 2px;">
+                                ✨ Producto Nuevo (Omitir Control de Calidad)
+                            </label>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">Si está marcado: pasa directo a <strong>Stock</strong>. Si no: va a <strong>Por Revisar</strong> (mesa de calidad).</p>
+
                     <div class="mb-4 p-3 rounded border border-secondary d-flex align-items-center" style="background-color: #2b3035;">
                         <div class="form-check form-switch m-0 fs-5">
                             <input class="form-check-input" type="checkbox" id="checkAccesorio" name="esAccesorio" value="true" onchange="toggleAccesorio()" style="cursor: pointer;">
@@ -176,6 +186,7 @@
         document.getElementById('modalTitulo').innerText = 'Recibir: ' + nombre;
 
         // Resetear
+        document.getElementById('checkProductoNuevo').checked = false;
         document.getElementById('checkAccesorio').checked = false;
         document.getElementById('inputSerie').value = '';
         toggleAccesorio();

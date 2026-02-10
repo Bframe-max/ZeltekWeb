@@ -1,0 +1,268 @@
+@model List<ZeltekWeb.Models.GarantiaVigenteViewModel>
+
+@{
+    ViewData["Title"] = "Garantías Vigentes";
+    var todas = Model;
+    var porVencer = Model.Where(x => x.DiasRestantes <= 30).ToList();
+}
+
+<div class="mb-4">
+    <h2 class="fw-bold text-white">🛡️ Garantías Vigentes</h2>
+</div>
+
+<div class="card mb-4 bg-card border-0">
+    <div class="card-body py-3">
+        <form method="get" class="row g-2 align-items-center">
+            <div class="col-md-10">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color: var(--border-color);">🔍</span>
+                    <input type="text" name="buscar" class="form-control border-start-0 text-white bg-dark"
+                           placeholder="Buscar por cliente, teléfono, producto o serie..."
+                           value="@ViewData["Busqueda"]" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100 fw-bold">Buscar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-card border-start border-4 border-success">
+            <div class="card-body">
+                <small class="text-secondary text-uppercase fw-bold">Total vigentes</small>
+                <h3 class="text-white fw-bold mb-0">@todas.Count</h3>
+                <small class="text-success">Garantías activas</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-card border-start border-4 border-warning">
+            <div class="card-body">
+                <small class="text-secondary text-uppercase fw-bold">Por vencer (≤30 días)</small>
+                <h3 class="text-warning fw-bold mb-0">@porVencer.Count</h3>
+                <small class="text-secondary">Próximas a vencer</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-card border-start border-4 border-info">
+            <div class="card-body">
+                <small class="text-secondary text-uppercase fw-bold">Garantía más próxima</small>
+                <h3 class="text-info fw-bold mb-0">
+                    @if (todas.Any())
+                    {
+                        var min = todas.OrderBy(x => x.DiasRestantes).First();
+                        <span>@min.DiasRestantes días</span>
+                    }
+                    else
+                    {
+                        <span>—</span>
+                    }
+                </h3>
+                <small class="text-secondary">Para contactar al cliente</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ul class="nav nav-tabs border-bottom-0 mb-3" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link fw-bold px-4 active" href="#todas" data-bs-toggle="tab" role="tab">
+            🛡️ Todas vigentes
+            <span class="badge bg-success ms-2">@todas.Count</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link fw-bold px-4 text-secondary" href="#porvencer" data-bs-toggle="tab" role="tab">
+            ⏱️ Por vencer pronto
+            <span class="badge bg-warning text-dark ms-2">@porVencer.Count</span>
+        </a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="todas" role="tabpanel">
+        <div class="card bg-card border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="border-bottom: 1px solid var(--border-color);">
+                        <tr>
+                            <th class="ps-4 text-white">Cliente</th>
+                            <th class="text-white">Producto vendido</th>
+                            <th class="text-white">Garantía</th>
+                            <th class="text-end pe-4 text-white">Días restantes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var g in todas)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-white">@g.Cliente</span>
+                                        @if (!string.IsNullOrWhiteSpace(g.Telefono))
+                                        {
+                                            <small class="text-secondary" style="font-size: 0.8rem;">
+                                                <i class="bi bi-telephone me-1"></i>@g.Telefono
+                                            </small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-white">@g.Producto</span>
+                                        <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(g.NumeroSerie) ? "—" : g.NumeroSerie)</small>
+                                        <small class="text-secondary mt-1" style="font-size: 0.7rem;">
+                                            @if (!string.IsNullOrEmpty(g.Procesador) || g.RAM_GB > 0 || g.Almacenamiento_GB > 0)
+                                            {
+                                                @if (!string.IsNullOrEmpty(g.Procesador)) { <span>@g.Procesador</span> }
+                                                @if (g.RAM_GB > 0) { <span> • @g.RAM_GB GB RAM</span> }
+                                                @if (g.Almacenamiento_GB > 0) { <span> • @g.Almacenamiento_GB GB</span> }
+                                            }
+                                            else
+                                            {
+                                                <span class="fst-italic">—</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3">
+                                        @(g.GarantiaMeses == 1 ? "1 mes" : g.GarantiaMeses + " meses")
+                                    </span>
+                                    <small class="d-block text-secondary mt-1" style="font-size: 0.75rem;">
+                                        Vence: @g.FechaVenceGarantia.ToString("dd/MM/yyyy")
+                                    </small>
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (g.DiasRestantes <= 7)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 px-3">@g.DiasRestantes días</span>
+                                    }
+                                    else if (g.DiasRestantes <= 30)
+                                    {
+                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-3">@g.DiasRestantes días</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3">@g.DiasRestantes días</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!todas.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-secondary">
+                                    <i class="bi bi-shield-check fs-1 d-block mb-2"></i>
+                                    No hay garantías vigentes con los filtros actuales.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="porvencer" role="tabpanel">
+        <div class="card bg-card border-0 border-top border-4 border-warning">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="border-bottom: 1px solid var(--border-color);">
+                        <tr>
+                            <th class="ps-4 text-white">Cliente</th>
+                            <th class="text-white">Producto vendido</th>
+                            <th class="text-white">Garantía</th>
+                            <th class="text-end pe-4 text-white">Días restantes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var g in porVencer)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-white">@g.Cliente</span>
+                                        @if (!string.IsNullOrWhiteSpace(g.Telefono))
+                                        {
+                                            <small class="text-secondary" style="font-size: 0.8rem;">
+                                                <i class="bi bi-telephone me-1"></i>@g.Telefono
+                                            </small>
+                                        }
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-white">@g.Producto</span>
+                                        <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(g.NumeroSerie) ? "—" : g.NumeroSerie)</small>
+                                        <small class="text-secondary mt-1" style="font-size: 0.7rem;">
+                                            @if (!string.IsNullOrEmpty(g.Procesador) || g.RAM_GB > 0 || g.Almacenamiento_GB > 0)
+                                            {
+                                                @if (!string.IsNullOrEmpty(g.Procesador)) { <span>@g.Procesador</span> }
+                                                @if (g.RAM_GB > 0) { <span> • @g.RAM_GB GB RAM</span> }
+                                                @if (g.Almacenamiento_GB > 0) { <span> • @g.Almacenamiento_GB GB</span> }
+                                            }
+                                            else
+                                            {
+                                                <span class="fst-italic">—</span>
+                                            }
+                                        </small>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-3">
+                                        @(g.GarantiaMeses == 1 ? "1 mes" : g.GarantiaMeses + " meses")
+                                    </span>
+                                    <small class="d-block text-secondary mt-1" style="font-size: 0.75rem;">
+                                        Vence: @g.FechaVenceGarantia.ToString("dd/MM/yyyy")
+                                    </small>
+                                </td>
+                                <td class="text-end pe-4">
+                                    @if (g.DiasRestantes <= 7)
+                                    {
+                                        <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25 px-3">@g.DiasRestantes días</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-25 px-3">@g.DiasRestantes días</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        @if (!porVencer.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-secondary">
+                                    <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+                                    Ninguna garantía vence en los próximos 30 días.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-tabs .nav-link {
+        color: #8a8a9e;
+        border: none;
+        background: transparent;
+        border-bottom: 3px solid transparent;
+    }
+    .nav-tabs .nav-link:hover {
+        color: #fff;
+    }
+    .nav-tabs .nav-link.active {
+        background-color: transparent !important;
+        color: #fff !important;
+        border-bottom-color: #198754 !important;
+    }
+</style>
+

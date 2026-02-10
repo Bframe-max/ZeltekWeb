@@ -1,67 +1,309 @@
-﻿@{
+@model ZeltekWeb.Models.ReporteIndexViewModel
+
+@{
     ViewData["Title"] = "Reportes";
 }
 
-<style>
-    /* Efecto Hover para levantar la tarjeta */
-    .hover-card {
-        transition: transform 0.2s ease-in-out, box-shadow 0.2s;
-        /* Asegura que el fondo sea el correcto del tema */
-        background-color: var(--bg-card);
-    }
-
-        .hover-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 .5rem 1rem rgba(0,0,0,0.4) !important; /* Sombra más fuerte para modo oscuro */
-        }
-</style>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">📊 Panel de Reportes</h2>
+    <h2 class="fw-bold text-white">📊 Reportes</h2>
+    <div class="d-flex gap-2 align-items-center">
+        <span class="text-secondary small">Tendencia:</span>
+        <a asp-action="Index" asp-route-meses="6" asp-route-periodoGanancia="@Model.PeriodoGananciaMeses" class="btn btn-sm @(Model.MesesTendencia == 6 ? "btn-primary" : "btn-outline-secondary")">6 meses</a>
+        <a asp-action="Index" asp-route-meses="12" asp-route-periodoGanancia="@Model.PeriodoGananciaMeses" class="btn btn-sm @(Model.MesesTendencia == 12 ? "btn-primary" : "btn-outline-secondary")">12 meses</a>
+    </div>
 </div>
 
-<div class="row g-4">
-
-    <div class="col-md-4">
-        <div class="card h-100 hover-card border-start border-4 border-success">
-            <div class="card-body text-center p-4">
-                <div class="display-4 mb-3">📈</div>
-                <h5 class="card-title fw-bold text-success">Ganancia Neta</h5>
-                <p class="card-text text-secondary small">Cálculo de utilidad final (Ventas - Costos - Gastos).</p>
-
-                <a asp-controller="Reportes" asp-action="GananciaNeta" class="btn btn-outline-success w-100 mt-2 fw-bold">
-                    Ver Reporte de Ganancias
-                </a>
+<!-- Ganancia Neta (Ventas - Gastos = Ganancia Neta) -->
+<div class="card bg-card border-0 border-start border-4 border-primary mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <h5 class="text-white fw-bold mb-0">📊 Visualización de Ganancia Neta</h5>
+            <small class="text-secondary">Ganancia Bruta (Ventas) − Gastos Operativos = Ganancia Neta. Mostrando: últimos @Model.PeriodoGananciaMeses @(Model.PeriodoGananciaMeses == 1 ? "mes" : "meses").</small>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="text-secondary small">Período:</span>
+            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="1" class="btn btn-sm @(Model.PeriodoGananciaMeses == 1 ? "btn-primary" : "btn-outline-secondary")">Último mes</a>
+            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="3" class="btn btn-sm @(Model.PeriodoGananciaMeses == 3 ? "btn-primary" : "btn-outline-secondary")">3 meses</a>
+            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="12" class="btn btn-sm @(Model.PeriodoGananciaMeses == 12 ? "btn-primary" : "btn-outline-secondary")">12 meses</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <div class="card bg-dark border border-secondary">
+                    <div class="card-body">
+                        <small class="text-secondary text-uppercase fw-bold">Ganancia Bruta (Ventas)</small>
+                        <h3 class="text-success fw-bold mb-0">$@Model.GananciaBrutaVentas.ToString("N2")</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark border border-secondary">
+                    <div class="card-body">
+                        <small class="text-secondary text-uppercase fw-bold">Gastos Operativos</small>
+                        <h3 class="text-danger fw-bold mb-0">− $@Model.TotalGastosOperativos.ToString("N2")</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-dark border border-secondary">
+                    <div class="card-body">
+                        <small class="text-secondary text-uppercase fw-bold">Ganancia Neta (Limpia)</small>
+                        <h3 class="fw-bold mb-0 @(Model.GananciaNeta >= 0 ? "text-success" : "text-danger")">$@Model.GananciaNeta.ToString("N2")</h3>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-
-    <div class="col-md-4">
-        <div class="card h-100 hover-card border-start border-4 border-primary">
-            <div class="card-body text-center p-4">
-                <div class="display-4 mb-3">💰</div>
-                <h5 class="card-title fw-bold text-primary">Reporte de Ventas</h5>
-                <p class="card-text text-secondary small">Historial detallado de todas las ventas por fecha.</p>
-
-                <a asp-controller="Ventas" asp-action="Index" class="btn btn-outline-primary w-100 mt-2 fw-bold">
-                    Consultar Ventas
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card h-100 hover-card border-start border-4 border-danger">
-            <div class="card-body text-center p-4">
-                <div class="display-4 mb-3">📉</div>
-                <h5 class="card-title fw-bold text-danger">Gastos Operativos</h5>
-                <p class="card-text text-secondary small">Control de salidas de dinero y pagos operativos.</p>
-
-                <a asp-controller="Gastos" asp-action="Index" class="btn btn-outline-danger w-100 mt-2 fw-bold">
-                    Gestionar Gastos
-                </a>
-            </div>
-        </div>
-    </div>
-
 </div>
+
+<!-- Valor del Inventario Actual -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card bg-card border-0 border-start border-4 border-success">
+            <div class="card-body py-4">
+                <small class="text-secondary text-uppercase fw-bold">💰 Valor del Inventario Actual</small>
+                <p class="text-secondary small mb-0">Dinero que tienes parado en bodega (costo real)</p>
+                <h1 class="text-success fw-bold mb-0 display-4">$@Model.ValorInventarioActual.ToString("N2")</h1>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tendencia de Crecimiento -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h5 class="text-white fw-bold mb-0">📈 Tendencia de Crecimiento</h5>
+        <small class="text-secondary">¿Estoy creciendo o cayendo respecto al mes pasado? Últimos @Model.MesesTendencia meses.</small>
+    </div>
+    <div class="card-body">
+        <canvas id="chartTendencia" height="120"></canvas>
+    </div>
+</div>
+
+<!-- 3. Top Productos -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h5 class="text-white fw-bold mb-0">🏆 Top Productos (Qué comprar en eBay)</h5>
+        <small class="text-secondary">Invierte donde hay retorno rápido. Los que más vendes.</small>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead style="border-bottom: 1px solid var(--border-color);">
+                            <tr>
+                                <th class="text-white">Producto</th>
+                                <th class="text-end text-white">Ventas</th>
+                                <th class="text-end text-white">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var t in Model.TopProductos.Take(10))
+                            {
+                                <tr>
+                                    <td class="fw-bold text-white">@t.ProductoNombre</td>
+                                    <td class="text-end text-info">@t.CantidadVentas</td>
+                                    <td class="text-end text-success">$@t.TotalVendido.ToString("N2")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @if (Model.TopProductos.Count == 0)
+                {
+                    <p class="text-secondary mb-0">Aún no hay ventas para mostrar.</p>
+                }
+            </div>
+            <div class="col-md-6 d-flex align-items-center justify-content-center">
+                <canvas id="chartTopProductos" height="220"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3.5 Top Clientes Revendedores (vw_TopClientes) -->
+<div class="card bg-card border-0 mb-4">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h5 class="text-white fw-bold mb-0">🤝 Top Clientes Revendedores</h5>
+        <small class="text-secondary">Quién más compra: desde vw_TopClientes (TipoCliente = Revendedor).</small>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-4 text-white">#</th>
+                        <th class="text-white">Cliente</th>
+                        <th class="text-center text-white">Compras</th>
+                        <th class="text-end text-white">Total comprado</th>
+                        <th class="text-end text-white">Ganancia generada</th>
+                        <th class="text-end pe-4 text-white">Última compra</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int pos = 1; }
+                    @foreach (var r in Model.TopRevendedores.Take(10))
+                    {
+                        <tr>
+                            <td class="ps-4 text-secondary">@pos</td>
+                            <td class="fw-bold text-white">@r.NombreCliente</td>
+                            <td class="text-center text-info">@r.CantidadCompras</td>
+                            <td class="text-end text-success fw-bold">$@r.TotalComprado.ToString("N2")</td>
+                            <td class="text-end text-success">$@r.GananciaGenerada.ToString("N2")</td>
+                            <td class="text-end pe-4 text-secondary">@(r.UltimaCompra?.ToString("dd/MM/yyyy") ?? "—")</td>
+                        </tr>
+                        pos++;
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.TopRevendedores.Count == 0)
+        {
+            <p class="text-secondary mb-0">No hay clientes revendedores con ventas. Revisa que en vw_ReporteVentas existan ventas con TipoCliente = 'Revendedor'.</p>
+        }
+    </div>
+</div>
+
+<!-- 4. Alerta Inventario Dormido -->
+<div class="card bg-card border-0 border-top border-4 border-danger">
+    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+        <h5 class="text-white fw-bold mb-0">🐢 Alerta de Inventario Dormido (Aging)</h5>
+        <small class="text-secondary">Productos +60 días en stock. Bájales el precio o sácalos ya.</small>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead style="border-bottom: 1px solid var(--border-color);">
+                    <tr>
+                        <th class="ps-4 text-white">Producto / Serie</th>
+                        <th class="text-center text-white">Días en stock</th>
+                        <th class="text-end text-white">Costo</th>
+                        <th class="text-end text-white">Precio venta</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.InventarioDormido)
+                    {
+                        <tr class="table-danger bg-danger bg-opacity-10">
+                            <td class="ps-4">
+                                <div class="d-flex flex-column">
+                                    <span class="fw-bold text-white">@d.ProductoNombre</span>
+                                    <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(d.NumeroSerie) ? "—" : d.NumeroSerie)</small>
+                                    @if (!string.IsNullOrEmpty(d.Procesador) || d.RAM_GB > 0 || d.Almacenamiento_GB > 0)
+                                    {
+                                        <small class="text-secondary" style="font-size: 0.7rem;">
+                                            @if (!string.IsNullOrEmpty(d.Procesador)) { <span>@d.Procesador</span> }
+                                            @if (d.RAM_GB > 0) { <span> • @d.RAM_GB GB RAM</span> }
+                                            @if (d.Almacenamiento_GB > 0) { <span> • @d.Almacenamiento_GB GB</span> }
+                                        </small>
+                                    }
+                                </div>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3">@d.DiasEnStock días</span>
+                            </td>
+                            <td class="text-end text-secondary">$@d.CostoTotal.ToString("N2")</td>
+                            <td class="text-end fw-bold text-white">$@d.PrecioVenta.ToString("N2")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        @if (Model.InventarioDormido.Count == 0)
+        {
+            <div class="text-center py-5 text-secondary">
+                <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
+                No hay ítems con más de 60 días en stock.
+            </div>
+        }
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    (function () {
+        const coloresBarras = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c'];
+        const coloresPie = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#6c757d', '#212529'];
+
+        // Gráfico de tendencia (barras)
+        const tendencia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TendenciaMeses.Select(x => new { x.MesLabel, x.TotalVentas })));
+        const ctxTendencia = document.getElementById('chartTendencia')?.getContext('2d');
+        if (ctxTendencia && tendencia.length) {
+            new Chart(ctxTendencia, {
+                type: 'bar',
+                data: {
+                    labels: tendencia.map(x => x.MesLabel),
+                    datasets: [{
+                        label: 'Ventas ($)',
+                        data: tendencia.map(x => x.TotalVentas),
+                        backgroundColor: 'rgba(86, 70, 255, 0.7)',
+                        borderColor: '#5646ff',
+                        borderWidth: 1,
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) { return '$' + ctx.parsed.y.toLocaleString(); }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            ticks: { color: '#92929f', callback: v => '$' + v.toLocaleString() }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#92929f' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Gráfico de pastel Top Productos (solo top 8)
+        const topProductos = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TopProductos.Take(8).Select(x => new { x.ProductoNombre, x.CantidadVentas })));
+        const ctxPie = document.getElementById('chartTopProductos')?.getContext('2d');
+        if (ctxPie && topProductos.length) {
+            new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: topProductos.map(x => x.ProductoNombre),
+                    datasets: [{
+                        data: topProductos.map(x => x.CantidadVentas),
+                        backgroundColor: coloresPie.slice(0, topProductos.length),
+                        borderWidth: 2,
+                        borderColor: '#1e1e2d'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#fff', padding: 12 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function (ctx) {
+                                    const t = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                    const p = ((ctx.raw / t) * 100).toFixed(1);
+                                    return ctx.label + ': ' + ctx.raw + ' ventas (' + p + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    })();
+</script>
+
+<style>
+    .table-danger.bg-danger.bg-opacity-10 { background-color: rgba(220, 53, 69, 0.08) !important; }
+</style>

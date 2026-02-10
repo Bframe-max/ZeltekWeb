@@ -1,4 +1,4 @@
-﻿@model ZeltekWeb.Models.CompraCreateViewModel
+@model ZeltekWeb.Models.CompraCreateViewModel
 @{
     ViewData["Title"] = "Actualizar Seguimiento";
     string estado = ViewBag.EstadoActual as string;
@@ -20,6 +20,14 @@
                         <input type="text" name="tracking" class="form-control bg-dark text-white border-secondary"
                                value="@Model.TrackingProveedor" placeholder="Ej: TBA..." />
                         <div class="form-text text-muted">Ingrésalo cuando el vendedor te lo envíe.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label text-secondary small fw-bold">Costo Total de la Compra ($)</label>
+                        <input type="number" name="costoTotal" step="0.01" min="0" class="form-control bg-dark text-white border-secondary"
+                               value="@(ViewBag.CostoTotal != null ? ((decimal)ViewBag.CostoTotal).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : "0")"
+                               placeholder="0.00" required />
+                        <div class="form-text text-muted">Si lo cambias, el monto se repartirá entre todos los ítems de esta compra.</div>
                     </div>
 
                     <div class="mb-4">

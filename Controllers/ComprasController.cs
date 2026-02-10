@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
@@ -224,6 +224,7 @@ namespace ZeltekWeb.Controllers
             int itemId,
             int compraIdRetorno,
             bool esAccesorio,
+            bool productoNuevo,
             string serieReal,
             decimal costoEnvio,
             decimal costoReparacion,
@@ -234,6 +235,9 @@ namespace ZeltekWeb.Controllers
             string procesador
         )
         {
+            // Producto nuevo (checkbox marcado) → En Stock. Usado (desmarcado) → Por Revisar (mesa de calidad).
+            var estadoFinal = productoNuevo ? "En Stock" : "Por Revisar";
+
             string cadena = _config.GetConnectionString("ZeltekDB");
             using (SqlConnection con = new SqlConnection(cadena))
             {
@@ -257,9 +261,10 @@ namespace ZeltekWeb.Controllers
                     if (string.IsNullOrEmpty(serieFinal)) serieFinal = "SIN-SERIE-" + itemId;
                 }
 
+                // FechaRecepcion: si la columna no existe en ItemInventario, quita esa línea o agrega: ALTER TABLE ItemInventario ADD FechaRecepcion DATETIME NULL
                 string sql = @"
                     UPDATE ItemInventario 
-                    SET Estado = 'En Stock', 
+                    SET Estado = @Estado, 
                         NumeroSerie = @Serie,
                         CostoEnvio = @Envio,
                         CostoReparacion = @Reparacion,
@@ -267,12 +272,13 @@ namespace ZeltekWeb.Controllers
                         SaludBateria = @Bateria,
                         RAM_GB = @Ram,
                         Almacenamiento_GB = @Rom,
-                        Procesador = @Cpu
+                        Procesador = @Cpu,
+                        FechaRecepcion = GETDATE()
                     WHERE ItemID = @ItemID";
 
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
-                    // NOTA IMPORTANTE: Fíjate que los nombres como "@Serie" están entre comillas dobles.
+                    cmd.Parameters.AddWithValue("@Estado", estadoFinal);
                     cmd.Parameters.AddWithValue("@Serie", serieFinal);
                     cmd.Parameters.AddWithValue("@Envio", costoEnvio);
                     cmd.Parameters.AddWithValue("@Reparacion", costoReparacion);
@@ -313,7 +319,7 @@ namespace ZeltekWeb.Controllers
             using (SqlConnection con = new SqlConnection(cadena))
             {
                 con.Open();
-                string sql = "SELECT VendedorOnline, TrackingProveedor, EstadoCompra FROM Compra WHERE CompraID = @ID";
+                string sql = "SELECT VendedorOnline, TrackingProveedor, EstadoCompra, CostoTotal FROM Compra WHERE CompraID = @ID";
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
                     cmd.Parameters.AddWithValue("@ID", id);
@@ -325,6 +331,7 @@ namespace ZeltekWeb.Controllers
                             model.Vendedor = dr.GetString(0);
                             model.TrackingProveedor = dr.IsDBNull(1) ? "" : dr.GetString(1);
                             ViewBag.EstadoActual = dr.GetString(2);
+                            ViewBag.CostoTotal = dr.IsDBNull(3) ? 0m : dr.GetDecimal(3);
                         }
                     }
                 }
@@ -336,24 +343,45 @@ namespace ZeltekWeb.Controllers
         // 7. GUARDAR EDICIÓN (POST)
         // ==========================================
         [HttpPost]
-        public IActionResult Edit(int id, string tracking, string estado)
+        public IActionResult Edit(int id, string tracking, string estado, decimal costoTotal)
         {
             string cadena = _config.GetConnectionString("ZeltekDB");
             using (SqlConnection con = new SqlConnection(cadena))
             {
                 con.Open();
+
+                // 1. Actualizar Compra (Tracking, Estado, CostoTotal)
                 string sql = @"
                     UPDATE Compra 
                     SET TrackingProveedor = @Tracking, 
-                        EstadoCompra = @Estado 
+                        EstadoCompra = @Estado,
+                        CostoTotal = @CostoTotal
                     WHERE CompraID = @ID";
-
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
                     cmd.Parameters.AddWithValue("@Tracking", tracking ?? "");
                     cmd.Parameters.AddWithValue("@Estado", estado);
+                    cmd.Parameters.AddWithValue("@CostoTotal", costoTotal);
                     cmd.Parameters.AddWithValue("@ID", id);
                     cmd.ExecuteNonQuery();
+                }
+
+                // 2. Repartir el nuevo total entre los ítems: cada ItemInventario de esta compra recibe CostoCompra = CostoTotal / CantidadItems
+                int cantidadItems = 0;
+                using (SqlCommand cmdCount = new SqlCommand("SELECT COUNT(*) FROM ItemInventario WHERE CompraID = @ID", con))
+                {
+                    cmdCount.Parameters.AddWithValue("@ID", id);
+                    cantidadItems = Convert.ToInt32(cmdCount.ExecuteScalar());
+                }
+                if (cantidadItems > 0)
+                {
+                    decimal costoPorItem = costoTotal / cantidadItems;
+                    using (SqlCommand cmdItems = new SqlCommand("UPDATE ItemInventario SET CostoCompra = @Costo WHERE CompraID = @ID", con))
+                    {
+                        cmdItems.Parameters.AddWithValue("@Costo", costoPorItem);
+                        cmdItems.Parameters.AddWithValue("@ID", id);
+                        cmdItems.ExecuteNonQuery();
+                    }
                 }
             }
             return RedirectToAction("Index");
