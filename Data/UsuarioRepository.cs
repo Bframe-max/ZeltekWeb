@@ -1,4 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using ZeltekWeb.Models.Entities;
 
 namespace ZeltekWeb.Data
@@ -9,7 +9,8 @@ namespace ZeltekWeb.Data
 
         public UsuarioRepository(IConfiguration config)
         {
-            _cn = config.GetConnectionString("ZeltekDB")!;
+            _cn = config.GetConnectionString("DefaultConnection") ?? config.GetConnectionString("ZeltekDB")
+                ?? throw new InvalidOperationException("No se encontró DefaultConnection ni ZeltekDB en ConnectionStrings.");
         }
 
         public Usuario? ObtenerPorUsuario(string nombreUsuario)

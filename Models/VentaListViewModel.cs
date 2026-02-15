@@ -8,8 +8,9 @@
         public string? NumeroSerie { get; set; }
 
         // COSTOS Y PRECIOS
-        public decimal Costo { get; set; }
-        public decimal PrecioVenta { get; set; }
+        // COSTOS Y PRECIOS
+        public decimal CostoTotalVenta { get; set; }
+        public decimal VentaTotal { get; set; }
         public decimal Ganancia { get; set; } // Esta es la clave 💰
 
         public string MetodoPago { get; set; } = "";

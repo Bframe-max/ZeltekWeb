@@ -12,5 +12,6 @@
 
         // NUEVO: Para mostrar "iPad 11th Gen" en la lista
         public string ProductoPrincipal { get; set; }
+        public int ItemsPendientes { get; set; }
     }
 }

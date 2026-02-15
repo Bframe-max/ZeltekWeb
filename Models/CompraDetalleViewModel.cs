@@ -1,4 +1,4 @@
-﻿namespace ZeltekWeb.Models
+namespace ZeltekWeb.Models
 {
     public class CompraDetalleViewModel
     {
@@ -17,7 +17,13 @@
         public int ItemID { get; set; }
         public string ProductoNombre { get; set; }
         public decimal Costo { get; set; }
-        public string Estado { get; set; }     // 'En Camino' o 'En Stock'
-        public string NumeroSerie { get; set; } // Puede ser 'PEND-TRACK...' o la real
+        public string Estado { get; set; }
+        public string NumeroSerie { get; set; }
+        public bool EsAccesorio { get; set; }
+
+        public string? Procesador { get; set; }
+        public int? Ram { get; set; }
+        public int? Almacenamiento { get; set; }
+        public string? Color { get; set; }  // UI Only, not preserved in DB yet
     }
 }

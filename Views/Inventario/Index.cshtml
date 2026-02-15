@@ -1,8 +1,11 @@
-﻿@model List<ZeltekWeb.Models.ItemInventarioViewModel>
+@model ZeltekWeb.Models.InventarioIndexViewModel
 
 @{
     ViewData["Title"] = "Gestión de Inventario";
-    string filtro = ViewData["FiltroActual"] as string ?? "Stock";
+    var filtro = Model?.FiltroActual ?? "Stock";
+    var laptops = Model?.Laptops ?? new List<ZeltekWeb.Models.ItemInventarioViewModel>();
+    var accesorios = Model?.Accesorios ?? new List<ZeltekWeb.Models.ItemInventarioViewModel>();
+    var totalItems = laptops.Count + accesorios.Count;
 }
 
 <div class="mb-4">
@@ -17,7 +20,7 @@
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0 text-secondary">🔍</span>
                     <input type="text" name="buscar" class="form-control border-start-0 text-white bg-dark"
-                           placeholder="Buscar por Serie, Producto..." value="@ViewData["Busqueda"]">
+                           placeholder="Buscar por Serie, Producto..." value="@(Model?.Busqueda)">
                 </div>
             </div>
             <div class="col-md-2">
@@ -29,52 +32,72 @@
 
 <ul class="nav nav-tabs border-bottom-0 mb-3">
     <li class="nav-item">
-        <a class="nav-link fw-bold px-4 @(filtro == "Stock" ? "active" : "")" href="/Inventario/Index?filtro=Stock">
+        <a class="nav-link fw-bold px-4 @(filtro == "Stock" ? "active" : "")" href="/Inventario/Index?filtro=Stock&buscar=@(Model?.Busqueda)">
             📦 En Bodega
             @if (filtro == "Stock")
             {
-                <span class="badge bg-success ms-2">@Model.Count</span>
+                <span class="badge bg-success ms-2">@totalItems</span>
             }
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link fw-bold px-4 @(filtro == "Transito" ? "active" : "")" href="/Inventario/Index?filtro=Transito">
+        <a class="nav-link fw-bold px-4 @(filtro == "Transito" ? "active" : "")" href="/Inventario/Index?filtro=Transito&buscar=@(Model?.Busqueda)">
             ✈️ En Tránsito
             @if (filtro == "Transito")
             {
-                <span class="badge bg-info ms-2">@Model.Count</span>
+                <span class="badge bg-info ms-2">@totalItems</span>
             }
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link fw-bold px-4 @(filtro == "Vendido" ? "active" : "")" href="/Inventario/Index?filtro=Vendido">
+        <a class="nav-link fw-bold px-4 @(filtro == "Vendido" ? "active" : "")" href="/Inventario/Index?filtro=Vendido&buscar=@(Model?.Busqueda)">
             🔴 Historial
             @if (filtro == "Vendido")
             {
-                <span class="badge bg-danger ms-2">@Model.Count</span>
+                <span class="badge bg-danger ms-2">@totalItems</span>
             }
         </a>
     </li>
 </ul>
 
-<div class="card bg-card border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead style="border-bottom: 1px solid var(--border-color);">
-                <tr>
-                    <th class="ps-4 text-white">Producto</th>
-                    <th class="text-white">Serie / ID</th>
-                    <th class="text-white">Costo Real</th>
-                    <th class="text-white">Precio Venta</th>
-                    <th class="text-center text-white">Estado</th>
-                    <th class="text-end pe-4 text-white">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var i in Model)
+<!-- Sub-tabs: Dispositivos | Accesorios -->
+<ul class="nav nav-tabs nav-tabs-inner border-bottom border-secondary mb-2" id="navLaptopsAccesorios" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold active" id="tab-laptops" data-bs-toggle="tab" data-bs-target="#panel-laptops" type="button" role="tab">
+            📱 Dispositivos <span class="badge bg-secondary ms-1">@laptops.Count</span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link fw-bold" id="tab-accesorios" data-bs-toggle="tab" data-bs-target="#panel-accesorios" type="button" role="tab">
+            🔌 Accesorios <span class="badge bg-secondary ms-1">@accesorios.Count</span>
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="panelesInventario">
+    <!-- Tab Dispositivos -->
+    <div class="tab-pane fade show active" id="panel-laptops" role="tabpanel">
+        <div class="card bg-card border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="border-bottom: 1px solid var(--border-color);">
+                        <tr>
+                            <th class="ps-4 text-white">Producto</th>
+                            <th class="text-white">Serie / ID</th>
+                            <th class="text-white">Color</th>
+                            <th class="text-white">Costo Real</th>
+                            <th class="text-white">Precio Venta</th>
+                            <th class="text-center text-white">Estado</th>
+                            <th class="text-end pe-4 text-white">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                @foreach (var i in laptops)
                 {
                     bool esVendido = i.Estado == "Vendido";
+
                     bool esTransito = filtro == "Transito";
+                    decimal costoUnitarioCalc = i.CostoTotal; // Para únicos, el total es el unitario
 
                     <tr class="@(esVendido ? "opacity-75" : "")">
                         <td class="ps-4">
@@ -93,6 +116,10 @@
                                     {
                                         <span>@i.Almacenamiento_GB GB</span>
                                     }
+                                    @if (!string.IsNullOrEmpty(i.Color))
+                                    {
+                                        <span> • @i.Color</span>
+                                    }
                                 </small>
                             </div>
                         </td>
@@ -104,21 +131,31 @@
                             }
                             else
                             {
-                                <span class="badge bg-secondary border border-secondary font-monospace">@i.NumeroSerie</span>
+                                <span class="badge bg-secondary border border-secondary serial-code">@i.NumeroSerie</span>
+                            }
+                        </td>
+
+                        <td>
+                            @if (!string.IsNullOrEmpty(i.Color))
+                            {
+                                <span class="badge border border-secondary text-secondary bg-transparent">@i.Color</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">-</span>
                             }
                         </td>
 
                         <td class="text-secondary text-opacity-50">$@i.CostoTotal.ToString("N2")</td>
 
-                        <td class="fw-bold text-success fs-5">
+                        <td class="fw-bold fs-5">
                             @if (i.PrecioVenta > 0)
                             {
-                                <span>$@i.PrecioVenta.ToString("N2")</span>
+                                <span class="text-success">$@i.PrecioVenta.ToString("N2")</span>
                             }
                             else
                             {
-
-                                <span>-</span>
+                                <span class="badge bg-warning text-dark">⚠️ Fijar Precio</span>
                             }
                         </td>
 
@@ -141,7 +178,15 @@
                             @if (filtro == "Stock")
                             {
                                 <button type="button" class="btn btn-success fw-bold shadow-sm px-4"
-                                        onclick="abrirModalVenta(@i.ItemID, '@i.ProductoNombre', '@i.NumeroSerie', @i.PrecioVenta)">
+                                        data-itemid="@i.ItemID"
+                                        data-productoid="@i.ProductoID"
+                                        data-nombre="@i.ProductoNombre"
+                                        data-serie="@i.NumeroSerie"
+                                        data-precio="@i.PrecioVenta.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-costo="@costoUnitarioCalc.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-es-unico="true"
+                                        data-cantidad-actual="1"
+                                        onclick="abrirModalVenta(this)">
                                     💰 Vender
                                 </button>
                             }
@@ -156,17 +201,91 @@
                         </td>
                     </tr>
                 }
-                @if (Model.Count == 0)
+                @if (laptops.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-secondary">
-                            <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
-                            No hay registros en esta sección.
+                        <td colspan="7" class="text-center py-5 text-secondary">
+                            <i class="bi bi-laptop fs-1 d-block mb-2"></i>
+                            No hay dispositivos en esta sección.
                         </td>
                     </tr>
                 }
-            </tbody>
-        </table>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Accesorios -->
+    <div class="tab-pane fade" id="panel-accesorios" role="tabpanel">
+        <div class="card bg-card border-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead style="border-bottom: 1px solid var(--border-color);">
+                        <tr>
+                            <th class="ps-4 text-white">Producto</th>
+                            <th class="text-white">Serie / ID</th>
+                            <th class="text-center text-white">Cantidad Inicial</th>
+                            <th class="text-center text-white">Stock (Actual)</th>
+                            <th class="text-white">Costo Real</th>
+                            <th class="text-center text-white">Estado</th>
+                            <th class="text-end pe-4 text-white">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                @foreach (var a in accesorios)
+                {
+                    bool esVendidoAcc = a.Estado == "Vendido";
+
+                    bool esTransitoAcc = filtro == "Transito";
+                    // Cálculo de Costo Unitario para Lotes: CostoTotal / CantidadInicial
+                    decimal costoUnitarioCalc = (a.CantidadInicial > 0) ? (a.CostoTotal / a.CantidadInicial) : 0;
+                    <tr class="@(esVendidoAcc ? "opacity-75" : "")">
+                        <td class="ps-4"><span class="fw-bold text-white">@a.ProductoNombre</span></td>
+                        <td><span class="badge bg-secondary serial-code">@(string.IsNullOrEmpty(a.NumeroSerie) ? "Lote" : a.NumeroSerie)</span></td>
+                        <td class="text-center text-secondary">@a.CantidadInicial</td>
+                        <td class="text-center fw-bold @(a.CantidadActual < 3 ? (a.CantidadActual == 0 ? "text-danger" : "text-warning") : "text-success")">@a.CantidadActual</td>
+                        <td class="text-secondary">$@a.CostoTotal.ToString("N2")</td>
+                        <td class="text-center">
+                            @if (esVendidoAcc) { <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">Vendido</span> }
+                            else if (esTransitoAcc) { <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3">✈️ @a.Estado</span> }
+                            else { <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 px-3">En Stock</span> }
+                        </td>
+                        <td class="text-end pe-4">
+                            @if (filtro == "Stock" && a.CantidadActual > 0)
+                            {
+                                <button type="button" class="btn btn-success fw-bold shadow-sm px-4"
+                                        data-itemid="@a.ItemID"
+                                        data-productoid="@a.ProductoID"
+                                        data-nombre="@a.ProductoNombre"
+                                        data-serie="@(a.NumeroSerie ?? "Lote")"
+                                        data-precio="@a.PrecioVenta.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-costo="@costoUnitarioCalc.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                                        data-es-unico="false"
+                                        data-cantidad-actual="@a.CantidadActual"
+                                        onclick="abrirModalVenta(this)">
+                                    💰 Vender
+                                </button>
+                            }
+                            else if (esTransitoAcc) { <small class="text-info fst-italic">Esperando llegada...</small> }
+                            else if (a.CantidadActual == 0) { <small class="text-secondary fst-italic">Sin stock</small> }
+                            else { <small class="text-secondary fst-italic">—</small> }
+                        </td>
+                    </tr>
+                }
+                @if (accesorios.Count == 0)
+                {
+                    <tr>
+                        <td colspan="7" class="text-center py-5 text-secondary">
+                            <i class="bi bi-plug fs-1 d-block mb-2"></i>
+                            No hay accesorios en esta sección.
+                        </td>
+                    </tr>
+                }
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -182,18 +301,26 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form asp-controller="Ventas" asp-action="CrearVentaRapida" method="post">
+            <form asp-controller="Ventas" asp-action="CrearVentaRapida" method="post" id="formVenta">
+                <div id="modalErrorAlert" class="alert alert-danger d-none" role="alert"></div>
                 <div class="modal-body">
-                    <input type="hidden" name="itemId" id="ventaItemID" />
+                    <input type="hidden" name="itemId" id="hiddenItemID" />
+                    <input type="hidden" name="productoId" id="hiddenProductoID" />
                     <input type="hidden" name="clienteIdExistente" id="clienteIdExistente" value="0" />
 
                     <div class="mb-3">
                         <label class="form-label text-secondary small fw-bold">Tipo de Venta / Cliente</label>
                         <select name="tipoVenta" id="selectTipoVenta" class="form-select bg-black text-white border-secondary fw-bold">
-                            <option value="Publico">👤 Cliente Normal (Precio Público)</option>
+                            <option value="Normal">👤 Cliente Normal (Precio Público)</option>
                             <option value="Revendedor">🤝 Revendedor / Frecuente (Precio Especial)</option>
                         </select>
                         <div class="form-text text-muted small" style="font-size: 0.7rem;">Selecciona "Revendedor" para diferenciarlo en tus reportes.</div>
+                    </div>
+
+                    <div id="wrapCantidadVender" class="mb-3 d-none">
+                        <label class="form-label text-secondary small fw-bold">Cantidad a Vender</label>
+                        <input type="number" name="cantidadAVender" id="inputCantidadAVender" min="1" value="1" class="form-control bg-black text-white border-secondary" />
+                        <small id="ayudaCantidadVender" class="text-muted small">Stock disponible: <span id="lblStockDisponible">0</span></small>
                     </div>
 
                     <div class="mb-4">
@@ -203,6 +330,17 @@
                             <input type="number" step="0.01" name="precioFinal" id="ventaPrecio"
                                    class="form-control bg-black text-white border-secondary fw-bold fs-4" required />
                         </div>
+                        <small id="ayudaPrecioVenta" class="text-muted d-block mt-1" style="font-size: 0.85rem;"></small>
+                        <small id="alertaPerdidaVenta" class="text-danger d-none" style="font-size: 0.85rem;">⚠️ Pérdida</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">Fecha de la venta</label>
+                        <input type="date"
+                               name="fechaVenta"
+                               class="form-control bg-black text-white border-secondary"
+                               value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                        <small class="text-muted small">Por defecto hoy. Puedes elegir hasta 5 días atrás.</small>
                     </div>
 
                     <hr class="border-secondary" />
@@ -220,7 +358,7 @@
 
                     <div class="row g-2 mb-3">
                         <div class="col-md-7">
-                            <label class="form-label text-secondary small">Nombre Completo</label>
+                            <label class="form-label text-secondary small">Nombre Completo <span class="text-danger">*</span></label>
                             <input type="text" name="clienteNombre" id="inputNombre" class="form-control bg-black text-white border-secondary" placeholder="Ej: Juan Pérez" required />
                         </div>
                         <div class="col-md-5">
@@ -236,20 +374,21 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label text-secondary small">Garantía</label>
-                            <select name="garantiaMeses" class="form-select bg-black text-white border-secondary">
+                            <select name="garantiaMeses" id="selectGarantiaMeses" class="form-select bg-black text-white border-secondary" required>
+                                <option value="0">Sin Garantía</option>
                                 <option value="1">1 Mes (Básica)</option>
                                 <option value="3" selected>3 Meses (Estándar)</option>
                                 <option value="4">4 Meses (Especial)</option>
                                 <option value="6">6 Meses (Extendida)</option>
                                 <option value="12">12 Meses (Premium)</option>
-                                <option value="0">Sin Garantía</option>
                             </select>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-secondary small">Método de Pago</label>
-                        <select name="metodoPago" class="form-select bg-black text-white border-secondary">
+                        <label class="form-label text-secondary small">Método de Pago <span class="text-danger">*</span></label>
+                        <select name="metodoPago" id="selectMetodoPago" class="form-select bg-black text-white border-secondary" required>
+                            <option value="">— Seleccione —</option>
                             <option value="Efectivo">💵 Efectivo</option>
                             <option value="Transferencia">🏦 Transferencia / BAC</option>
                             <option value="Tarjeta">💳 Tarjeta / POS</option>
@@ -264,9 +403,32 @@
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success fw-bold w-50">✅ Confirmar Venta</button>
+                    <button type="button" id="btnMostrarResumen" class="btn btn-success fw-bold w-50">✅ Confirmar Venta</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de resumen antes de guardar -->
+<div class="modal fade" id="modalResumenVenta" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">📋 Resumen de la venta</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2"><strong>📦 Producto:</strong> <span id="resumenProducto"></span></p>
+                <p class="mb-2"><strong>👤 Cliente:</strong> <span id="resumenCliente"></span></p>
+                <p class="mb-2"><strong>📅 Fecha:</strong> <span id="resumenFecha"></span></p>
+                <p class="mb-2"><strong>🛡️ Garantía:</strong> <span id="resumenGarantia"></span></p>
+                <p class="mb-0 fs-5"><strong>💰 Total a pagar:</strong> <span id="resumenTotal" class="text-success"></span></p>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">❌ Cancelar / Corregir</button>
+                <button type="button" id="btnConfirmarEnviar" class="btn btn-success fw-bold">✅ Confirmar y vender</button>
+            </div>
         </div>
     </div>
 </div>
@@ -301,18 +463,119 @@
             .nav-tabs .nav-link.active[href*="Vendido"] {
                 border-bottom-color: #dc3545 !important;
             }
+
+    /* Números de serie tipo código */
+    .serial-code {
+        font-family: 'Consolas', 'Monaco', monospace;
+        letter-spacing: 1px;
+    }
+
+    /* Sub-tabs Dispositivos / Accesorios */
+    .nav-tabs-inner .nav-link {
+        color: #8a8a9e;
+        border: none;
+        background: transparent;
+    }
+    .nav-tabs-inner .nav-link:hover { color: #fff; }
+    .nav-tabs-inner .nav-link.active {
+        color: #0dcaf0;
+        border-bottom: 2px solid #0dcaf0;
+    }
 </style>
 
 <script>
-    function abrirModalVenta(id, nombre, serie, precio) {
-        // Resetear formulario
+    var costoActualModal = null;
+
+    var esVentaAccesorio = false;
+    var stockDisponibleModal = 1;
+
+    function abrirModalVenta(btn) {
+        var id = parseInt(btn.getAttribute('data-itemid'), 10);
+        var productId = parseInt(btn.getAttribute('data-productoid'), 10);
+        var nombre = btn.getAttribute('data-nombre') || '';
+        var serie = btn.getAttribute('data-serie') || '';
+        var precio = btn.getAttribute('data-precio') || '0';
+        var esUnico = btn.getAttribute('data-es-unico') !== 'false';
+        var cantidadActual = parseInt(btn.getAttribute('data-cantidad-actual') || '1', 10) || 1;
+
+        var costoAttr = btn.getAttribute('data-costo');
+        costoActualModal = createFloat(costoAttr); // Helper o parseFloat directo
+
+        esVentaAccesorio = !esUnico;
+        stockDisponibleModal = cantidadActual;
+
         limpiarCliente();
-        document.getElementById('ventaItemID').value = id;
+        // No reseteamos a null si ya lo leímos del atributo, pero el fetch podría traer info extra.
+        // Si no hay atributo, lo ponemos null para esperar al fetch.
+        if (!costoAttr) costoActualModal = null;
+        document.getElementById('hiddenItemID').value = id;
+        document.getElementById('hiddenProductoID').value = productId;
         document.getElementById('lblProductoVenta').innerText = nombre + ' (' + serie + ')';
-        document.getElementById('ventaPrecio').value = precio;
+        var ventaPrecioEl = document.getElementById('ventaPrecio');
+        var ayudaPrecioVenta = document.getElementById('ayudaPrecioVenta');
+        var alertaPerdidaVenta = document.getElementById('alertaPerdidaVenta');
+        ventaPrecioEl.value = precio;
+        ventaPrecioEl.classList.remove('border', 'border-danger');
+        if (alertaPerdidaVenta) alertaPerdidaVenta.classList.add('d-none');
+        if (ayudaPrecioVenta) ayudaPrecioVenta.textContent = '';
+
+        var wrapCantidad = document.getElementById('wrapCantidadVender');
+        var inputCantidad = document.getElementById('inputCantidadAVender');
+        var lblStock = document.getElementById('lblStockDisponible');
+        if (esUnico) {
+            if (wrapCantidad) wrapCantidad.classList.add('d-none');
+            if (inputCantidad) { inputCantidad.value = '1'; inputCantidad.removeAttribute('max'); }
+        } else {
+            if (wrapCantidad) wrapCantidad.classList.remove('d-none');
+            if (inputCantidad) { inputCantidad.value = '1'; inputCantidad.setAttribute('max', cantidadActual); }
+            if (lblStock) lblStock.textContent = cantidadActual;
+        }
+
+        fetch('/Ventas/GetProductoInfo?id=' + id)
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data) return;
+                // Si ya tenemos costo del atributo (prioridad vista), no lo sobrescribimos con el total del backend
+                // a menos que sea 0 o nulo.
+                if (costoActualModal === null || costoActualModal === 0) {
+                     costoActualModal = data.costo;
+                }
+                // Si costoActualModal fue 0, data.costo podría ser el total (error visual), 
+                // pero si el atributo data-costo estaba bien calculado, usaremos ese.
+                
+                // Actualizar leyenda solo informativo
+                if (ayudaPrecioVenta) {
+                    ayudaPrecioVenta.textContent = 'Costo Ref: $' + costoActualModal.toFixed(2) + ' | Sugerido: $' + data.precioSugerido.toFixed(2);
+                }
+                var precioNum = parseFloat(ventaPrecioEl.value) || 0;
+                if (precioNum === 0) {
+                    ventaPrecioEl.value = data.precioSugerido.toFixed(2);
+                }
+                actualizarAlertaPerdidaModal();
+            })
+            .catch(function () { });
 
         var myModal = new bootstrap.Modal(document.getElementById('modalVenta'));
         myModal.show();
+    }
+
+    function actualizarAlertaPerdidaModal() {
+        var ventaPrecioEl = document.getElementById('ventaPrecio');
+        var alertaPerdidaVenta = document.getElementById('alertaPerdidaVenta');
+        if (!ventaPrecioEl || !alertaPerdidaVenta || costoActualModal == null) return;
+        var val = parseFloat(ventaPrecioEl.value) || 0;
+        if (val > 0 && val < costoActualModal) {
+            ventaPrecioEl.classList.add('border', 'border-danger');
+            alertaPerdidaVenta.classList.remove('d-none');
+        } else {
+            ventaPrecioEl.classList.remove('border', 'border-danger');
+            alertaPerdidaVenta.classList.add('d-none');
+        }
+    }
+
+    function createFloat(str) {
+        var f = parseFloat(str);
+        return isNaN(f) ? 0 : f;
     }
 
     // --- LÓGICA DEL BUSCADOR DE CLIENTES ---
@@ -400,6 +663,151 @@
         document.getElementById('buscadorCliente').placeholder = "Escribe Nombre o Cédula...";
         document.getElementById('listaResultados').style.display = 'none';
     }
+
+    // Paso 1: Validación y envío del modal de venta
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('formVenta');
+        const btnResumen = document.getElementById('btnMostrarResumen');
+        const btnConfirmarEnviar = document.getElementById('btnConfirmarEnviar');
+        const alertDiv = document.getElementById('modalErrorAlert');
+        const selectGarantia = document.getElementById('selectGarantiaMeses');
+        const modalResumen = document.getElementById('modalResumenVenta');
+
+        if (!form || !btnResumen) return;
+
+        function validarFormularioVenta() {
+            var nombre = (document.getElementById('inputNombre') && document.getElementById('inputNombre').value) ? document.getElementById('inputNombre').value.trim() : '';
+            var precioVal = document.getElementById('ventaPrecio') ? parseFloat(document.getElementById('ventaPrecio').value) : 0;
+            var metodoPago = document.getElementById('selectMetodoPago') ? document.getElementById('selectMetodoPago').value : '';
+            var cantidadVal = 1;
+            var inputCant = document.getElementById('inputCantidadAVender');
+            if (inputCant && !document.getElementById('wrapCantidadVender').classList.contains('d-none')) {
+                cantidadVal = parseInt(inputCant.value, 10) || 0;
+                if (cantidadVal < 1 || cantidadVal > stockDisponibleModal) {
+                    var msg = 'Cantidad a vender debe estar entre 1 y ' + stockDisponibleModal + ' (stock disponible).';
+                    if (alertDiv) { alertDiv.textContent = msg; alertDiv.classList.remove('d-none'); }
+                    alert('⚠️ ' + msg);
+                    return false;
+                }
+            }
+            var errores = [];
+            if (nombre === '') errores.push('Nombre del cliente es obligatorio.');
+            if (isNaN(precioVal) || precioVal <= 0) errores.push('El precio de venta debe ser mayor a 0.');
+            if (!metodoPago || metodoPago.trim() === '') errores.push('Debe seleccionar un método de pago.');
+            if (errores.length) {
+                var msg = '⚠️ Complete los datos obligatorios:\n\n' + errores.join('\n');
+                if (alertDiv) {
+                    alertDiv.textContent = errores.join(' ');
+                    alertDiv.classList.remove('d-none');
+                }
+                alert(msg);
+                return false;
+            }
+            return true;
+        }
+
+        var ventaPrecioInput = document.getElementById('ventaPrecio');
+        if (ventaPrecioInput) {
+            ventaPrecioInput.addEventListener('input', actualizarAlertaPerdidaModal);
+            ventaPrecioInput.addEventListener('change', actualizarAlertaPerdidaModal);
+        }
+
+        function enviarVenta() {
+            if (alertDiv) {
+                alertDiv.classList.add('d-none');
+                alertDiv.textContent = '';
+            }
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (!data || data.success === false) {
+                        var msg = (data && data.message) ? data.message : '⚠️ Error al registrar la venta. Sin mensaje del servidor.';
+                        if (alertDiv) {
+                            alertDiv.textContent = msg;
+                            alertDiv.classList.remove('d-none');
+                        }
+                        alert(msg);
+                        return;
+                    }
+                    const modalEl = document.getElementById('modalVenta');
+                    if (modalEl) {
+                        const m = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        m.hide();
+                    }
+                    if (modalResumen) {
+                        const mr = bootstrap.Modal.getInstance(modalResumen) || new bootstrap.Modal(modalResumen);
+                        mr.hide();
+                    }
+                    window.location.reload();
+                })
+                .catch(err => {
+                    console.error('Error al registrar venta:', err);
+                    var msg = '⚠️ Error inesperado: ' + (err.message || String(err));
+                    if (alertDiv) {
+                        alertDiv.textContent = msg;
+                        alertDiv.classList.remove('d-none');
+                    }
+                    alert(msg);
+                });
+        }
+
+        btnResumen.addEventListener('click', function () {
+            if (alertDiv) { alertDiv.classList.add('d-none'); alertDiv.textContent = ''; }
+            if (!validarFormularioVenta()) return;
+
+            // Validación: Garantía debe tener valor numérico (0, 1, 3, 4, 6, 12)
+            var garantiaVal = selectGarantia ? selectGarantia.value : '';
+            if (garantiaVal === '' || garantiaVal === null || isNaN(parseInt(garantiaVal, 10))) {
+                if (alertDiv) {
+                    alertDiv.textContent = '⚠️ Selecciona una opción de garantía válida.';
+                    alertDiv.classList.remove('d-none');
+                }
+                alert('⚠️ Selecciona una opción de garantía válida.');
+                return;
+            }
+
+            var producto = document.getElementById('lblProductoVenta') ? document.getElementById('lblProductoVenta').innerText : '—';
+            var cliente = document.getElementById('inputNombre') ? document.getElementById('inputNombre').value.trim() : '';
+            var fechaInput = form.querySelector('input[name="fechaVenta"]');
+            var fechaTexto = fechaInput && fechaInput.value ? new Date(fechaInput.value + 'T12:00:00').toLocaleDateString('es-NI', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+            var garantiaTexto = selectGarantia && selectGarantia.options[selectGarantia.selectedIndex] ? selectGarantia.options[selectGarantia.selectedIndex].text : '—';
+            var total = document.getElementById('ventaPrecio') ? document.getElementById('ventaPrecio').value : '0';
+            var totalFormato = '$' + parseFloat(total).toLocaleString('es-NI', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            document.getElementById('resumenProducto').textContent = producto;
+            document.getElementById('resumenCliente').textContent = cliente;
+            document.getElementById('resumenFecha').textContent = fechaTexto;
+            document.getElementById('resumenGarantia').textContent = garantiaTexto;
+            document.getElementById('resumenTotal').textContent = totalFormato;
+
+            var resumenModalInstance = new bootstrap.Modal(modalResumen);
+            resumenModalInstance.show();
+        });
+
+        btnConfirmarEnviar.addEventListener('click', function () {
+            if (modalResumen) {
+                var mr = bootstrap.Modal.getInstance(modalResumen);
+                if (mr) mr.hide();
+            }
+            enviarVenta();
+        });
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            if (!validarFormularioVenta()) return;
+            var garantiaVal = selectGarantia ? selectGarantia.value : '';
+            if (garantiaVal === '' || isNaN(parseInt(garantiaVal, 10))) {
+                alert('⚠️ Selecciona una opción de garantía válida.');
+                return;
+            }
+            btnResumen.click();
+        });
+    });
 </script>
 
 <style>

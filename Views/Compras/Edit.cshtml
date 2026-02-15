@@ -14,6 +14,7 @@
 
                 <form asp-action="Edit" method="post">
                     <input type="hidden" name="id" value="@ViewBag.CompraID" />
+                    <div asp-validation-summary="All" class="text-danger small mb-2"></div>
 
                     <div class="mb-4">
                         <label class="form-label text-secondary small fw-bold">Tracking Number (USA)</label>
@@ -38,8 +39,8 @@
                             <!option value="En Miami" @(estado == "En Miami" ? "selected" : "")>🏢 3. Recibido en Miami</!option>
                             <!option value="Viajando a NIC" @(estado == "Viajando a NIC" ? "selected" : "")>✈️/🚢 4. Viajando a Nicaragua</!option>
                             <!option value="En Aduana" @(estado == "En Aduana" ? "selected" : "")>👮‍♂️ 5. En Aduana Managua</!option>
-                            <!option value="Recibido" @(estado == "Recibido" ? "selected" : "")>✅ 6. Recibido Final</!option>
                         </select>
+                        <div class="form-text text-muted">El estado "Recibido Final" se asigna al completar el ingreso de seriales en esta compra.</div>
                     </div>
 
                     <div class="d-grid gap-2">

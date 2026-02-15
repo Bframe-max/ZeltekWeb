@@ -38,6 +38,7 @@ namespace ZeltekWeb.Controllers
                         c.CostoTotal,
                         c.EstadoCompra,
                         (SELECT COUNT(*) FROM ItemInventario WHERE CompraID = c.CompraID) as CantidadItems,
+                        (SELECT COUNT(*) FROM ItemInventario WHERE CompraID = c.CompraID AND Estado NOT IN ('En Stock', 'Vendido', 'Por Revisar')) as ItemsPendientes,
                         ISNULL((SELECT TOP 1 p.Nombre 
                          FROM ItemInventario i 
                          INNER JOIN Producto p ON i.ProductoID = p.ProductoID 
@@ -66,7 +67,8 @@ namespace ZeltekWeb.Controllers
                                 Total = dr.GetDecimal(4),
                                 Estado = dr.GetString(5),
                                 CantidadItems = dr.GetInt32(6),
-                                ProductoPrincipal = dr.GetString(7)
+                                ItemsPendientes = dr.GetInt32(7),
+                                ProductoPrincipal = dr.GetString(8)
                             });
                         }
                     }
@@ -75,6 +77,92 @@ namespace ZeltekWeb.Controllers
 
             ViewData["BusquedaActual"] = buscar;
             return View(lista);
+        }
+
+        // ==========================================
+        // API: VERIFICAR SI TRACKING YA EXISTE
+        // ==========================================
+        /// <summary>
+        /// Retorna true si el tracking ya está registrado, false si está libre.
+        /// </summary>
+        [HttpGet]
+        public IActionResult VerificarTracking(string tracking)
+        {
+            var t = tracking?.Trim() ?? "";
+            if (string.IsNullOrEmpty(t))
+            {
+                return Json(false);
+            }
+
+            string cadena = _config.GetConnectionString("ZeltekDB");
+            using (SqlConnection con = new SqlConnection(cadena))
+            {
+                con.Open();
+                string sql = "SELECT 1 FROM Compra WHERE TrackingProveedor = @T";
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@T", t);
+                    var existe = cmd.ExecuteScalar() != null;
+                    return Json(existe);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Devuelve si el ítem es accesorio/cargador (por categoría del producto) para ocultar detalles técnicos.
+        /// </summary>
+        [HttpGet]
+        public IActionResult GetItemInfo(int itemId)
+        {
+            if (itemId <= 0) return Json(new { esAccesorio = false, productoNombre = "" });
+            string cadena = _config.GetConnectionString("ZeltekDB");
+            using (SqlConnection con = new SqlConnection(cadena))
+            {
+                con.Open();
+                string sql = @"
+                    SELECT p.Nombre, ISNULL(c.Nombre, '') AS Categoria
+                    FROM ItemInventario i
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    LEFT JOIN Categoria c ON p.CategoriaID = c.CategoriaID
+                    WHERE i.ItemID = @ItemID";
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@ItemID", itemId);
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.Read())
+                            return Json(new { esAccesorio = false, productoNombre = "" });
+                        string nombre = dr.GetString(0);
+                        string cat = dr.IsDBNull(1) ? "" : dr.GetString(1);
+                        bool esAccesorio = cat.IndexOf("Cargador", StringComparison.OrdinalIgnoreCase) >= 0
+                                        || cat.IndexOf("Accesorio", StringComparison.OrdinalIgnoreCase) >= 0;
+                        return Json(new { esAccesorio, productoNombre = nombre });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Retorna true si el serial ya existe en ItemInventario (evitar duplicados).
+        /// </summary>
+        [HttpGet]
+        public IActionResult VerificarSerial(string serial)
+        {
+            var s = serial?.Trim() ?? "";
+            if (string.IsNullOrEmpty(s))
+                return Json(false);
+            string cadena = _config.GetConnectionString("ZeltekDB");
+            using (SqlConnection con = new SqlConnection(cadena))
+            {
+                con.Open();
+                string sql = "SELECT 1 FROM ItemInventario WHERE NumeroSerie = @S";
+                using (SqlCommand cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@S", s);
+                    var existe = cmd.ExecuteScalar() != null;
+                    return Json(existe);
+                }
+            }
         }
 
         // ==========================================
@@ -92,70 +180,76 @@ namespace ZeltekWeb.Controllers
         [HttpPost]
         public IActionResult Create(CompraCreateViewModel model)
         {
+            // Validación explícita de lote (por si se omite validación en cliente)
+            if (model.Cantidad <= 0)
+            {
+                ModelState.AddModelError("Cantidad", "La cantidad debe ser mayor a 0.");
+            }
+            if (model.CostoTotalCompra <= 0)
+            {
+                ModelState.AddModelError("CostoTotalCompra", "El costo total de la compra debe ser mayor a 0.");
+            }
+            var costoEnvio = model.CostoEnvioTotal ?? 0;
+            if (costoEnvio < 0)
+            {
+                ModelState.AddModelError("CostoEnvioTotal", "El costo de envío no puede ser negativo.");
+            }
+
             if (!ModelState.IsValid)
             {
                 CargarListaProductos();
                 return View(model);
             }
 
+            var tracking = model.TrackingProveedor?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(tracking))
+            {
+                string cadenaCheck = _config.GetConnectionString("ZeltekDB");
+                using (SqlConnection conCheck = new SqlConnection(cadenaCheck))
+                {
+                    conCheck.Open();
+                    using (SqlCommand cmdCheck = new SqlCommand("SELECT 1 FROM Compra WHERE TrackingProveedor = @T", conCheck))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@T", tracking);
+                        if (cmdCheck.ExecuteScalar() != null)
+                        {
+                            ModelState.AddModelError("TrackingProveedor", "Este tracking ya fue registrado.");
+                            CargarListaProductos();
+                            return View(model);
+                        }
+                    }
+                }
+            }
+
+            var trackingVal = model.TrackingProveedor?.Trim();
+            var trackingParaBD = string.IsNullOrEmpty(trackingVal) ? "" : trackingVal;
             string cadena = _config.GetConnectionString("ZeltekDB");
 
             using (SqlConnection con = new SqlConnection(cadena))
             {
                 con.Open();
-                using (SqlTransaction tx = con.BeginTransaction())
+                try
                 {
-                    try
+                    using (SqlCommand cmd = new SqlCommand("sp_RegistrarCompraConItem", con))
                     {
-                        string sqlCompra = @"
-                            INSERT INTO Compra 
-                            (ProveedorID, VendedorOnline, TrackingProveedor, FechaCompra, CostoTotal, EstadoCompra)
-                            OUTPUT INSERTED.CompraID
-                            VALUES 
-                            (1, @Vendedor, @Tracking, @Fecha, @Total, 'En Transito')";
-
-                        int compraId;
-                        using (SqlCommand cmd = new SqlCommand(sqlCompra, con, tx))
-                        {
-                            cmd.Parameters.AddWithValue("@Vendedor", model.Vendedor);
-                            cmd.Parameters.AddWithValue("@Tracking", model.TrackingProveedor);
-                            cmd.Parameters.AddWithValue("@Fecha", model.FechaCompra);
-                            cmd.Parameters.AddWithValue("@Total", model.Cantidad * model.CostoPorUnidad);
-
-                            compraId = (int)cmd.ExecuteScalar();
-                        }
-
-                        string sqlItem = @"
-                            INSERT INTO ItemInventario 
-                            (ProductoID, CompraID, CostoCompra, PrecioVenta, Estado, NumeroSerie)
-                            VALUES 
-                            (@ProdID, @CompraID, @Costo, 0.00, 'En Camino', @SerieTemp)";
-
-                        using (SqlCommand cmdItem = new SqlCommand(sqlItem, con, tx))
-                        {
-                            cmdItem.Parameters.AddWithValue("@ProdID", model.ProductoID);
-                            cmdItem.Parameters.AddWithValue("@CompraID", compraId);
-                            cmdItem.Parameters.AddWithValue("@Costo", model.CostoPorUnidad);
-
-                            SqlParameter pSerie = cmdItem.Parameters.Add("@SerieTemp", SqlDbType.NVarChar);
-
-                            for (int i = 1; i <= model.Cantidad; i++)
-                            {
-                                pSerie.Value = $"PEND-{model.TrackingProveedor}-{i}";
-                                cmdItem.ExecuteNonQuery();
-                            }
-                        }
-
-                        tx.Commit();
-                        return RedirectToAction("Index");
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.Parameters.AddWithValue("@ProveedorID", 1);
+                        cmd.Parameters.AddWithValue("@VendedorOnline", model.Vendedor);
+                        cmd.Parameters.AddWithValue("@TrackingProveedor", trackingParaBD);
+                        cmd.Parameters.AddWithValue("@FechaCompra", model.FechaCompra);
+                        cmd.Parameters.AddWithValue("@ProductoID", model.ProductoID);
+                        cmd.Parameters.AddWithValue("@Cantidad", model.Cantidad);
+                        cmd.Parameters.AddWithValue("@CostoTotalLote", model.CostoTotalCompra);
+                        cmd.Parameters.AddWithValue("@CostoEnvioTotal", model.CostoEnvioTotal ?? 0);
+                        cmd.ExecuteNonQuery();
                     }
-                    catch (Exception ex)
-                    {
-                        tx.Rollback();
-                        ModelState.AddModelError("", "Error: " + ex.Message);
-                        CargarListaProductos();
-                        return View(model);
-                    }
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "Error al registrar la compra: " + ex.Message);
+                    CargarListaProductos();
+                    return View(model);
                 }
             }
         }
@@ -188,8 +282,17 @@ namespace ZeltekWeb.Controllers
                     }
                 }
 
-                string sqlItems = @"
-                    SELECT i.ItemID, p.Nombre, i.CostoCompra, i.Estado, i.NumeroSerie
+                    string sqlItems = @"
+                    SELECT 
+                        i.ItemID, 
+                        p.Nombre, 
+                        i.CostoCompra, 
+                        i.Estado, 
+                        i.NumeroSerie, 
+                        ISNULL(p.EsUnico, 1),
+                        i.Procesador,
+                        i.RAM_GB,
+                        i.Almacenamiento_GB
                     FROM ItemInventario i
                     INNER JOIN Producto p ON i.ProductoID = p.ProductoID
                     WHERE i.CompraID = @ID";
@@ -207,11 +310,30 @@ namespace ZeltekWeb.Controllers
                                 ProductoNombre = dr.GetString(1),
                                 Costo = dr.GetDecimal(2),
                                 Estado = dr.GetString(3),
-                                NumeroSerie = dr.IsDBNull(4) ? "-" : dr.GetString(4)
+                                NumeroSerie = dr.IsDBNull(4) ? "-" : dr.GetString(4),
+                                EsAccesorio = !dr.GetBoolean(5),
+                                Procesador = dr.IsDBNull(6) ? null : dr.GetString(6),
+                                Ram = dr.IsDBNull(7) ? null : dr.GetInt32(7),
+                                Almacenamiento = dr.IsDBNull(8) ? null : dr.GetInt32(8)
                             });
                         }
                     }
                 }
+
+                var cargadores = new List<SelectListItem>();
+                string sqlCarg = @"
+                    SELECT p.ProductoID, p.Nombre FROM Producto p
+                    LEFT JOIN Categoria c ON p.CategoriaID = c.CategoriaID
+                    WHERE p.IsDeleted = 0 AND p.EsUnico = 0
+                    AND (ISNULL(c.Nombre,'') LIKE '%Cargador%' OR ISNULL(c.Nombre,'') LIKE '%Accesorio%')
+                    ORDER BY p.Nombre";
+                using (SqlCommand cmdC = new SqlCommand(sqlCarg, con))
+                using (SqlDataReader drC = cmdC.ExecuteReader())
+                {
+                    while (drC.Read())
+                        cargadores.Add(new SelectListItem { Value = drC.GetInt32(0).ToString(), Text = drC.GetString(1) });
+                }
+                ViewBag.Cargadores = cargadores;
             }
             return View(modelo);
         }
@@ -223,7 +345,6 @@ namespace ZeltekWeb.Controllers
         public IActionResult RecibirItem(
             int itemId,
             int compraIdRetorno,
-            bool esAccesorio,
             bool productoNuevo,
             string serieReal,
             decimal costoEnvio,
@@ -235,33 +356,89 @@ namespace ZeltekWeb.Controllers
             string procesador
         )
         {
-            // Producto nuevo (checkbox marcado) → En Stock. Usado (desmarcado) → Por Revisar (mesa de calidad).
-            var estadoFinal = productoNuevo ? "En Stock" : "Por Revisar";
-
             string cadena = _config.GetConnectionString("ZeltekDB");
+
+            // Determinar esAccesorio por categoría del producto (Cargador/Accesorio) — no por checkbox
+            bool esAccesorio = false;
+            using (SqlConnection conCat = new SqlConnection(cadena))
+            {
+                conCat.Open();
+                string sqlCat = @"
+                    SELECT ISNULL(c.Nombre, '') FROM ItemInventario i
+                    INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                    LEFT JOIN Categoria c ON p.CategoriaID = c.CategoriaID
+                    WHERE i.ItemID = @ItemID";
+                using (SqlCommand cmdCat = new SqlCommand(sqlCat, conCat))
+                {
+                    cmdCat.Parameters.AddWithValue("@ItemID", itemId);
+                    var catObj = cmdCat.ExecuteScalar();
+                    var cat = (catObj?.ToString() ?? "");
+                    esAccesorio = cat.IndexOf("Cargador", StringComparison.OrdinalIgnoreCase) >= 0
+                               || cat.IndexOf("Accesorio", StringComparison.OrdinalIgnoreCase) >= 0;
+                }
+            }
+
+            var estadoFinal = productoNuevo ? "En Stock" : "Por Revisar";
+            string serieFinal = (serieReal ?? "").Trim();
+
+            if (esAccesorio)
+            {
+                if (string.IsNullOrEmpty(serieFinal))
+                    serieFinal = "ACC-" + itemId + "-" + DateTime.Now.ToString("HHmm");
+                condicion = "Nuevo/Accesorio";
+                bateria = "N/A";
+                ram = null;
+                almacenamiento = null;
+                procesador = null;
+            }
+            else
+            {
+                if (string.IsNullOrEmpty(serieFinal))
+                    serieFinal = "SIN-SERIE-" + itemId;
+                else
+                {
+                    // Validar serial duplicado (excluyendo el item actual)
+                    using (SqlConnection conDup = new SqlConnection(cadena))
+                    {
+                        conDup.Open();
+                        using (SqlCommand cmdDup = new SqlCommand("SELECT 1 FROM ItemInventario WHERE NumeroSerie = @S AND ItemID <> @CurrentID", conDup))
+                        {
+                            cmdDup.Parameters.AddWithValue("@S", serieFinal);
+                            cmdDup.Parameters.AddWithValue("@CurrentID", itemId);
+                            if (cmdDup.ExecuteScalar() != null)
+                            {
+                                TempData["ErrorRecibir"] = "⛔ Serial ya existe en inventario.";
+                                return RedirectToAction("Details", new { id = compraIdRetorno });
+                            }
+                        }
+                    }
+                }
+
+                // Validación Laptop/Celular: Batería 1-100, Almacenamiento > 0
+                if (!string.IsNullOrWhiteSpace(bateria) && bateria.Trim() != "N/A")
+                {
+                    var batStr = bateria.Trim().TrimEnd('%');
+                    if (int.TryParse(batStr, out int pct) && (pct <= 0 || pct > 100))
+                    {
+                        TempData["ErrorRecibir"] = "Porcentaje de batería debe ser mayor a 0 y menor o igual a 100.";
+                        return RedirectToAction("Details", new { id = compraIdRetorno });
+                    }
+                }
+                if (almacenamiento.HasValue && almacenamiento.Value <= 0)
+                {
+                    TempData["ErrorRecibir"] = "Almacenamiento debe ser mayor a 0.";
+                    return RedirectToAction("Details", new { id = compraIdRetorno });
+                }
+            }
+
+
+            // Detectar AJAX
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
             using (SqlConnection con = new SqlConnection(cadena))
             {
                 con.Open();
 
-                string serieFinal = serieReal;
-
-                if (esAccesorio)
-                {
-                    if (string.IsNullOrEmpty(serieFinal))
-                        serieFinal = "ACC-" + itemId + "-" + DateTime.Now.ToString("HHmm");
-
-                    condicion = "Nuevo/Accesorio";
-                    bateria = "N/A";
-                    ram = null;
-                    almacenamiento = null;
-                    procesador = null;
-                }
-                else
-                {
-                    if (string.IsNullOrEmpty(serieFinal)) serieFinal = "SIN-SERIE-" + itemId;
-                }
-
-                // FechaRecepcion: si la columna no existe en ItemInventario, quita esa línea o agrega: ALTER TABLE ItemInventario ADD FechaRecepcion DATETIME NULL
                 string sql = @"
                     UPDATE ItemInventario 
                     SET Estado = @Estado, 
@@ -296,13 +473,18 @@ namespace ZeltekWeb.Controllers
                    UPDATE Compra 
                    SET EstadoCompra = 'Recibida' 
                    WHERE CompraID = @CompraID 
-                   AND NOT EXISTS (SELECT * FROM ItemInventario WHERE CompraID = @CompraID AND Estado = 'En Camino')";
+                   AND NOT EXISTS (SELECT * FROM ItemInventario WHERE CompraID = @CompraID AND Estado NOT IN ('En Stock', 'Vendido', 'Por Revisar'))";
 
                 using (SqlCommand cmdCheck = new SqlCommand(sqlCheck, con))
                 {
                     cmdCheck.Parameters.AddWithValue("@CompraID", compraIdRetorno);
                     cmdCheck.ExecuteNonQuery();
                 }
+            }
+
+            if (isAjax)
+            {
+                return Json(new { success = true, message = "Item recibido correctamente." });
             }
 
             return RedirectToAction("Details", new { id = compraIdRetorno });
@@ -343,8 +525,36 @@ namespace ZeltekWeb.Controllers
         // 7. GUARDAR EDICIÓN (POST)
         // ==========================================
         [HttpPost]
-        public IActionResult Edit(int id, string tracking, string estado, decimal costoTotal)
+        public IActionResult Edit(int id, string? tracking, string estado, decimal costoTotal)
         {
+            var trackingTrim = tracking?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(trackingTrim))
+            {
+                string cadenaCheck = _config.GetConnectionString("ZeltekDB");
+                using (SqlConnection conCheck = new SqlConnection(cadenaCheck))
+                {
+                    conCheck.Open();
+                    using (SqlCommand cmdCheck = new SqlCommand("SELECT 1 FROM Compra WHERE TrackingProveedor = @T AND CompraID <> @ID", conCheck))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@T", trackingTrim);
+                        cmdCheck.Parameters.AddWithValue("@ID", id);
+                        if (cmdCheck.ExecuteScalar() != null)
+                        {
+                            var model = new CompraCreateViewModel
+                            {
+                                TrackingProveedor = trackingTrim,
+                                Vendedor = ""
+                            };
+                            ViewBag.CompraID = id;
+                            ViewBag.EstadoActual = estado;
+                            ViewBag.CostoTotal = costoTotal;
+                            ModelState.AddModelError("TrackingProveedor", "Este tracking ya fue registrado en otra compra.");
+                            return View(model);
+                        }
+                    }
+                }
+            }
+
             string cadena = _config.GetConnectionString("ZeltekDB");
             using (SqlConnection con = new SqlConnection(cadena))
             {
@@ -359,7 +569,7 @@ namespace ZeltekWeb.Controllers
                     WHERE CompraID = @ID";
                 using (SqlCommand cmd = new SqlCommand(sql, con))
                 {
-                    cmd.Parameters.AddWithValue("@Tracking", tracking ?? "");
+                    cmd.Parameters.AddWithValue("@Tracking", string.IsNullOrEmpty(trackingTrim) ? "" : trackingTrim);
                     cmd.Parameters.AddWithValue("@Estado", estado);
                     cmd.Parameters.AddWithValue("@CostoTotal", costoTotal);
                     cmd.Parameters.AddWithValue("@ID", id);
@@ -381,6 +591,67 @@ namespace ZeltekWeb.Controllers
                         cmdItems.Parameters.AddWithValue("@Costo", costoPorItem);
                         cmdItems.Parameters.AddWithValue("@ID", id);
                         cmdItems.ExecuteNonQuery();
+                    }
+                }
+            }
+            return RedirectToAction("Index");
+        }
+
+        // ==========================================
+        // 8. ELIMINAR COMPRA (solo En Transito o Pagado)
+        // ==========================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Eliminar(int id)
+        {
+            string cadena = _config.GetConnectionString("ZeltekDB");
+            string? estado = null;
+            using (SqlConnection con = new SqlConnection(cadena))
+            {
+                con.Open();
+                using (SqlCommand cmd = new SqlCommand("SELECT EstadoCompra FROM Compra WHERE CompraID = @ID", con))
+                {
+                    cmd.Parameters.AddWithValue("@ID", id);
+                    var obj = cmd.ExecuteScalar();
+                    if (obj == null)
+                    {
+                        TempData["ErrorEliminar"] = "Compra no encontrada.";
+                        return RedirectToAction("Index");
+                    }
+                    estado = obj.ToString();
+                }
+            }
+
+            if (estado != "En Transito" && estado != "Pagado")
+            {
+                TempData["ErrorEliminar"] = "⛔ No se puede eliminar una compra ya procesada. Debes revertir el inventario primero.";
+                return RedirectToAction("Index");
+            }
+
+            using (SqlConnection con = new SqlConnection(cadena))
+            {
+                con.Open();
+                using (SqlTransaction tx = con.BeginTransaction())
+                {
+                    try
+                    {
+                        using (SqlCommand cmdItems = new SqlCommand("DELETE FROM ItemInventario WHERE CompraID = @ID", con, tx))
+                        {
+                            cmdItems.Parameters.AddWithValue("@ID", id);
+                            cmdItems.ExecuteNonQuery();
+                        }
+                        using (SqlCommand cmdCompra = new SqlCommand("DELETE FROM Compra WHERE CompraID = @ID", con, tx))
+                        {
+                            cmdCompra.Parameters.AddWithValue("@ID", id);
+                            cmdCompra.ExecuteNonQuery();
+                        }
+                        tx.Commit();
+                        TempData["SuccessEliminar"] = "Compra eliminada correctamente.";
+                    }
+                    catch (Exception ex)
+                    {
+                        tx.Rollback();
+                        TempData["ErrorEliminar"] = "Error al eliminar: " + ex.Message;
                     }
                 }
             }

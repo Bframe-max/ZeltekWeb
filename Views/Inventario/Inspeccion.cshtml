@@ -17,97 +17,171 @@
                 <h5 class="text-white fw-bold mb-0">Checklist de Ingreso</h5>
             </div>
             <div class="card-body p-4">
-
-                <form asp-action="Inspeccion" asp-route-id="@Model.ItemID" method="post">
+                <form asp-action="Inspeccion" asp-route-id="@Model.ItemID" method="post" id="formInspeccion">
                     <input type="hidden" asp-for="ItemID" />
                     <input type="hidden" asp-for="ProductoNombre" />
                     <input type="hidden" asp-for="NumeroSerie" />
+                    <input type="hidden" asp-for="EsUnico" />
+                    <input type="hidden" asp-for="CantidadTotal" />
+                    <input type="hidden" asp-for="CostoUnitario" />
 
-                    <div class="mb-4">
-                        <label class="form-label text-secondary small fw-bold">Cosmética</label>
-                        <div class="d-flex gap-2 flex-wrap">
-                            <div class="form-check form-check-inline">
-                                <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" />
-                                <label class="form-check-label text-secondary" for="CondicionA">Grado A</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" />
-                                <label class="form-check-label text-secondary" for="CondicionB">Grado B</label>
-                            </div>
-                            <div class="form-check form-check-inline">
-                                <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" />
-                                <label class="form-check-label text-secondary" for="CondicionC">Grado C</label>
+                    @if (Model.EsUnico)
+                    {
+                        <!-- PANEL PARA ITEMS ÚNICOS (LAPTOPS/CELULARES) -->
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small fw-bold">Cosmética</label>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" />
+                                    <label class="form-check-label text-secondary" for="CondicionA">Grado A</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" />
+                                    <label class="form-check-label text-secondary" for="CondicionB">Grado B</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" />
+                                    <label class="form-check-label text-secondary" for="CondicionC">Grado C</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label asp-for="SaludBateriaPorcentaje" class="form-label text-secondary small fw-bold">Batería (%)</label>
-                        <input asp-for="SaludBateriaPorcentaje" type="number" min="0" max="100" class="form-control bg-dark text-white border-secondary w-25" placeholder="85" />
-                    </div>
+                        <div class="mb-4">
+                            <label asp-for="SaludBateriaPorcentaje" class="form-label text-secondary small fw-bold">Batería (%)</label>
+                            <input asp-for="SaludBateriaPorcentaje" type="number" min="0" max="100" class="form-control bg-dark text-white border-secondary w-25" placeholder="85" />
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="form-label text-secondary small fw-bold">Funciona todo</label>
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="form-check">
-                                <input asp-for="PantallaOk" class="form-check-input" />
-                                <label asp-for="PantallaOk" class="form-check-label text-secondary">Pantalla</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="TecladoOk" class="form-check-input" />
-                                <label asp-for="TecladoOk" class="form-check-label text-secondary">Teclado</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="AudioOk" class="form-check-input" />
-                                <label asp-for="AudioOk" class="form-check-label text-secondary">Audio</label>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small fw-bold">Funciona todo</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check">
+                                    <input asp-for="PantallaOk" class="form-check-input" />
+                                    <label asp-for="PantallaOk" class="form-check-label text-secondary">Pantalla</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="TecladoOk" class="form-check-input" />
+                                    <label asp-for="TecladoOk" class="form-check-label text-secondary">Teclado</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="AudioOk" class="form-check-input" />
+                                    <label asp-for="AudioOk" class="form-check-label text-secondary">Audio</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label class="form-label text-secondary small fw-bold">Checklist</label>
-                        <div class="d-flex flex-wrap gap-3">
-                            <div class="form-check">
-                                <input asp-for="EncendioCorrectamente" class="form-check-input" />
-                                <label asp-for="EncendioCorrectamente" class="form-check-label text-secondary">Encendió correctamente</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="PantallaSinManchas" class="form-check-input" />
-                                <label asp-for="PantallaSinManchas" class="form-check-label text-secondary">Pantalla sin manchas</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="TecladoFuncional" class="form-check-input" />
-                                <label asp-for="TecladoFuncional" class="form-check-label text-secondary">Teclado funcional</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="CargadorIncluido" class="form-check-input" />
-                                <label asp-for="CargadorIncluido" class="form-check-label text-secondary">Cargador original incluido</label>
-                            </div>
-                            <div class="form-check">
-                                <input asp-for="LimpiezaRealizada" class="form-check-input" />
-                                <label asp-for="LimpiezaRealizada" class="form-check-label text-secondary">Limpieza realizada</label>
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small fw-bold">Checklist</label>
+                            <div class="d-flex flex-wrap gap-3">
+                                <div class="form-check">
+                                    <input asp-for="EncendioCorrectamente" class="form-check-input" />
+                                    <label asp-for="EncendioCorrectamente" class="form-check-label text-secondary">Encendió correctamente</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="PantallaSinManchas" class="form-check-input" />
+                                    <label asp-for="PantallaSinManchas" class="form-check-label text-secondary">Pantalla sin manchas</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="TecladoFuncional" class="form-check-input" />
+                                    <label asp-for="TecladoFuncional" class="form-check-label text-secondary">Teclado funcional</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="CargadorIncluido" class="form-check-input" />
+                                    <label asp-for="CargadorIncluido" class="form-check-label text-secondary">Cargador original incluido</label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="LimpiezaRealizada" class="form-check-input" />
+                                    <label asp-for="LimpiezaRealizada" class="form-check-label text-secondary">Limpieza realizada</label>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="mb-4">
-                        <label asp-for="NotasInspeccion" class="form-label text-secondary small fw-bold">Notas</label>
-                        <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Ej: Vino sucio, se limpió. Cargador genérico."></textarea>
-                    </div>
+                        <div class="mb-4">
+                            <label asp-for="NotasInspeccion" class="form-label text-secondary small fw-bold">Notas</label>
+                            <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Ej: Vino sucio, se limpió. Cargador genérico."></textarea>
+                        </div>
 
-                    <hr class="border-secondary my-4" />
+                        <hr class="border-secondary my-4" />
 
-                    <div class="d-flex gap-3 flex-wrap">
-                        <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
-                            ✅ Aprobar y pasar a Stock
-                        </button>
-                        <button type="submit" name="resultado" value="reparacion" class="btn btn-warning btn-lg fw-bold">
-                            ⚠️ Enviar a Reparación
-                        </button>
-                    </div>
+                        <div class="d-flex gap-3 flex-wrap">
+                            <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
+                                ✅ Aprobar y pasar a Stock
+                            </button>
+                            <button type="submit" name="resultado" value="reparacion" class="btn btn-warning btn-lg fw-bold">
+                                ⚠️ Enviar a Reparación
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- PANEL PARA LOTES / ACCESORIOS -->
+                        <div class="alert alert-info border-info bg-dark text-info">
+                            <i class="bi bi-box-seam me-2"></i> Inspección de Lote / Accesorios
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label text-secondary small fw-bold">Total Recibido</label>
+                                <input type="text" readonly class="form-control-plaintext text-white fw-bold fs-4" value="@Model.CantidadTotal" />
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="CantidadAprobada" class="form-label text-success small fw-bold">Cantidad Aprobada (Stock)</label>
+                                <input asp-for="CantidadAprobada" type="number" min="0" max="@Model.CantidadTotal" class="form-control bg-dark text-white border-success fw-bold" id="inputAprobada" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label text-danger small fw-bold">Rechazados (Pérdida)</label>
+                                <input type="text" readonly class="form-control bg-dark text-danger border-danger fw-bold" id="inputRechazada" value="0" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4 d-none" id="divMotivo">
+                            <label asp-for="MotivoRechazo" class="form-label text-danger small fw-bold">Motivo del Rechazo (Merma)</label>
+                            <textarea asp-for="MotivoRechazo" class="form-control bg-dark text-white border-danger" rows="2" placeholder="Ej: 2 unidades rotas, 1 no carga..."></textarea>
+                        </div>
+
+                        <hr class="border-secondary my-4" />
+
+                        <div class="d-grid">
+                            <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
+                                ✅ Confirmar Inspección Lote
+                            </button>
+                        </div>
+                    }
                 </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var total = @(Model.CantidadTotal);
+        var inputAprobada = document.getElementById('inputAprobada');
+        var inputRechazada = document.getElementById('inputRechazada');
+        var divMotivo = document.getElementById('divMotivo');
+
+        if(inputAprobada && inputRechazada) {
+            function calcular() {
+                var aprob = parseInt(inputAprobada.value) || 0;
+                if(aprob > total) aprob = total;
+                if(aprob < 0) aprob = 0;
+                // inputAprobada.value = aprob; // Evitar loop de escritura si se quiere permitir borrado
+                
+                var rech = total - aprob;
+                inputRechazada.value = rech;
+
+                if(rech > 0) {
+                    divMotivo.classList.remove('d-none');
+                    document.getElementById('MotivoRechazo').setAttribute('required', 'required');
+                } else {
+                    divMotivo.classList.add('d-none');
+                    document.getElementById('MotivoRechazo').removeAttribute('required');
+                    document.getElementById('MotivoRechazo').value = '';
+                }
+            }
+            
+            inputAprobada.addEventListener('input', calcular);
+            calcular(); // init
+        }
+    });
+</script>
 

@@ -9,5 +9,7 @@ namespace ZeltekWeb.Models
         public string MesLabel { get; set; } = "";  // etiqueta corta para el eje
         public decimal TotalVentas { get; set; }
         public int CantidadVentas { get; set; }
+        /// <summary>Unidades vendidas por mes (desde vw_ResumenFinanciero).</summary>
+        public int CantidadEquipos { get; set; }
     }
 }

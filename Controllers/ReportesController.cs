@@ -32,7 +32,8 @@ namespace ZeltekWeb.Controllers
             {
                 con.Open();
 
-                // 1. Tendencia de crecimiento (últimos 6 o 12 meses)
+                // Fecha inicio = día 1 del mes que está N meses atrás (incluir el mes completo)
+                // Ej: hoy 9-Feb → 6 meses atrás día 1 = 1-Ago (no 9-Ago), así el primer mes cuenta todo.
                 var sqlTendencia = @"
                     SELECT
                         FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes,
@@ -41,7 +42,7 @@ namespace ZeltekWeb.Controllers
                         COUNT(*) AS CantidadVentas
                     FROM Venta v
                     INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                    WHERE v.FechaVenta >= DATEADD(month, -@Meses, CAST(GETDATE() AS DATE))
+                    WHERE v.FechaVenta >= DATEADD(MONTH, -@Meses, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))
                     GROUP BY FORMAT(v.FechaVenta, 'yyyy-MM')
                     ORDER BY FORMAT(v.FechaVenta, 'yyyy-MM')";
 
@@ -61,6 +62,33 @@ namespace ZeltekWeb.Controllers
                             });
                         }
                     }
+                }
+
+                // 1.1 CantidadEquipos por mes desde vw_ResumenFinanciero (misma fecha inicio = día 1 del mes)
+                var sqlCantidadEquipos = @"
+                    SELECT Anio, Mes, ISNULL(CantidadEquipos, 0)
+                    FROM vw_ResumenFinanciero
+                    WHERE DATEFROMPARTS(Anio, Mes, 1) >= DATEADD(MONTH, -@Meses, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1))
+                    ORDER BY Anio, Mes";
+                var dictCantidadEquipos = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                using (var cmd = new SqlCommand(sqlCantidadEquipos, con))
+                {
+                    cmd.Parameters.AddWithValue("@Meses", meses);
+                    using (var dr = cmd.ExecuteReader())
+                    {
+                        while (dr.Read())
+                        {
+                            var anio = dr.GetInt32(0);
+                            var mes = dr.GetInt32(1);
+                            var key = $"{anio}-{mes:D2}";
+                            dictCantidadEquipos[key] = dr.GetInt32(2);
+                        }
+                    }
+                }
+                foreach (var t in model.TendenciaMeses)
+                {
+                    if (dictCantidadEquipos.TryGetValue(t.Mes, out var cant))
+                        t.CantidadEquipos = cant;
                 }
 
                 // 2. Top productos (más vendidos)

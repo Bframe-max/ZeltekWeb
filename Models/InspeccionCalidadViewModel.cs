@@ -7,7 +7,14 @@ namespace ZeltekWeb.Models
     {
         public int ItemID { get; set; }
         public string ProductoNombre { get; set; } = "";
-        public string NumeroSerie { get; set; } = "";
+        public string? NumeroSerie { get; set; } = "";
+        public bool EsUnico { get; set; } = true;
+
+        // Para Lotes / Accesorios
+        public int CantidadTotal { get; set; }
+        public int CantidadAprobada { get; set; }
+        public string? MotivoRechazo { get; set; }
+        public decimal CostoUnitario { get; set; }
 
         // Cosmética y batería (se guardan en ItemInventario)
         public string? Condicion { get; set; }   // Grado A, B, C

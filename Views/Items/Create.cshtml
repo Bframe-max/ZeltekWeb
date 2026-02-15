@@ -1,4 +1,4 @@
-﻿@model ZeltekWeb.Models.ItemViewModel
+@model ZeltekWeb.Models.ItemViewModel
 @{
     var productos = ViewBag.Productos as List<ZeltekWeb.Models.ProductoSelectViewModel>;
 }
@@ -12,7 +12,7 @@
     <!-- PRODUCTO -->
     <div class="mb-3">
         <label class="form-label">Producto</label>
-        <select asp-for="ProductoID" class="form-select" required>
+        <select asp-for="ProductoID" class="form-select select2-producto" required style="width: 100%;">
             <option value="">-- Seleccione un producto --</option>
             @foreach (var p in productos!)
             {
@@ -45,3 +45,4 @@
     <a href="/Compras" class="btn btn-secondary">Volver</a>
 
 </form>
+

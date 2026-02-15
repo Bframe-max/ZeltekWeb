@@ -9,76 +9,87 @@ namespace ZeltekWeb.Controllers
     public class GarantiasController : Controller
     {
         private readonly IConfiguration _config;
+        private readonly ILogger<GarantiasController> _logger;
 
-        public GarantiasController(IConfiguration config)
+        public GarantiasController(IConfiguration config, ILogger<GarantiasController> logger)
         {
             _config = config;
+            _logger = logger;
         }
 
         /// <summary>
-        /// Lista garantías vigentes. Opcional: filtrar por nombre cliente, teléfono, producto o serie.
+        /// Lista garantías vigentes desde la vista vw_GarantiasVigentes.
+        /// Opcional: filtrar por nombre cliente, teléfono, producto o serie.
         /// </summary>
         public IActionResult Index(string? buscar)
         {
             var lista = new List<GarantiaVigenteViewModel>();
             var cadena = _config.GetConnectionString("ZeltekDB");
 
+            // Leer desde la VISTA (tabla Garantias), no desde DetalleVenta.
+            // La vista debe devolver columnas en este orden: Cliente, Telefono, Producto, NumeroSerie,
+            // FechaVenta, GarantiaMeses, FechaVenceGarantia, DiasRestantes, Procesador, RAM_GB, Almacenamiento_GB
             const string sql = @"
                 SELECT
-                    c.NombreCompleto AS Cliente,
-                    ISNULL(c.Telefono, '') AS Telefono,
-                    p.Nombre AS Producto,
-                    ISNULL(i.NumeroSerie, '') AS NumeroSerie,
-                    v.FechaVenta,
-                    dv.GarantiaMeses,
-                    DATEADD(month, dv.GarantiaMeses, v.FechaVenta) AS FechaVenceGarantia,
-                    DATEDIFF(day, CAST(GETDATE() AS DATE), DATEADD(month, dv.GarantiaMeses, v.FechaVenta)) AS DiasRestantes,
-                    i.Procesador,
-                    ISNULL(i.RAM_GB, 0) AS RAM_GB,
-                    ISNULL(i.Almacenamiento_GB, 0) AS Almacenamiento_GB
-                FROM DetalleVenta dv
-                JOIN Venta v ON dv.VentaID = v.VentaID
-                JOIN Cliente c ON v.ClienteID = c.ClienteID
-                JOIN ItemInventario i ON dv.ItemID = i.ItemID
-                JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE dv.GarantiaMeses > 0
-                  AND DATEADD(month, dv.GarantiaMeses, v.FechaVenta) >= CAST(GETDATE() AS DATE)
+                    Cliente,
+                    ISNULL(Telefono, '') AS Telefono,
+                    Producto,
+                    ISNULL(NumeroSerie, '') AS NumeroSerie,
+                    FechaInicio AS FechaVenta,
+                    DATEDIFF(month, FechaInicio, FechaFin) AS GarantiaMeses,
+                    FechaFin AS FechaVenceGarantia,
+                    DATEDIFF(day, CAST(GETDATE() AS DATE), FechaFin) AS DiasRestantes,
+                    Procesador,
+                    ISNULL(RAM_GB, 0) AS RAM_GB,
+                    ISNULL(Almacenamiento_GB, 0) AS Almacenamiento_GB
+                FROM vw_GarantiasVigentes
+                WHERE Estado = 'Activa'
+                  AND FechaFin >= CAST(GETDATE() AS DATE)
                   AND (@Buscar IS NULL OR @Buscar = ''
-                       OR c.NombreCompleto LIKE '%' + @Buscar + '%'
-                       OR c.Telefono LIKE '%' + @Buscar + '%'
-                       OR p.Nombre LIKE '%' + @Buscar + '%'
-                       OR i.NumeroSerie LIKE '%' + @Buscar + '%')
-                ORDER BY FechaVenceGarantia ASC";
+                       OR Cliente LIKE '%' + @Buscar + '%'
+                       OR Telefono LIKE '%' + @Buscar + '%'
+                       OR Producto LIKE '%' + @Buscar + '%'
+                       OR NumeroSerie LIKE '%' + @Buscar + '%')
+                ORDER BY FechaFin ASC";
 
-            using (var con = new SqlConnection(cadena))
+            try
             {
-                con.Open();
-                using (var cmd = new SqlCommand(sql, con))
+                using (var con = new SqlConnection(cadena))
                 {
-                    cmd.Parameters.AddWithValue("@Buscar", string.IsNullOrWhiteSpace(buscar) ? (object)DBNull.Value : buscar.Trim());
-                    using (var dr = cmd.ExecuteReader())
+                    con.Open();
+                    using (var cmd = new SqlCommand(sql, con))
                     {
-                        while (dr.Read())
+                        cmd.Parameters.AddWithValue("@Buscar", string.IsNullOrWhiteSpace(buscar) ? (object)DBNull.Value : buscar.Trim());
+                        using (var dr = cmd.ExecuteReader())
                         {
-                            lista.Add(new GarantiaVigenteViewModel
+                            while (dr.Read())
                             {
-                                Cliente = dr.GetString(0),
-                                Telefono = dr.GetString(1),
-                                Producto = dr.GetString(2),
-                                NumeroSerie = dr.GetString(3),
-                                FechaVenta = dr.GetDateTime(4),
-                                GarantiaMeses = dr.GetInt32(5),
-                                FechaVenceGarantia = dr.GetDateTime(6),
-                                DiasRestantes = dr.GetInt32(7),
-                                Procesador = dr.IsDBNull(8) ? null : dr.GetString(8),
-                                RAM_GB = dr.GetInt32(9),
-                                Almacenamiento_GB = dr.GetInt32(10)
-                            });
+                                lista.Add(new GarantiaVigenteViewModel
+                                {
+                                    Cliente = dr.GetString(0),
+                                    Telefono = dr.GetString(1),
+                                    Producto = dr.GetString(2),
+                                    NumeroSerie = dr.GetString(3),
+                                    FechaVenta = dr.GetDateTime(4),
+                                    GarantiaMeses = dr.IsDBNull(5) ? 0 : dr.GetInt32(5),
+                                    FechaVenceGarantia = dr.GetDateTime(6),
+                                    DiasRestantes = dr.GetInt32(7),
+                                    Procesador = dr.IsDBNull(8) ? null : dr.GetString(8),
+                                    RAM_GB = dr.IsDBNull(9) ? 0 : dr.GetInt32(9),
+                                    Almacenamiento_GB = dr.IsDBNull(10) ? 0 : dr.GetInt32(10)
+                                });
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al cargar garantías vigentes desde vw_GarantiasVigentes");
+                throw;
+            }
 
+            _logger.LogInformation("Garantías vigentes recuperadas: {Count} (filtro buscar='{Buscar}')", lista.Count, buscar ?? "");
             ViewData["Busqueda"] = buscar;
             return View(lista);
         }

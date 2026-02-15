@@ -9,6 +9,13 @@
         <h2 class="fw-bold text-white">📦 Recibir Pedido #@Model.CompraID</h2>
     </div>
 </div>
+@if (TempData["ErrorRecibir"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorRecibir"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
 
 <div class="card bg-card border-0 mb-4 shadow-sm">
     <div class="card-body">
@@ -62,10 +69,19 @@
                             }
                         </td>
                         <td class="text-end pe-4">
-                            @if (enCamino)
+                        <td class="text-end pe-4">
+                            @if (item.Estado != "En Stock" && item.Estado != "Vendido" && item.Estado != "Recibido")
                             {
                                 <button type="button" class="btn btn-primary btn-sm fw-bold px-3 shadow-sm"
-                                        onclick="abrirModalRecibir(@item.ItemID, '@item.ProductoNombre')">
+                                        data-itemid="@item.ItemID"
+                                        data-nombre="@item.ProductoNombre"
+                                        data-es-accesorio="@(item.EsAccesorio ? "true" : "false")"
+                                        data-es-serializado="@(item.EsAccesorio ? "false" : "true")"
+                                        data-serial="@item.NumeroSerie"
+                                        data-procesador="@item.Procesador"
+                                        data-ram="@item.Ram"
+                                        data-almacenamiento="@item.Almacenamiento"
+                                        onclick="abrirModalRecibir(this)">
                                     📥 Recibir
                                 </button>
                             }
@@ -73,6 +89,7 @@
                             {
                                 <button class="btn btn-sm btn-outline-secondary disabled">Completado</button>
                             }
+                        </td>
                         </td>
                     </tr>
                 }
@@ -90,14 +107,14 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <form asp-action="RecibirItem" method="post">
+            <form asp-controller="Inventario" asp-action="Recibir" method="post" id="formRecibir">
                 <div class="modal-body">
-                    <input type="hidden" name="itemId" id="inputItemId" />
-                    <input type="hidden" name="compraIdRetorno" value="@Model.CompraID" />
+                    <input type="hidden" name="ItemID" id="inputItemId" />
+                    <input type="hidden" name="CompraID" value="@Model.CompraID" />
 
                     <div class="mb-3 p-3 rounded border border-success border-opacity-50 d-flex align-items-center" style="background-color: rgba(25, 135, 84, 0.1);">
                         <div class="form-check form-switch m-0 fs-5">
-                            <input class="form-check-input" type="checkbox" id="checkProductoNuevo" name="productoNuevo" value="true" style="cursor: pointer;">
+                            <input class="form-check-input" type="checkbox" id="checkProductoNuevo" name="ProductoNuevo" value="true" style="cursor: pointer;">
                             <label class="form-check-label fw-bold text-success ps-3" for="checkProductoNuevo" style="cursor: pointer; padding-top: 2px;">
                                 ✨ Producto Nuevo (Omitir Control de Calidad)
                             </label>
@@ -105,12 +122,23 @@
                     </div>
                     <p class="text-muted small mb-4">Si está marcado: pasa directo a <strong>Stock</strong>. Si no: va a <strong>Por Revisar</strong> (mesa de calidad).</p>
 
-                    <div class="mb-4 p-3 rounded border border-secondary d-flex align-items-center" style="background-color: #2b3035;">
-                        <div class="form-check form-switch m-0 fs-5">
-                            <input class="form-check-input" type="checkbox" id="checkAccesorio" name="esAccesorio" value="true" onchange="toggleAccesorio()" style="cursor: pointer;">
-                            <label class="form-check-label fw-bold text-info ps-3" for="checkAccesorio" style="cursor: pointer; padding-top: 2px;">
-                                🔌 Es un Accesorio / Lote (Sin detalles técnicos)
-                            </label>
+                    <div id="bloqueCargador" class="mb-3 p-3 rounded border border-warning border-opacity-50" style="background-color: rgba(255, 193, 7, 0.08);">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="checkRequiereCargador" name="RequiereCargadorDeStock" value="true" style="cursor: pointer;">
+                            <label class="form-check-label fw-bold text-warning ps-2" for="checkRequiereCargador" style="cursor: pointer;">🔌 ¿Asignar Cargador del Stock?</label>
+                        </div>
+                        <div id="wrapSelectCargador" class="d-none">
+                            <label class="form-label small text-secondary">Tipo de Cargador</label>
+                            <select name="IdCargador" id="selectIdCargador" class="form-select bg-black text-white border-secondary">
+                                <option value="">— Seleccione —</option>
+                                @if (ViewBag.Cargadores != null)
+                                {
+                                    @foreach (var c in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.Cargadores)
+                                    {
+                                        <option value="@c.Value">@c.Text</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
 
@@ -120,13 +148,14 @@
                         <div class="row g-3 mb-3">
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary">Número de Serie (S/N)</label>
-                                <input type="text" name="serieReal" id="inputSerie"
+                                <input type="text" name="NumeroSerie" id="inputSerie"
                                        class="form-control bg-black text-white border-secondary fw-bold"
                                        placeholder="Escanea aquí..." />
+                                <small id="errorSerial" class="text-danger d-none">⛔ Serial ya existe en inventario</small>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label small text-secondary">Condición Estética</label>
-                                <select name="condicion" class="form-select bg-black text-white border-secondary">
+                                <select name="Condicion" class="form-select bg-black text-white border-secondary">
                                     <option value="Grado A">✅ Grado A (Excelente)</option>
                                     <option value="Grado B">⚠️ Grado B (Leves Rayones)</option>
                                     <option value="Grado C">❌ Grado C (Desgaste visible)</option>
@@ -134,26 +163,53 @@
                                     <option value="Open Box">📦 Open Box</option>
                                 </select>
                             </div>
+                            <div class="col-md-12">
+                                <label class="form-label small text-secondary">Color (Opcional)</label>
+                                <input type="text" name="Color" id="inputColor" class="form-control bg-black text-white border-secondary" placeholder="Ej: Gris Espacial, Plata..." />
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label small text-secondary">Procesador (CPU)</label>
-                            <input type="text" name="procesador" class="form-control bg-black text-white border-secondary"
+                            <input type="text" name="Procesador" class="form-control bg-black text-white border-secondary"
                                    placeholder="Ej: Intel Core i5-1135G7 2.40GHz" />
                         </div>
 
                         <div class="row g-3 mb-3">
                             <div class="col-md-4">
-                                <label class="form-label small text-secondary">Memoria RAM (GB)</label>
-                                <input type="number" name="ram" class="form-control bg-black text-white border-secondary" placeholder="Ej: 8, 16..." />
+                                <label class="form-label small text-secondary d-block mb-2">Memoria RAM (GB)</label>
+                                <div class="btn-group btn-group-sm flex-wrap" role="group">
+                                    <input type="radio" class="btn-check" name="Ram" id="ram4" value="4" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram4">4 GB</label>
+                                    <input type="radio" class="btn-check" name="Ram" id="ram6" value="6" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram6">6 GB</label>
+                                    <input type="radio" class="btn-check" name="Ram" id="ram8" value="8" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram8">8 GB</label>
+                                    <input type="radio" class="btn-check" name="Ram" id="ram12" value="12" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram12">12 GB</label>
+                                    <input type="radio" class="btn-check" name="Ram" id="ram16" value="16" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram16">16 GB</label>
+                                    <input type="radio" class="btn-check" name="Ram" id="ram32" value="32" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="ram32">32 GB</label>
+                                </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small text-secondary">Almacenamiento (GB)</label>
-                                <input type="number" name="almacenamiento" class="form-control bg-black text-white border-secondary" placeholder="Ej: 256, 512..." />
+                                <label class="form-label small text-secondary d-block mb-2">Almacenamiento</label>
+                                <div class="btn-group btn-group-sm flex-wrap" role="group">
+                                    <input type="radio" class="btn-check" name="Almacenamiento" id="alm128" value="128" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="alm128">128 GB</label>
+                                    <input type="radio" class="btn-check" name="Almacenamiento" id="alm256" value="256" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="alm256">256 GB</label>
+                                    <input type="radio" class="btn-check" name="Almacenamiento" id="alm512" value="512" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="alm512">512 GB</label>
+                                    <input type="radio" class="btn-check" name="Almacenamiento" id="alm1024" value="1024" autocomplete="off">
+                                    <label class="btn btn-outline-secondary text-white border-secondary" for="alm1024">1 TB</label>
+                                </div>
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label small text-secondary">Salud Batería</label>
-                                <input type="text" name="bateria" class="form-control bg-black text-white border-secondary" placeholder="Ej: 95% o Normal" />
+                                <label class="form-label small text-secondary">Salud Batería (%) <span class="text-warning">Laptop/Celular</span></label>
+                                <input type="number" name="SaludBateria" id="inputBateria" min="1" max="100" step="1" class="form-control bg-black text-white border-secondary" placeholder="1-100" />
+                                <small id="errorBateria" class="text-danger d-none">Debe ser mayor a 0 y menor o igual a 100</small>
                             </div>
                         </div>
                     </div>
@@ -162,50 +218,356 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label small text-secondary">Costo de Envío / Casillero ($)</label>
-                            <input type="number" step="0.01" name="costoEnvio" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
+                            <input type="number" step="0.01" name="CostoEnvio" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small text-secondary">Costo Reparación / Extras ($)</label>
-                            <input type="number" step="0.01" name="costoReparacion" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
+                            <input type="number" step="0.01" name="CostoOtros" class="form-control bg-black text-white border-secondary" placeholder="0.00" value="0" />
                         </div>
                     </div>
 
                 </div>
                 <div class="modal-footer border-secondary">
                     <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-success fw-bold px-4">Confirmar y Guardar</button>
+                    <button type="button" class="btn btn-success fw-bold px-4" id="btnConfirmarRecibir">Recibir / Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Modal de confirmación antes de guardar -->
+<div class="modal fade" id="modalConfirmarRecibir" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title fw-bold">¿Confirmar ingreso?</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Verifica los datos:</p>
+                <ul class="list-unstyled mb-0">
+                    <li><strong>Producto:</strong> <span id="resumenProducto"></span></li>
+                    <li><strong>Serial:</strong> <span id="resumenSerial"></span></li>
+                    <li><strong>Condición:</strong> <span id="resumenCondicion"></span></li>
+                </ul>
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-outline-secondary text-white" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success fw-bold" id="btnEnviarRecibir">Sí, confirmar ingreso</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    function abrirModalRecibir(id, nombre) {
+    var esAccesorioActual = false;
+    var serialDuplicado = false;
+    var currentBtn = null; // Para referencia al botón que abrió el modal
+
+    function abrirModalRecibir(btn) {
+        currentBtn = btn;
+        var id = parseInt(btn.getAttribute('data-itemid'), 10);
+        var nombre = btn.getAttribute('data-nombre') || '';
+        var serialActual = btn.getAttribute('data-serial') || '';
+        
+        // Datos técnicos actuales
+        var procesador = btn.getAttribute('data-procesador') || '';
+        var ram = btn.getAttribute('data-ram') || '';
+        var alm = btn.getAttribute('data-almacenamiento') || '';
+
+        // Determinar si es Lote/Accesorio basado en el serial o la categoría
+        var esLote = serialActual.startsWith('LOTE-') || serialActual.startsWith('ACC-');
+        esAccesorioActual = (btn.getAttribute('data-es-accesorio') === 'true') || esLote;
+
         document.getElementById('inputItemId').value = id;
         document.getElementById('modalTitulo').innerText = 'Recibir: ' + nombre;
-
-        // Resetear
         document.getElementById('checkProductoNuevo').checked = false;
-        document.getElementById('checkAccesorio').checked = false;
-        document.getElementById('inputSerie').value = '';
-        toggleAccesorio();
+        
+        var inputSerie = document.getElementById('inputSerie');
+        
+        // Configuración de Serial
+        if (esLote) {
+            inputSerie.value = serialActual;
+            inputSerie.setAttribute('readonly', 'readonly');
+            inputSerie.classList.add('bg-secondary', 'text-white-50'); 
+        } else {
+            inputSerie.value = '';
+            inputSerie.removeAttribute('readonly');
+            inputSerie.classList.remove('bg-secondary', 'text-white-50');
+        }
+
+        // Pre-llenar Specs
+        var inputProcesador = document.querySelector('input[name="Procesador"]');
+        if(inputProcesador) inputProcesador.value = procesador;
+
+        document.querySelectorAll('input[name="Ram"]').forEach(function (r) { 
+            r.checked = (r.value === ram); 
+        });
+        document.querySelectorAll('input[name="Almacenamiento"]').forEach(function (r) { 
+            r.checked = (r.value === alm); 
+        });
+        
+        // Color (siempre vacío o predeterminado para ingerso)
+        var inputColor = document.getElementById('inputColor');
+        if(inputColor) inputColor.value = '';
+
+        document.getElementById('errorSerial').classList.add('d-none');
+        inputSerie.classList.remove('border-danger');
+        document.getElementById('errorBateria').classList.add('d-none');
+        document.getElementById('inputBateria').classList.remove('border-danger');
+        document.getElementById('btnConfirmarRecibir').disabled = false;
+        serialDuplicado = false;
+
+        var seccionTecnica = document.getElementById('seccionTecnica');
+        var bloqueCargador = document.getElementById('bloqueCargador');
+        var checkCargador = document.getElementById('checkRequiereCargador');
+        var wrapSelectCargador = document.getElementById('wrapSelectCargador');
+        var inputBateriaEl = document.getElementById('inputBateria');
+        
+        if (esAccesorioActual) {
+            seccionTecnica.style.display = 'none';
+            if (inputSerie) inputSerie.removeAttribute('required');
+            if (inputBateriaEl) inputBateriaEl.removeAttribute('required');
+            if (bloqueCargador) bloqueCargador.classList.add('d-none');
+        } else {
+            seccionTecnica.style.display = 'block';
+            if (inputSerie) inputSerie.setAttribute('required', 'required');
+            if (inputBateriaEl) inputBateriaEl.setAttribute('required', 'required');
+            if (bloqueCargador) bloqueCargador.classList.remove('d-none');
+            if (checkCargador) checkCargador.checked = false;
+            if (wrapSelectCargador) wrapSelectCargador.classList.add('d-none');
+        }
+        actualizarBotonGuardar();
 
         var myModal = new bootstrap.Modal(document.getElementById('modalRecibir'));
         myModal.show();
     }
 
-    function toggleAccesorio() {
-        var esAccesorio = document.getElementById('checkAccesorio').checked;
-        var seccionTecnica = document.getElementById('seccionTecnica');
-        var inputSerie = document.getElementById('inputSerie');
-
-        if (esAccesorio) {
-            seccionTecnica.style.display = 'none';
-            inputSerie.removeAttribute('required');
-        } else {
-            seccionTecnica.style.display = 'block';
-            inputSerie.setAttribute('required', 'required');
+    function actualizarBotonGuardar() {
+        var btn = document.getElementById('btnConfirmarRecibir');
+        if (!btn) return;
+        var bloqueado = serialDuplicado;
+        if (!esAccesorioActual) {
+            var bat = document.getElementById('inputBateria');
+            var vBat = parseFloat(bat && bat.value ? bat.value : 0);
+            if (bat && bat.value !== '' && (isNaN(vBat) || vBat <= 0 || vBat > 100)) bloqueado = true;
         }
+        btn.disabled = bloqueado;
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var checkRequiereCargador = document.getElementById('checkRequiereCargador');
+        var wrapSelectCargador = document.getElementById('wrapSelectCargador');
+        if (checkRequiereCargador && wrapSelectCargador) {
+            checkRequiereCargador.addEventListener('change', function () {
+                if (checkRequiereCargador.checked) {
+                    wrapSelectCargador.classList.remove('d-none');
+                } else {
+                    wrapSelectCargador.classList.add('d-none');
+                    var sel = document.getElementById('selectIdCargador');
+                    if (sel) sel.value = '';
+                }
+            });
+        }
+
+        var inputSerie = document.getElementById('inputSerie');
+        var formRecibir = document.querySelector('#modalRecibir form');
+        var btnConfirmarRecibir = document.getElementById('btnConfirmarRecibir');
+        var btnEnviarRecibir = document.getElementById('btnEnviarRecibir');
+
+        function verificarSerialAjax() {
+            var s = (inputSerie.value || '').trim();
+            if (s === '' || esAccesorioActual) {
+                document.getElementById('errorSerial').classList.add('d-none');
+                inputSerie.classList.remove('border-danger');
+                serialDuplicado = false;
+                actualizarBotonGuardar();
+                return;
+            }
+            fetch('/Compras/VerificarSerial?serial=' + encodeURIComponent(s))
+                .then(function (r) { return r.json(); })
+                .then(function (existe) {
+                    serialDuplicado = existe === true;
+                    var err = document.getElementById('errorSerial');
+                    if (serialDuplicado) {
+                        err.classList.remove('d-none');
+                        inputSerie.classList.add('border-danger');
+                    } else {
+                        err.classList.add('d-none');
+                        inputSerie.classList.remove('border-danger');
+                    }
+                    actualizarBotonGuardar();
+                });
+        }
+
+        var timeoutSerial = null;
+        if (inputSerie) {
+            inputSerie.addEventListener('blur', verificarSerialAjax);
+            inputSerie.addEventListener('input', function () {
+                clearTimeout(timeoutSerial);
+                var s = (inputSerie.value || '').trim();
+                if (s === '') {
+                    document.getElementById('errorSerial').classList.add('d-none');
+                    inputSerie.classList.remove('border-danger');
+                    serialDuplicado = false;
+                    actualizarBotonGuardar();
+                    return;
+                }
+                if (!inputSerie.hasAttribute('readonly')) {
+                     timeoutSerial = setTimeout(verificarSerialAjax, 400);
+                }
+            });
+        }
+
+        var inputBateria = document.getElementById('inputBateria');
+        if (inputBateria) {
+            inputBateria.addEventListener('input', function () {
+                var v = parseFloat(inputBateria.value);
+                var err = document.getElementById('errorBateria');
+                if (inputBateria.value !== '' && (isNaN(v) || v <= 0 || v > 100)) {
+                    err.classList.remove('d-none');
+                    inputBateria.classList.add('border-danger');
+                } else {
+                    err.classList.add('d-none');
+                    inputBateria.classList.remove('border-danger');
+                }
+                actualizarBotonGuardar();
+            });
+        }
+
+        function validarFormularioSerializado() {
+            if (esAccesorioActual) return true;
+            var serie = (document.getElementById('inputSerie').value || '').trim();
+            var ramSeleccionado = formRecibir.querySelector('input[name="Ram"]:checked');
+            var almSeleccionado = formRecibir.querySelector('input[name="Almacenamiento"]:checked');
+            var bateriaVal = document.getElementById('inputBateria').value;
+            var bateriaNum = parseFloat(bateriaVal);
+            var errores = [];
+            if (!serie) errores.push('Número de Serie es obligatorio.');
+            if (!ramSeleccionado) errores.push('Debe seleccionar la Memoria RAM.');
+            if (!almSeleccionado) errores.push('Debe seleccionar el Almacenamiento.');
+            if (bateriaVal === '' || isNaN(bateriaNum) || bateriaNum < 1 || bateriaNum > 100)
+                errores.push('Salud Batería debe estar entre 1 y 100.');
+            if (errores.length) {
+                alert('⚠️ Complete los datos obligatorios:\n\n' + errores.join('\n'));
+                return false;
+            }
+            return true;
+        }
+
+        if (btnConfirmarRecibir && formRecibir) {
+            btnConfirmarRecibir.addEventListener('click', function () {
+                if (btnConfirmarRecibir.disabled) return;
+                if (!validarFormularioSerializado()) return;
+                
+                var producto = document.getElementById('modalTitulo').innerText.replace('Recibir: ', '');
+                var serial = esAccesorioActual ? (inputSerie.value || '(accesorio)') : (document.getElementById('inputSerie').value || '(auto)');
+                var condicion = esAccesorioActual ? 'Nuevo/Accesorio' : ((formRecibir.querySelector('select[name="Condicion"]') || {}).value || '-');
+                
+                var resumenHtml = '';
+
+                // Construcción Dinámica del Resumen
+                if (esAccesorioActual) {
+                     resumenHtml = '<ul class="list-unstyled mb-0">' +
+                                   '<li><strong>Producto:</strong> ' + producto + '</li>' +
+                                   '<li><strong>Tipo:</strong> Accesorio / Lote</li>' +
+                                   '<li><strong>Serial:</strong> ' + serial + '</li>' +
+                                   '<li><strong>Cantidad a ingresar:</strong> 1 (Unidad)</li>' +
+                                   '</ul>';
+                } else {
+                    var proc = formRecibir.querySelector('input[name="Procesador"]').value || '-';
+                    var ram = (formRecibir.querySelector('input[name="Ram"]:checked') || {}).value || '-';
+                    var alm = (formRecibir.querySelector('input[name="Almacenamiento"]:checked') || {}).value || '-';
+                    var color = document.getElementById('inputColor').value || '-';
+                    var bat = document.getElementById('inputBateria').value || '-';
+
+                    resumenHtml = '<ul class="list-unstyled mb-0">' +
+                                  '<li><strong>Producto:</strong> ' + producto + '</li>' +
+                                  '<li><strong>Serial:</strong> ' + serial + '</li>' +
+                                  '<li><strong>Condición:</strong> ' + condicion + '</li>' +
+                                  '<li class="mt-2 text-info fw-bold">Especificaciones:</li>' +
+                                  '<li>• Procesador: ' + proc + '</li>' +
+                                  '<li>• RAM: ' + ram + ' GB</li>' +
+                                  '<li>• Disco: ' + alm + ' GB</li>' +
+                                  '<li>• Color: ' + color + '</li>' +
+                                  '<li>• Batería: ' + bat + '%</li>' + 
+                                  '</ul>';
+                }
+
+                document.querySelector('#modalConfirmarRecibir .modal-body').innerHTML = '<p class="mb-2">Verifica los datos:</p>' + resumenHtml;
+                
+                var modalConf = new bootstrap.Modal(document.getElementById('modalConfirmarRecibir'));
+                modalConf.show();
+            });
+        }
+
+        if (btnEnviarRecibir && formRecibir) {
+            btnEnviarRecibir.addEventListener('click', function () {
+                // Ocultar modal confirmación
+                var modalEl = document.getElementById('modalConfirmarRecibir');
+                var modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if(modalInstance) modalInstance.hide();
+                
+                // Enviar AJAX
+                enviarFormularioAjax();
+            });
+        }
+
+        function enviarFormularioAjax() {
+            if (!formRecibir) return;
+            var formData = new FormData(formRecibir);
+            
+            fetch(formRecibir.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function(response) { return response.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // 1. Cerrar Modal Principal
+                    var modalMainEl = document.getElementById('modalRecibir');
+                    var modalMain = bootstrap.Modal.getInstance(modalMainEl);
+                    if(modalMain) modalMain.hide();
+
+                    // 2. Actualizar Botón UI
+                    if(currentBtn) {
+                        currentBtn.textContent = 'Recibido';
+                        currentBtn.classList.remove('btn-primary', 'shadow-sm');
+                        currentBtn.classList.add('btn-secondary', 'disabled');
+                        currentBtn.setAttribute('disabled', 'disabled');
+                        currentBtn.removeAttribute('onclick');
+                    }
+                } else {
+                    alert('Error: ' + (data.message || 'No se pudo procesar la solicitud.'));
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                alert('Ocurrió un error al intentar recibir el producto.');
+            });
+        }
+
+        if (formRecibir) {
+            formRecibir.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (!btnConfirmarRecibir.disabled && validarFormularioSerializado()) {
+                    btnConfirmarRecibir.click(); 
+                }
+            });
+
+            var selectCondicion = formRecibir.querySelector('select[name="Condicion"]');
+            var checkNuevo = document.getElementById('checkProductoNuevo');
+            if (selectCondicion && checkNuevo) {
+                selectCondicion.addEventListener('change', function () {
+                    if (selectCondicion.value === 'Nuevo') {
+                        checkNuevo.checked = true;
+                    }
+                });
+            }
+        }
+    });
 </script>

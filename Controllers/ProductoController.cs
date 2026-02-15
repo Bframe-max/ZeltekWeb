@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Filters;
+using Dapper;
 using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
@@ -75,32 +76,68 @@ namespace ZeltekWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
+                var camposConError = string.Join(", ", ModelState
+                    .Where(x => x.Value?.Errors?.Count > 0)
+                    .Select(x => string.IsNullOrEmpty(x.Key) ? "(general)" : x.Key));
+                ModelState.AddModelError("", $"[Validación] Campos con error: {camposConError}. Revisa Nombre y Marca.");
                 ViewBag.Marcas = ObtenerMarcas();
                 ViewBag.Categorias = ObtenerCategorias();
                 return View("CreateEdit", model);
             }
 
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
+            try
+            {
+                var nombreTrim = model.Nombre?.Trim() ?? "";
+                if (!string.IsNullOrEmpty(nombreTrim))
+                {
+                    var cadenaCheck = _config.GetConnectionString("ZeltekDB");
+                    using (var conCheck = new SqlConnection(cadenaCheck))
+                    {
+                        conCheck.Open();
+                        using var cmdCheck = new SqlCommand(
+                            "SELECT 1 FROM Producto WHERE LOWER(RTRIM(LTRIM(Nombre))) = LOWER(@Nombre) AND IsDeleted = 0", conCheck);
+                        cmdCheck.Parameters.AddWithValue("@Nombre", nombreTrim);
+                        if (cmdCheck.ExecuteScalar() != null)
+                        {
+                            ModelState.AddModelError("Nombre", "Ya existe un producto activo con ese nombre. No se permiten duplicados.");
+                            ViewBag.Marcas = ObtenerMarcas();
+                            ViewBag.Categorias = ObtenerCategorias();
+                            return View("CreateEdit", model);
+                        }
+                    }
+                }
 
-            var sql = @"
-                INSERT INTO Producto
-                (Nombre, Descripcion, MarcaID, Modelo, CategoriaID, EsUnico, CostoReferencia)
-                VALUES
-                (@Nombre, @Descripcion, @MarcaID, @Modelo, @CategoriaID, @EsUnico, @Costo)";
+                var cadena = _config.GetConnectionString("ZeltekDB");
+                using SqlConnection con = new SqlConnection(cadena);
+                con.Open();
 
-            using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@Nombre", model.Nombre);
-            cmd.Parameters.AddWithValue("@Descripcion", (object?)model.Descripcion ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@MarcaID", model.MarcaID);
-            cmd.Parameters.AddWithValue("@Modelo", (object?)model.Modelo ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@CategoriaID", (object?)model.CategoriaID ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@EsUnico", model.EsUnico);
-            cmd.Parameters.AddWithValue("@Costo", (object?)model.CostoReferencia ?? DBNull.Value);
+                var sql = @"
+                    INSERT INTO Producto
+                    (Nombre, Descripcion, MarcaID, Modelo, CategoriaID, EsUnico, CostoReferencia)
+                    VALUES
+                    (@Nombre, @Descripcion, @MarcaID, @Modelo, @CategoriaID, @EsUnico, @Costo)";
 
-            cmd.ExecuteNonQuery();
-            return RedirectToAction("Index");
+                using SqlCommand cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@Nombre", nombreTrim);
+                cmd.Parameters.AddWithValue("@Descripcion", (object?)model.Descripcion ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@MarcaID", model.MarcaID);
+                cmd.Parameters.AddWithValue("@Modelo", (object?)model.Modelo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@CategoriaID", (object?)model.CategoriaID ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@EsUnico", model.EsUnico);
+                cmd.Parameters.AddWithValue("@Costo", (object?)model.CostoReferencia ?? DBNull.Value);
+
+                cmd.ExecuteNonQuery();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                var mensajeCompleto = ex.ToString() + (ex.InnerException != null ? "\n--- Inner ---\n" + ex.InnerException.ToString() : "");
+                ModelState.AddModelError("", "Error al guardar: " + (ex.InnerException?.Message ?? ex.Message));
+                ModelState.AddModelError("", "[DEBUG] Excepción completa:\n" + mensajeCompleto);
+                ViewBag.Marcas = ObtenerMarcas();
+                ViewBag.Categorias = ObtenerCategorias();
+                return View("CreateEdit", model);
+            }
         }
 
         // =========================
@@ -148,38 +185,73 @@ namespace ZeltekWeb.Controllers
             if (model.ProductoID != id) return NotFound();
             if (!ModelState.IsValid)
             {
+                var camposConError = string.Join(", ", ModelState
+                    .Where(x => x.Value?.Errors?.Count > 0)
+                    .Select(x => string.IsNullOrEmpty(x.Key) ? "(general)" : x.Key));
+                ModelState.AddModelError("", $"[Validación] Campos con error: {camposConError}. Revisa Nombre y Marca.");
                 ViewBag.Marcas = ObtenerMarcas();
                 ViewBag.Categorias = ObtenerCategorias();
                 return View("CreateEdit", model);
             }
 
+            var nombreTrim = model.Nombre?.Trim() ?? "";
+            if (!string.IsNullOrEmpty(nombreTrim))
+            {
+                var cadenaCheck = _config.GetConnectionString("ZeltekDB");
+                using (var conCheck = new SqlConnection(cadenaCheck))
+                {
+                    conCheck.Open();
+                    using var cmdCheck = new SqlCommand(
+                        "SELECT 1 FROM Producto WHERE LOWER(RTRIM(LTRIM(Nombre))) = LOWER(@Nombre) AND ProductoID <> @ID AND IsDeleted = 0", conCheck);
+                    cmdCheck.Parameters.AddWithValue("@Nombre", nombreTrim);
+                    cmdCheck.Parameters.AddWithValue("@ID", id);
+                    if (cmdCheck.ExecuteScalar() != null)
+                    {
+                        ModelState.AddModelError("Nombre", "Ya existe otro producto activo con ese nombre. No se permiten duplicados.");
+                        ViewBag.Marcas = ObtenerMarcas();
+                        ViewBag.Categorias = ObtenerCategorias();
+                        return View("CreateEdit", model);
+                    }
+                }
+            }
+
             var cadena = _config.GetConnectionString("ZeltekDB");
-            using SqlConnection con = new SqlConnection(cadena);
-            con.Open();
+            try
+            {
+                using SqlConnection con = new SqlConnection(cadena);
+                con.Open();
 
-            var sql = @"
-                UPDATE Producto SET
-                    Nombre = @Nombre,
-                    Descripcion = @Descripcion,
-                    MarcaID = @MarcaID,
-                    Modelo = @Modelo,
-                    CategoriaID = @CategoriaID,
-                    EsUnico = @EsUnico,
-                    CostoReferencia = @Costo
-                WHERE ProductoID = @ID AND IsDeleted = 0";
+                var sql = @"
+                    UPDATE Producto SET
+                        Nombre = @Nombre,
+                        Descripcion = @Descripcion,
+                        MarcaID = @MarcaID,
+                        Modelo = @Modelo,
+                        CategoriaID = @CategoriaID,
+                        EsUnico = @EsUnico,
+                        CostoReferencia = @Costo
+                    WHERE ProductoID = @ID AND IsDeleted = 0";
 
-            using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@ID", id);
-            cmd.Parameters.AddWithValue("@Nombre", model.Nombre);
-            cmd.Parameters.AddWithValue("@Descripcion", (object?)model.Descripcion ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@MarcaID", model.MarcaID);
-            cmd.Parameters.AddWithValue("@Modelo", (object?)model.Modelo ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@CategoriaID", (object?)model.CategoriaID ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@EsUnico", model.EsUnico);
-            cmd.Parameters.AddWithValue("@Costo", (object?)model.CostoReferencia ?? DBNull.Value);
+                using SqlCommand cmd = new SqlCommand(sql, con);
+                cmd.Parameters.AddWithValue("@ID", id);
+                cmd.Parameters.AddWithValue("@Nombre", nombreTrim);
+                cmd.Parameters.AddWithValue("@Descripcion", (object?)model.Descripcion ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@MarcaID", model.MarcaID);
+                cmd.Parameters.AddWithValue("@Modelo", (object?)model.Modelo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@CategoriaID", (object?)model.CategoriaID ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@EsUnico", model.EsUnico);
+                cmd.Parameters.AddWithValue("@Costo", (object?)model.CostoReferencia ?? DBNull.Value);
 
-            cmd.ExecuteNonQuery();
-            return RedirectToAction("Index");
+                cmd.ExecuteNonQuery();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al guardar: " + (ex.InnerException?.Message ?? ex.Message));
+                ViewBag.Marcas = ObtenerMarcas();
+                ViewBag.Categorias = ObtenerCategorias();
+                return View("CreateEdit", model);
+            }
         }
 
         // =========================
@@ -254,6 +326,117 @@ namespace ZeltekWeb.Controllers
 
             cmd.ExecuteNonQuery();
             return RedirectToAction("Index");
+        }
+
+        // =========================
+        // AJAX API
+        // =========================
+
+        [HttpGet]
+        public IActionResult CheckNombre(string nombre, int? excludeId)
+        {
+            if (string.IsNullOrWhiteSpace(nombre)) return Json(new { exists = false });
+
+            using var con = new SqlConnection(_config.GetConnectionString("ZeltekDB"));
+            var sql = @"
+                SELECT ProductoID, IsDeleted 
+                FROM Producto 
+                WHERE Nombre = @Nombre 
+                AND (@ExcludeID IS NULL OR ProductoID != @ExcludeID)";
+
+            var result = con.QueryFirstOrDefault(sql, new { Nombre = nombre.Trim(), ExcludeID = excludeId });
+
+            if (result != null)
+            {
+                return Json(new 
+                { 
+                    exists = true, 
+                    isDeleted = (bool)result.IsDeleted, 
+                    id = (int)result.ProductoID 
+                });
+            }
+
+            return Json(new { exists = false });
+        }
+
+        [HttpPost]
+        public IActionResult CrearMarcaRapida(string nombre)
+        {
+            try
+            {
+                var nombreTrim = nombre?.Trim() ?? "";
+                if (string.IsNullOrWhiteSpace(nombreTrim)) return Json(new { success = false, message = "El nombre es requerido." });
+
+                var cadena = _config.GetConnectionString("ZeltekDB");
+                using (var con = new SqlConnection(cadena))
+                {
+                    con.Open();
+                    using (var cmdCheck = new SqlCommand("SELECT 1 FROM Marca WHERE LOWER(RTRIM(LTRIM(Nombre))) = LOWER(@Nombre)", con))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@Nombre", nombreTrim);
+                        if (cmdCheck.ExecuteScalar() != null)
+                            return Json(new { success = false, message = "⛔ Esta marca ya existe. No se permiten duplicados." });
+                    }
+                    using (var cmdInsert = new SqlCommand(
+                        "INSERT INTO Marca (Nombre) VALUES (@Nombre); SELECT CAST(SCOPE_IDENTITY() AS INT);", con))
+                    {
+                        cmdInsert.Parameters.AddWithValue("@Nombre", nombreTrim);
+                        var idRaw = cmdInsert.ExecuteScalar();
+                        var id = idRaw != null && idRaw != DBNull.Value ? Convert.ToInt32(idRaw) : 0;
+                        if (id <= 0) return Json(new { success = false, message = "No se pudo obtener el ID de la marca." });
+                        return Json(new { success = true, id, nombre = nombreTrim });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                return Json(new { success = false, message = "Error al guardar la marca: " + msg });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult CrearCategoriaRapida(string nombre)
+        {
+            try
+            {
+                var nombreTrim = nombre?.Trim() ?? "";
+                if (string.IsNullOrWhiteSpace(nombreTrim)) return Json(new { success = false, message = "El nombre es requerido." });
+
+                var cadena = _config.GetConnectionString("ZeltekDB");
+                using (var con = new SqlConnection(cadena))
+                {
+                    con.Open();
+                    using (var cmdCheck = new SqlCommand("SELECT 1 FROM Categoria WHERE LOWER(RTRIM(LTRIM(Nombre))) = LOWER(@Nombre)", con))
+                    {
+                        cmdCheck.Parameters.AddWithValue("@Nombre", nombreTrim);
+                        if (cmdCheck.ExecuteScalar() != null)
+                            return Json(new { success = false, message = "⛔ Esta categoría ya existe. No se permiten duplicados." });
+                    }
+                    using (var cmdInsert = new SqlCommand(
+                        "INSERT INTO Categoria (Nombre) VALUES (@Nombre); SELECT CAST(SCOPE_IDENTITY() AS INT);", con))
+                    {
+                        cmdInsert.Parameters.AddWithValue("@Nombre", nombreTrim);
+                        var idRaw = cmdInsert.ExecuteScalar();
+                        var id = idRaw != null && idRaw != DBNull.Value ? Convert.ToInt32(idRaw) : 0;
+                        if (id <= 0) return Json(new { success = false, message = "No se pudo obtener el ID de la categoría." });
+                        return Json(new { success = true, id, nombre = nombreTrim });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                var msg = ex.InnerException?.Message ?? ex.Message;
+                return Json(new { success = false, message = "Error al guardar la categoría: " + msg });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult Reactivar(int id)
+        {
+            using var con = new SqlConnection(_config.GetConnectionString("ZeltekDB"));
+            con.Execute("UPDATE Producto SET IsDeleted = 0 WHERE ProductoID = @ID", new { ID = id });
+            return RedirectToAction("Edit", new { id });
         }
 
     }

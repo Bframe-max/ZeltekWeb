@@ -227,38 +227,79 @@
         const coloresBarras = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c'];
         const coloresPie = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#6c757d', '#212529'];
 
-        // Gráfico de tendencia (barras)
-        const tendencia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TendenciaMeses.Select(x => new { x.MesLabel, x.TotalVentas })));
+        // Gráfico de tendencia: doble eje (barras = Total Facturado $, línea = Equipos Vendidos)
+        const tendencia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TendenciaMeses.Select(x => new { x.MesLabel, x.TotalVentas, x.CantidadEquipos })));
         const ctxTendencia = document.getElementById('chartTendencia')?.getContext('2d');
         if (ctxTendencia && tendencia.length) {
             new Chart(ctxTendencia, {
                 type: 'bar',
                 data: {
                     labels: tendencia.map(x => x.MesLabel),
-                    datasets: [{
-                        label: 'Ventas ($)',
-                        data: tendencia.map(x => x.TotalVentas),
-                        backgroundColor: 'rgba(86, 70, 255, 0.7)',
-                        borderColor: '#5646ff',
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }]
+                    datasets: [
+                        {
+                            label: 'Total Facturado ($)',
+                            data: tendencia.map(x => x.TotalVentas),
+                            backgroundColor: 'rgba(86, 70, 255, 0.7)',
+                            borderColor: '#5646ff',
+                            borderWidth: 1,
+                            borderRadius: 6,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Equipos Vendidos',
+                            type: 'line',
+                            data: tendencia.map(x => x.CantidadEquipos),
+                            borderColor: '#FF5733',
+                            backgroundColor: 'rgba(255, 87, 51, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.2,
+                            pointRadius: 4,
+                            pointBackgroundColor: '#FF5733',
+                            yAxisID: 'y1'
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
-                        legend: { display: false },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: { color: '#fff', usePointStyle: true }
+                        },
                         tooltip: {
                             callbacks: {
-                                label: function (ctx) { return '$' + ctx.parsed.y.toLocaleString(); }
+                                label: function (ctx) {
+                                    if (ctx.dataset.yAxisID === 'y')
+                                        return ctx.dataset.label + ': $' + ctx.parsed.y.toLocaleString();
+                                    return ctx.dataset.label + ': ' + ctx.parsed.y + ' equipos';
+                                }
                             }
                         }
                     },
                     scales: {
                         y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
                             beginAtZero: true,
                             grid: { color: 'rgba(255,255,255,0.06)' },
                             ticks: { color: '#92929f', callback: v => '$' + v.toLocaleString() }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            min: 0,
+                            ticks: {
+                                color: '#FF5733',
+                                stepSize: 1,
+                                callback: v => Number.isInteger(v) ? v : ''
+                            },
+                            grid: { drawOnChartArea: false }
                         },
                         x: {
                             grid: { display: false },

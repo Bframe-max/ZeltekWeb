@@ -1,4 +1,4 @@
-﻿@model ZeltekWeb.Models.VentaCreateViewModel
+@model ZeltekWeb.Models.VentaCreateViewModel
 
 <h3>💵 Registrar Venta</h3>
 
@@ -17,8 +17,9 @@
 
     <div class="mb-3">
         <label>Precio Venta</label>
-        <input asp-for="PrecioUnitario
-" class="form-control" />
+        <input asp-for="PrecioUnitario" id="inputPrecioVenta" class="form-control" type="number" step="0.01" />
+        <small id="ayudaPrecio" class="text-muted d-block mt-1" style="font-size: 0.85rem;"></small>
+        <small id="alertaPerdida" class="text-danger d-none" style="font-size: 0.85rem;">⚠️ Pérdida</small>
     </div>
 
     <div class="mb-3">
@@ -33,3 +34,53 @@
     <button class="btn btn-success">Confirmar Venta</button>
     <a href="/Inventario" class="btn btn-secondary">Cancelar</a>
 </form>
+
+@section Scripts {
+<script>
+(function () {
+    var inputPrecio = document.getElementById('inputPrecioVenta');
+    var ayudaPrecio = document.getElementById('ayudaPrecio');
+    var alertaPerdida = document.getElementById('alertaPerdida');
+    var costoActual = null;
+
+    function formatearMoneda(n) { return (n != null && n !== '') ? '$' + parseFloat(n).toFixed(2) : '-'; }
+
+    function actualizarAlertaPerdida() {
+        if (costoActual == null) return;
+        var val = parseFloat(inputPrecio.value) || 0;
+        if (val > 0 && val < costoActual) {
+            inputPrecio.classList.add('border', 'border-danger');
+            alertaPerdida.classList.remove('d-none');
+        } else {
+            inputPrecio.classList.remove('border', 'border-danger');
+            alertaPerdida.classList.add('d-none');
+        }
+    }
+
+    var itemIdEl = document.querySelector('input[name="ItemID"]');
+    if (itemIdEl && inputPrecio && ayudaPrecio) {
+        var itemId = parseInt(itemIdEl.value, 10);
+        if (itemId > 0) {
+            fetch('/Ventas/GetProductoInfo?id=' + itemId)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (!data) return;
+                    costoActual = data.costo;
+                    ayudaPrecio.textContent = 'Costo: ' + formatearMoneda(data.costo) + ' | Sugerido: ' + formatearMoneda(data.precioSugerido);
+                    var precioVal = parseFloat(inputPrecio.value) || 0;
+                    if (precioVal === 0) {
+                        inputPrecio.value = data.precioSugerido;
+                    }
+                    actualizarAlertaPerdida();
+                })
+                .catch(function () { });
+        }
+    }
+
+    if (inputPrecio && alertaPerdida) {
+        inputPrecio.addEventListener('input', actualizarAlertaPerdida);
+        inputPrecio.addEventListener('change', actualizarAlertaPerdida);
+    }
+})();
+</script>
+}
