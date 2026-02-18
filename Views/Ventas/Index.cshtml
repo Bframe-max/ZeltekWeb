@@ -4,152 +4,201 @@
     ViewData["Title"] = "Reporte de Ventas";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">📈 Reporte de Ventas</h2>
-</div>
-
-<div class="row mb-4 g-3">
-
-    <div class="col-md-4">
-        <div class="card bg-dark border-secondary text-white shadow-sm h-100">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-secondary text-uppercase mb-1 small fw-bold">Total Facturado</h6>
-                    <h2 class="fw-bold text-white mb-0">$@ViewBag.TotalVendido.ToString("N0")</h2>
-                </div>
-                <div class="fs-1 text-primary"><i class="bi bi-cash-stack"></i></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card bg-dark border-success text-white shadow-sm h-100" style="border-left: 5px solid #198754;">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-success text-uppercase mb-1 small fw-bold">Ganancia Bruta</h6>
-                    <h2 class="fw-bold text-success mb-0">$@ViewBag.TotalGanancia.ToString("N0")</h2>
-                    <small class="text-secondary" style="font-size: 0.7rem;">(Venta - Costos Directos)</small>
-                </div>
-                <div class="fs-1 text-success"><i class="bi bi-graph-up-arrow"></i></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="card bg-dark border-info text-white shadow-sm h-100" style="border-left: 5px solid #0dcaf0;">
-            <div class="card-body d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-info text-uppercase mb-1 small fw-bold">Equipos Vendidos</h6>
-                    <h2 class="fw-bold text-info mb-0">@ViewBag.TotalEquipos</h2>
-                    <small class="text-secondary" style="font-size: 0.7rem;">Unidades en este periodo</small>
-                </div>
-                <div class="fs-1 text-info"><i class="bi bi-box-seam"></i></div>
-            </div>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-white tracking-tight">Reporte de Ventas</h2>
+        <p class="text-gray-400 text-sm mt-1">Visión general del rendimiento comercial</p>
     </div>
 </div>
 
-<div class="card bg-card border-0 mb-4">
-    <div class="card-body py-3">
-        <form method="get" class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="text-secondary small fw-bold">Buscar</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary text-secondary">🔍</span>
-                    <input type="text" name="buscar" class="form-control bg-dark text-white border-secondary"
-                           placeholder="Cliente, Serie, Producto..." value="@ViewData["Busqueda"]">
+<!-- Bento Grid Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <!-- Total Facturado -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-blue-500/10"></div>
+        <div class="relative flex justify-between items-start">
+            <div>
+                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Facturado</p>
+                <h3 class="text-3xl font-bold text-white tracking-tight">$@ViewBag.TotalVendido.ToString("N0")</h3>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+                <i class="bi bi-cash-stack text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ganancia Bruta -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-500/10"></div>
+        <div class="relative flex justify-between items-start">
+            <div>
+                <p class="text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">Ganancia Bruta</p>
+                <h3 class="text-3xl font-bold text-white tracking-tight">$@ViewBag.TotalGanancia.ToString("N0")</h3>
+                <p class="text-xs text-gray-500 mt-1">(Venta - Costos)</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                <i class="bi bi-graph-up-arrow text-xl"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipos Vendidos -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-purple-500/10"></div>
+        <div class="relative flex justify-between items-start">
+            <div>
+                <p class="text-xs font-semibold text-purple-400/80 uppercase tracking-wider mb-1">Equipos Vendidos</p>
+                <h3 class="text-3xl font-bold text-white tracking-tight">@ViewBag.TotalEquipos</h3>
+                <p class="text-xs text-gray-500 mt-1">Unidades</p>
+            </div>
+            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+                <i class="bi bi-box-seam text-xl"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Filter Bar -->
+<div class="bg-[#24253b] rounded-xl p-5 mb-8 shadow-lg shadow-black/20 border border-white/5">
+    <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+        <div class="md:col-span-4">
+            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Buscar</label>
+            <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span class="text-gray-500">🔍</span>
                 </div>
+                <input type="text" name="buscar" 
+                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block pl-10 p-2.5 placeholder-gray-600 transition-colors"
+                       placeholder="Cliente, Serie, Producto..." value="@ViewData["Busqueda"]">
             </div>
-            <div class="col-md-3">
-                <label class="text-secondary small fw-bold">Desde</label>
-                <input type="date" name="fechaInicio" class="form-control bg-dark text-white border-secondary"
-                       value="@ViewData["FechaInicio"]">
-            </div>
-            <div class="col-md-3">
-                <label class="text-secondary small fw-bold">Hasta</label>
-                <input type="date" name="fechaFin" class="form-control bg-dark text-white border-secondary"
+        </div>
+        
+        <div class="md:col-span-3">
+            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Desde</label>
+            <input type="date" name="fechaInicio" lang="es-ES" style="color-scheme: dark;"
+                   class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
+                   value="@ViewData["FechaInicio"]">
+        </div>
+        
+        <div class="md:col-span-3">
+            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Hasta</label>
+            <input type="date" name="fechaFin" lang="es-ES" style="color-scheme: dark;"
+                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
                        value="@ViewData["FechaFin"]">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-primary w-100 fw-bold">Filtrar</button>
-            </div>
-        </form>
-    </div>
+        </div>
+        
+        <div class="md:col-span-2">
+            <button type="submit" 
+                    class="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-md shadow-purple-900/20 transition-all hover:shadow-purple-500/25">
+                Filtrar
+            </button>
+        </div>
+    </form>
 </div>
 
-<div class="card bg-card border-0 shadow-sm">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead style="border-bottom: 1px solid #373b3e;">
-                <tr>
-                    <th class="ps-4 text-white">Fecha / ID</th>
-                    <th class="text-white">Cliente</th>
-                    <th class="text-white">Producto Vendido</th>
-                    <th class="text-end text-secondary">Costo Real</th>
-                    <th class="text-end text-white">Venta</th>
-                    <th class="text-end text-white pe-4">Ganancia Bruta</th>
+<!-- Main Table Card -->
+<div class="bg-[#24253b] rounded-xl shadow-xl shadow-black/20 border border-white/5 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-800 bg-[#1f2033]">
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha / ID</th>
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Costo Real</th>
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Venta</th>
+                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Profit</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-gray-800">
                 @foreach (var v in Model)
                 {
-                    <tr>
-                        <td class="ps-4">
-                            <div class="text-white fw-bold">@v.FechaVenta.ToString("dd/MM/yyyy")</div>
-                            <small class="text-secondary font-monospace">#@v.VentaID</small>
+                    <tr class="hover:bg-gray-800/30 transition-colors group">
+                        <!-- Fecha / ID -->
+                        <td class="py-4 px-6 align-top">
+                            <div class="flex flex-col">
+                                <span class="text-white font-medium text-sm">@v.FechaVenta.ToString("dd/MM/yyyy")</span>
+                                <span class="text-xs text-gray-500 font-mono mt-1">#@v.VentaID</span>
+                            </div>
                         </td>
 
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="text-white">@v.Cliente</span>
-                                @if (v.TipoCliente == "Revendedor")
+                        <!-- Cliente -->
+                        <td class="py-4 px-6 align-top">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                    @(string.IsNullOrEmpty(v.Cliente) ? "?" : v.Cliente.Substring(0, 1).ToUpper())
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-gray-200 text-sm font-medium">@v.Cliente</span>
+                                    @if (v.TipoCliente == "Revendedor")
+                                    {
+                                        <span class="text-[10px] text-amber-400 mt-0.5 font-medium flex items-center gap-1">
+                                            <i class="bi bi-handshake"></i> Revendedor
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-[10px] text-gray-500 mt-0.5">Público General</span>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Producto -->
+                        <td class="py-4 px-6 align-top">
+                            <div class="flex gap-3">
+                                <!-- Thumbnail Placeholder -->
+                                <div class="w-10 h-10 rounded-md bg-gray-700/50 border border-gray-600/30 flex-shrink-0 flex items-center justify-center text-gray-500">
+                                    <i class="bi bi-phone"></i>
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors cursor-pointer">@v.Producto</span>
+                                    <span class="text-xs text-gray-400 mt-0.5">@v.Especificaciones</span>
+                                    <span class="text-[10px] text-gray-600 font-mono mt-0.5 uppercase tracking-wide">SN: @v.NumeroSerie</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <!-- Costo -->
+                         <td class="py-4 px-6 align-middle text-right">
+                             <span class="text-gray-400 font-mono text-sm">$@v.CostoTotalVenta.ToString("N2")</span>
+                         </td>
+
+                        <!-- Venta -->
+                        <td class="py-4 px-6 align-middle text-right">
+                            <span class="text-white font-bold font-mono text-sm">$@v.VentaTotal.ToString("N2")</span>
+                        </td>
+
+                        <!-- Profit Pill -->
+                        <td class="py-4 px-6 align-middle text-right">
+                            <div class="flex justify-end">
+                                @if (v.Ganancia > 0)
                                 {
-                                    <span class="badge bg-warning text-dark border border-warning mt-1" style="width: fit-content; font-size: 0.65rem;">
-                                        🤝 Revendedor
-                                    </span>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+                                        <span>+$@v.Ganancia.ToString("N2")</span>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <small class="text-secondary" style="font-size: 0.75rem;">👤 Público</small>
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-medium">
+                                        <span>$@v.Ganancia.ToString("N2")</span>
+                                    </div>
                                 }
                             </div>
                         </td>
-
-                        <td>
-                            <div class="d-flex flex-column">
-                                <span class="text-info fw-bold">@v.Producto</span>
-                                <small class="text-secondary" style="font-size: 0.75rem;">@v.Especificaciones</small>
-                                <small class="text-secondary font-monospace" style="font-size: 0.7rem;">S/N: @v.NumeroSerie</small>
-                            </div>
-                        </td>
-
-                        <td class="text-end text-secondary">
-                            $@v.CostoTotalVenta.ToString("N2")
-                        </td>
-
-                        <td class="text-end text-white fw-bold">
-                            $@v.VentaTotal.ToString("N2")
-                        </td>
-
-                        <td class="text-end pe-4">
-                            @if (v.Ganancia > 0)
-                            {
-                                <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 fs-6">
-                                    +$@v.Ganancia.ToString("N2")
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-25">
-                                    $@v.Ganancia.ToString("N2")
-                                </span>
-                            }
-                        </td>
                     </tr>
                 }
+                
                 @if (Model.Count == 0)
                 {
-                    <tr><td colspan="6" class="text-center py-5 text-secondary">No hay ventas registradas en este periodo.</td></tr>
+                    <tr>
+                        <td colspan="6" class="py-12 text-center">
+                            <div class="flex flex-col items-center justify-center text-gray-500">
+                                <i class="bi bi-inbox text-4xl mb-3 opacity-50"></i>
+                                <p class="text-sm">No se encontraron ventas con los filtros seleccionados.</p>
+                            </div>
+                        </td>
+                    </tr>
                 }
             </tbody>
         </table>

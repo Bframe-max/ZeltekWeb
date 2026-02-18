@@ -14,11 +14,16 @@ namespace ZeltekWeb.Models
         /// <summary>Período para Ganancia Neta: 1, 3 o 12 meses.</summary>
         public int PeriodoGananciaMeses { get; set; } = 1;
 
-        /// <summary>Ganancia Bruta = Total ventas del período (últimos N meses).</summary>
-        public decimal GananciaBrutaVentas { get; set; }
+        /// <summary>Ingreso Total = Facturación Bruta (Ventas).</summary>
+        public decimal IngresoTotal { get; set; }
+        
+        /// <summary>Ganancia Bruta Real (Ventas - Costos).</summary>
+        public decimal GananciaBrutaReal { get; set; }
+
         /// <summary>Total gastos operativos del mismo período.</summary>
         public decimal TotalGastosOperativos { get; set; }
-        /// <summary>Ganancia Neta = Ganancia Bruta - Gastos Operativos.</summary>
-        public decimal GananciaNeta => GananciaBrutaVentas - TotalGastosOperativos;
+        
+        /// <summary>Ganancia Neta = Ganancia Bruta Real - Gastos Operativos.</summary>
+        public decimal GananciaNeta => GananciaBrutaReal - TotalGastosOperativos;
     }
 }

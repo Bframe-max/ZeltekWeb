@@ -5,142 +5,167 @@
     ViewData["Title"] = esEdicion ? "Editar Producto" : "Nuevo Producto";
 }
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card bg-card border-0 shadow-lg mt-4">
-            <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                <h4 class="text-white fw-bold mb-0">
-                    @(esEdicion ? "✏️ Editar Producto" : "📦 Nuevo Producto")
-                </h4>
+<div class="max-w-4xl mx-auto mt-8">
+    <!-- Card Container -->
+    <div class="bg-[#24253b] rounded-2xl shadow-2xl overflow-hidden border border-white/5">
+        
+        <!-- Header -->
+        <div class="px-8 py-6 border-b border-gray-700/50 bg-[#1a1b2e]/50 flex justify-between items-center">
+            <div>
+                <h2 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                    @if (esEdicion) { <span>✏️ Editar Producto</span> } else { <span>📦 Nuevo Producto</span> }
+                </h2>
+                <p class="text-gray-400 text-sm mt-1">Ingresa la información básica del artículo.</p>
             </div>
-            <div class="card-body p-4">
+            <a asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Cancelar
+            </a>
+        </div>
 
-                <form id="formProducto" asp-action="@(esEdicion ? "Edit" : "Create")" asp-route-id="@(esEdicion ? Model.ProductoID : (int?)null)" method="post">
-                    @if (!ViewData.ModelState.IsValid)
-                    {
-                        <div class="alert alert-danger py-3 mb-3" role="alert">
-                            <strong><i class="bi bi-exclamation-triangle-fill me-2"></i>Errores al guardar</strong>
-                            <div asp-validation-summary="All" class="mt-2 small" style="white-space: pre-wrap; max-height: 40vh; overflow-y: auto;"></div>
+        <!-- Form Body -->
+        <div class="p-8">
+            <form id="formProducto" asp-action="@(esEdicion ? "Edit" : "Create")" asp-route-id="@(esEdicion ? Model.ProductoID : (int?)null)" method="post">
+                
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3">
+                        <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        <div>
+                            <h4 class="font-bold">Errores al guardar</h4>
+                            <div asp-validation-summary="All" class="text-sm mt-1 list-disc list-inside"></div>
                         </div>
-                    }
-                    @if (esEdicion)
-                    {
-                        <input type="hidden" asp-for="ProductoID" />
-                    }
+                    </div>
+                }
 
-                    <div class="row mb-3">
-                        <div class="col-md-8">
-                            <label asp-for="Nombre" class="form-label text-secondary small fw-bold"></label>
-                            <input asp-for="Nombre" class="form-control bg-dark text-white border-secondary" placeholder="Ej: MacBook Pro 14" autocomplete="off" />
-                            <span asp-validation-for="Nombre" class="text-danger small"></span>
-                            
-                            <!-- Alerta de Duplicados (sin form anidado: el form-reactivar está fuera del formProducto) -->
-                            <div id="alert-duplicado" class="alert alert-warning mt-2 d-none py-2 small">
-                                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                                <span id="msg-duplicado">Este producto ya existe.</span>
-                                <button type="button" id="btn-reactivar-producto" class="btn btn-link p-0 align-baseline text-dark fw-bold d-none">Click aquí para reactivarlo</button>
+                @if (esEdicion)
+                {
+                    <input type="hidden" asp-for="ProductoID" />
+                }
+
+                <div class="grid grid-cols-1 gap-8">
+                    
+                    <!-- Row 1: Product Name -->
+                    <div>
+                        <label asp-for="Nombre" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre del Producto</label>
+                        <input asp-for="Nombre" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="Ej: MacBook Pro 14 M3" autocomplete="off" />
+                        <span asp-validation-for="Nombre" class="text-red-400 text-xs mt-1 block"></span>
+                        
+                        <!-- Duplicate Alert -->
+                        <div id="alert-duplicado" class="hidden mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 flex items-start gap-3">
+                            <svg class="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            <div>
+                                <span id="msg-duplicado" class="text-yellow-500 text-sm font-medium block">Este producto ya existe.</span>
+                                <button type="button" id="btn-reactivar-producto" class="text-yellow-400 hover:text-yellow-300 text-xs font-bold underline mt-1 hidden">Click aquí para reactivarlo</button>
                             </div>
                         </div>
-                        <div class="col-md-4">
-                            <label asp-for="Modelo" class="form-label text-secondary small fw-bold"></label>
-                            <input asp-for="Modelo" class="form-control bg-dark text-white border-secondary" placeholder="Ej: M3 Pro" />
-                        </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="Descripcion" class="form-label text-secondary small fw-bold"></label>
-                        <textarea asp-for="Descripcion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Descripción opcional"></textarea>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label text-secondary small fw-bold">Marca</label>
-                            <div class="input-group">
-                                <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="form-select bg-dark text-white border-secondary">
+                    <!-- Row 2: Brand, Category, Model -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Brand -->
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Marca</label>
+                            <div class="flex gap-2">
+                                <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white appearance-none outline-none transition-all">
                                     <option value="">-- Seleccione --</option>
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalMarca" title="Nueva Marca">
-                                    <i class="bi bi-plus-lg"></i>
+                                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white rounded-xl px-3 border border-gray-600 transition-colors" data-bs-toggle="modal" data-bs-target="#modalMarca" title="Nueva Marca">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                             </div>
-                            <span asp-validation-for="MarcaID" class="text-danger small"></span>
+                            <span asp-validation-for="MarcaID" class="text-red-400 text-xs mt-1 block"></span>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label text-secondary small fw-bold">Categoría</label>
-                            <div class="input-group">
-                                <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="form-select bg-dark text-white border-secondary">
+
+                        <!-- Category -->
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Categoría</label>
+                            <div class="flex gap-2">
+                                <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white appearance-none outline-none transition-all">
                                     <option value="">-- Sin categoría --</option>
                                 </select>
-                                <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalCategoria" title="Nueva Categoría">
-                                    <i class="bi bi-plus-lg"></i>
+                                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white rounded-xl px-3 border border-gray-600 transition-colors" data-bs-toggle="modal" data-bs-target="#modalCategoria" title="Nueva Categoría">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <label asp-for="CostoReferencia" class="form-label text-secondary small fw-bold"></label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
-                                <input asp-for="CostoReferencia" type="number" step="0.01" class="form-control bg-dark text-white border-secondary" placeholder="0.00" />
-                            </div>
-                        </div>
-                        <div class="col-md-6 d-flex align-items-end pb-2">
-                            <div class="form-check">
-                                <input asp-for="EsUnico" class="form-check-input" />
-                                <label asp-for="EsUnico" class="form-check-label text-secondary">
-                                    Producto con serial (Laptop / iPhone)
-                                </label>
-                            </div>
+                        <!-- Model -->
+                        <div>
+                            <label asp-for="Modelo" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Modelo (Opcional)</label>
+                            <input asp-for="Modelo" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="Ej: A2442" />
                         </div>
                     </div>
 
-                    <hr class="border-secondary my-4" />
+                    <!-- Row 3: Cost & Unique Switch -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                         <!-- Reference Cost -->
+                        <div>
+                            <label asp-for="CostoReferencia" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Costo Referencia</label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 font-bold">$</span>
+                                </div>
+                                <input asp-for="CostoReferencia" type="number" step="0.01" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-8 pr-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="0.00" />
+                            </div>
+                        </div>
 
-                    <div class="d-flex gap-2">
-                        <button type="submit" id="btnGuardarProducto" class="btn btn-primary fw-bold py-2 px-4">
-                            <i class="bi bi-check-lg me-2"></i>Guardar
-                        </button>
-                        <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                        <!-- Unique/Serial Switch -->
+                        <div class="bg-[#1a1b2e] rounded-xl p-4 border border-gray-700/50 flex items-center justify-between">
+                            <div>
+                                <label for="EsUnico" class="text-white font-bold block mb-1">¿Tiene Número de Serie?</label>
+                                <p class="text-gray-400 text-xs">Actívalo para equipos únicos (Laptops)</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input asp-for="EsUnico" type="checkbox" class="sr-only peer">
+                                <div class="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
                     </div>
-                </form>
-                <!-- Form reactivar (fuera del formProducto para evitar formularios anidados) -->
-                <form id="form-reactivar" asp-action="Reactivar" method="post" class="d-none">
-                    <input type="hidden" name="id" id="id-reactivar" />
-                </form>
-            </div>
+
+                    <!-- Row 4: Description -->
+                    <div>
+                        <label asp-for="Descripcion" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Descripción</label>
+                        <textarea asp-for="Descripcion" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" rows="3" placeholder="Detalles técnicos adicionales..."></textarea>
+                    </div>
+
+                </div>
+
+                <div class="mt-8 pt-6 border-t border-gray-700/50 flex justify-end">
+                    <button type="submit" id="btnGuardarProducto" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105 flex items-center gap-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Guardar Producto
+                    </button>
+                </div>
+
+            </form>
+            
+            <!-- Hidden Reactivate Form -->
+            <form id="form-reactivar" asp-action="Reactivar" method="post" class="hidden">
+                 <input type="hidden" name="id" id="id-reactivar" />
+            </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 
     <script>
         $(document).ready(function () {
-            // ==========================================
-            // 1. VALIDACIÓN DE DUPLICADOS
-            // ==========================================
+            // Logic ported and adapted for Tailwind classes
             let timer;
             const $nombreInput = $("#Nombre");
             const $alert = $("#alert-duplicado");
             const $btnGuardar = $("#btnGuardarProducto");
             const excludeId = "@(Model.ProductoID > 0 ? Model.ProductoID : "")";
 
-            // Envío: el botón tiene type="submit" y está DENTRO de #formProducto, así que el clic dispara el submit del form.
             $("#formProducto").on("submit", function (e) {
-                console.log("Intentando enviar formulario...");
-                console.log("Datos del formulario:", $(this).serialize());
                 if ($btnGuardar.prop("disabled")) {
-                    console.warn("Botón Guardar deshabilitado (ej. producto duplicado).");
-                    alert("Envío bloqueado: el botón Guardar está deshabilitado (p. ej. producto duplicado). Revisa el nombre.");
+                    alert("Envío bloqueado: el botón Guardar está deshabilitado.");
                     e.preventDefault();
                     return false;
                 }
-                console.log("Formulario se enviará al servidor (POST).");
                 return true;
             });
 
@@ -148,8 +173,8 @@
                 clearTimeout(timer);
                 const nombre = $(this).val().trim();
                 
-                $alert.addClass("d-none");
-                $btnGuardar.prop("disabled", false);
+                $alert.addClass("hidden");
+                $btnGuardar.prop("disabled", false).removeClass("opacity-50 cursor-not-allowed");
 
                 if (nombre.length < 3) return;
 
@@ -157,39 +182,33 @@
                     $.get('@Url.Action("CheckNombre", "Producto")', { nombre: nombre, excludeId: excludeId })
                         .done(function (data) {
                             if (data && data.exists) {
-                                $alert.removeClass("d-none");
+                                $alert.removeClass("hidden");
                                 if (data.isDeleted) {
                                     $("#msg-duplicado").text("Este producto existe pero fue eliminado.");
-                                    $("#btn-reactivar-producto").removeClass("d-none");
+                                    $("#btn-reactivar-producto").removeClass("hidden");
                                     $("#id-reactivar").val(data.id);
                                 } else {
                                     $("#msg-duplicado").text("⛔ Este producto ya existe y está activo.");
-                                    $("#btn-reactivar-producto").addClass("d-none");
-                                    $btnGuardar.prop("disabled", true);
+                                    $("#btn-reactivar-producto").addClass("hidden");
+                                    $btnGuardar.prop("disabled", true).addClass("opacity-50 cursor-not-allowed");
                                 }
                             }
                         })
-                        .fail(function (xhr, status, err) {
-                            console.error("CheckNombre error:", status, err);
-                            $btnGuardar.prop("disabled", false);
-                            alert("No se pudo verificar si el producto existe. Revisa la conexión e intenta de nuevo.");
+                        .fail(function (xhr) {
+                            console.error("CheckNombre error");
                         });
                 }, 500);
             });
 
-            // ==========================================
-            // 2. AUTO-CATEGORIZACIÓN (Cargador/Adaptador → Accesorio o Cargador, sin serial)
-            // ==========================================
+            // Auto-Categoria Logic
             $nombreInput.on("input", function () {
                 const nombre = $(this).val().toLowerCase();
                 
-                // Cargador / Adaptador: Categoría Cargador si existe, si no Accesorio; y NO es único (accesorio)
                 if (nombre.includes("cargador") || nombre.includes("adaptador")) {
                     if (!selectByText("#CategoriaID", "Cargador")) selectByText("#CategoriaID", "Accesorio");
                     $("#EsUnico").prop("checked", false);
                 }
 
-                // Marcas + Categoría
                 if (nombre.includes("latitude") || nombre.includes("precision") || nombre.includes("xps")) {
                     selectByText("#MarcaID", "Dell");
                     selectByText("#CategoriaID", "Laptop");
@@ -210,189 +229,130 @@
 
             function selectByText(selector, text) {
                 const $opts = $(selector + " option");
-                const found = $opts.filter(function () {
-                    return $(this).text().trim().toLowerCase() === text.toLowerCase();
-                });
-                if (found.length) {
-                    found.prop('selected', true);
-                    return true;
-                }
-                const partial = $opts.filter(function () {
-                    return $(this).text().toLowerCase().includes(text.toLowerCase());
-                });
-                if (partial.length) {
-                    partial.prop('selected', true);
-                    return true;
-                }
+                let found = $opts.filter(function () { return $(this).text().trim().toLowerCase() === text.toLowerCase(); });
+                if (found.length) { found.prop('selected', true); return true; }
+                
+                let partial = $opts.filter(function () { return $(this).text().toLowerCase().includes(text.toLowerCase()); });
+                if (partial.length) { partial.prop('selected', true); return true; }
                 return false;
             }
 
-            // ==========================================
-            // 3. MODALES DE CREACIÓN RÁPIDA (errores dentro del modal, no duplicados)
-            // ==========================================
-            
-            // Creación rápida Marca: asegurar que el select reciba el ID numérico real y el formulario lo envíe
-            function guardarMarcaRapida() {
-                const nombre = $("#marca-nombre").val().trim();
-                const $err = $("#error-marca");
-                const $select = $("#MarcaID");
-                $err.addClass("d-none").text("");
-                if (!nombre) {
-                    $err.text("Escribe el nombre de la marca.").removeClass("d-none");
-                    return;
-                }
-                $.post('@Url.Action("CrearMarcaRapida")', { nombre: nombre })
-                    .done(function(res) {
-                        if (res.success && res.id) {
-                            const idVal = String(res.id);
-                            const newOption = new Option(res.nombre, idVal, true, true);
-                            $select.append(newOption);
-                            $select.val(idVal);
-                            $select.trigger("change");
-                            cerrarModalB5("modalMarca");
-                            $("#marca-nombre").val("");
-                        } else {
-                            $err.html(res.message || "Error al guardar.").removeClass("d-none");
-                            alert(res.message || "Error al guardar la marca.");
-                        }
-                    })
-                    .fail(function(xhr, status, err) {
-                        console.error("CrearMarcaRapida error:", status, err);
-                        let msg = "No se pudo guardar la marca. ";
-                        if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                        else if (xhr.responseText) {
-                            try {
-                                const j = JSON.parse(xhr.responseText);
-                                if (j.message) msg = j.message;
-                            } catch (e) {
-                                if (xhr.responseText.length < 200) msg += xhr.responseText;
-                                else msg += "Error del servidor.";
-                            }
-                        } else msg += (xhr.statusText || status || "Error de conexión.");
-                        $err.html(msg).removeClass("d-none");
-                        alert(msg);
-                    });
-            }
-
-            // Creación rápida Categoría: mismo criterio para CategoriaID
-            function guardarCategoriaRapida() {
-                const nombre = $("#categoria-nombre").val().trim();
-                const $err = $("#error-categoria");
-                const $select = $("#CategoriaID");
-                $err.addClass("d-none").text("");
-                if (!nombre) {
-                    $err.text("Escribe el nombre de la categoría.").removeClass("d-none");
-                    return;
-                }
-                $.post('@Url.Action("CrearCategoriaRapida")', { nombre: nombre })
-                    .done(function(res) {
-                        if (res.success && res.id) {
-                            const idVal = String(res.id);
-                            const newOption = new Option(res.nombre, idVal, true, true);
-                            $select.append(newOption);
-                            $select.val(idVal);
-                            $select.trigger("change");
-                            cerrarModalB5("modalCategoria");
-                            $("#categoria-nombre").val("");
-                        } else {
-                            $err.html(res.message || "Error al guardar.").removeClass("d-none");
-                            alert(res.message || "Error al guardar la categoría.");
-                        }
-                    })
-                    .fail(function(xhr, status, err) {
-                        console.error("CrearCategoriaRapida error:", status, err);
-                        let msg = "No se pudo guardar la categoría. ";
-                        if (xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                        else if (xhr.responseText) {
-                            try {
-                                const j = JSON.parse(xhr.responseText);
-                                if (j.message) msg = j.message;
-                            } catch (e) {
-                                if (xhr.responseText.length < 200) msg += xhr.responseText;
-                                else msg += "Error del servidor.";
-                            }
-                        } else msg += (xhr.statusText || status || "Error de conexión.");
-                        $err.html(msg).removeClass("d-none");
-                        alert(msg);
-                    });
-            }
-
-            // Cerrar modal con Bootstrap 5 (compatible con BS5 sin jQuery)
-            function cerrarModalB5(id) {
-                var el = document.getElementById(id);
-                if (el && typeof bootstrap !== "undefined" && bootstrap.Modal) {
-                    var inst = bootstrap.Modal.getInstance(el);
-                    if (inst) inst.hide(); else new bootstrap.Modal(el).hide();
-                } else if ($("#" + id).modal) {
-                    $("#" + id).modal("hide");
-                }
-            }
-
-            $("#btn-save-marca").click(guardarMarcaRapida);
-            $("#btn-save-categoria").click(guardarCategoriaRapida);
-
-            // Botón "Click aquí para reactivarlo" envía el form-reactivar (está fuera del formProducto)
             $("#btn-reactivar-producto").on("click", function () {
                 $("#form-reactivar").submit();
             });
-
-            // Limpiar error al abrir modales (Bootstrap 5: show.bs.modal)
-            $("#modalMarca").on("show.bs.modal", function () { $("#error-marca").addClass("d-none").text(""); });
-            $("#modalCategoria").on("show.bs.modal", function () { $("#error-categoria").addClass("d-none").text(""); });
+            
+             // Modal Logic (re-implementing basic handlers for the buttons since we removed the inline script)
+             // Note: Modals need to be present in the layout or included here. Assuming we keep the existing modals structure but styled.
         });
     </script>
 }
 
-<!-- Modal Nueva Marca (Bootstrap 5 estándar, tema oscuro) -->
-<div class="modal fade" id="modalMarca" tabindex="-1" aria-labelledby="modalMarcaLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+<!-- Modals for Brand/Category (Dark Mode) -->
+<!-- Modal Nueva Marca -->
+<div class="modal fade" id="modalMarca" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border border-secondary text-white shadow">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold" id="modalMarcaLabel">
-                    <i class="bi bi-tag-fill me-2"></i>Nueva Marca
+        <div class="modal-content bg-[#1a1b2e] border border-gray-700 text-white shadow-2xl rounded-2xl">
+            <div class="modal-header border-gray-700 p-4">
+                <h5 class="modal-title font-bold text-lg flex items-center gap-2">
+                    <span class="bg-blue-500/10 text-blue-400 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg></span>
+                    Nueva Marca
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger py-2 small d-none" id="error-marca" role="alert"></div>
-                <label class="form-label text-secondary mb-2">Nombre de la marca</label>
-                <input type="text" id="marca-nombre" class="form-control bg-secondary text-white border-secondary" placeholder="Ej: Dell, HP, Apple..." autocomplete="off" />
-            </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Cancelar
+                <button type="button" class="text-gray-400 hover:text-white" data-bs-dismiss="modal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
-                <button type="button" class="btn btn-primary" id="btn-save-marca">
-                    <i class="bi bi-check-lg me-1"></i>Guardar
-                </button>
+            </div>
+            <div class="modal-body p-6">
+                <div class="alert bg-red-500/10 text-red-400 p-3 rounded-lg mb-4 text-sm hidden" id="error-marca"></div>
+                <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la marca</label>
+                <input type="text" id="marca-nombre" class="w-full bg-[#24253b] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white outline-none transition-all" placeholder="Ej: Dell, HP..." autocomplete="off" />
+            </div>
+            <div class="modal-footer border-gray-700 p-4 flex justify-end gap-3">
+                <button type="button" class="text-gray-400 hover:text-white font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-xl transition-colors" id="btn-save-marca" onclick="guardarMarcaRapida()">Guardar</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Nueva Categoría (Bootstrap 5 estándar, tema oscuro) -->
-<div class="modal fade" id="modalCategoria" tabindex="-1" aria-labelledby="modalCategoriaLabel" aria-hidden="true" data-bs-backdrop="true" data-bs-keyboard="true">
+<!-- Modal Nueva Categoria -->
+<div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-dark border border-secondary text-white shadow">
-            <div class="modal-header border-secondary">
-                <h5 class="modal-title fw-bold" id="modalCategoriaLabel">
-                    <i class="bi bi-grid-3x3-gap-fill me-2"></i>Nueva Categoría
+        <div class="modal-content bg-[#1a1b2e] border border-gray-700 text-white shadow-2xl rounded-2xl">
+            <div class="modal-header border-gray-700 p-4">
+                <h5 class="modal-title font-bold text-lg flex items-center gap-2">
+                    <span class="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></span>
+                    Nueva Categoría
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-            </div>
-            <div class="modal-body">
-                <div class="alert alert-danger py-2 small d-none" id="error-categoria" role="alert"></div>
-                <label class="form-label text-secondary mb-2">Nombre de la categoría</label>
-                <input type="text" id="categoria-nombre" class="form-control bg-secondary text-white border-secondary" placeholder="Ej: Laptop, Celular, Accesorio..." autocomplete="off" />
-            </div>
-            <div class="modal-footer border-secondary">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-                    <i class="bi bi-x-lg me-1"></i>Cancelar
+                <button type="button" class="text-gray-400 hover:text-white" data-bs-dismiss="modal">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
-                <button type="button" class="btn btn-success" id="btn-save-categoria">
-                    <i class="bi bi-check-lg me-1"></i>Guardar
-                </button>
+            </div>
+            <div class="modal-body p-6">
+                <div class="alert bg-red-500/10 text-red-400 p-3 rounded-lg mb-4 text-sm hidden" id="error-categoria"></div>
+                <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la categoría</label>
+                <input type="text" id="categoria-nombre" class="w-full bg-[#24253b] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white outline-none transition-all" placeholder="Ej: Laptop, Accesorio..." autocomplete="off" />
+            </div>
+            <div class="modal-footer border-gray-700 p-4 flex justify-end gap-3">
+                <button type="button" class="text-gray-400 hover:text-white font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl transition-colors" id="btn-save-categoria" onclick="guardarCategoriaRapida()">Guardar</button>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    // Inline functions specifically for the modals to ensure scope access
+    function guardarMarcaRapida() {
+        const nombre = $("#marca-nombre").val().trim();
+        const $err = $("#error-marca");
+        const $select = $("#MarcaID");
+        $err.addClass("hidden").text("");
+        
+        if (!nombre) {
+            $err.text("Escribe el nombre de la marca.").removeClass("hidden");
+            return;
+        }
+
+        $.post('@Url.Action("CrearMarcaRapida")', { nombre: nombre })
+            .done(function(res) {
+                if (res.success && res.id) {
+                    const newOption = new Option(res.nombre, res.id, true, true);
+                    $select.append(newOption).trigger("change");
+                    bootstrap.Modal.getInstance(document.getElementById('modalMarca')).hide();
+                    $("#marca-nombre").val("");
+                } else {
+                    $err.text(res.message || "Error al guardar.").removeClass("hidden");
+                }
+            })
+            .fail(function() {
+                $err.text("Error de conexión.").removeClass("hidden");
+            });
+    }
+
+    function guardarCategoriaRapida() {
+        const nombre = $("#categoria-nombre").val().trim();
+        const $err = $("#error-categoria");
+        const $select = $("#CategoriaID");
+        $err.addClass("hidden").text("");
+        
+        if (!nombre) {
+            $err.text("Escribe el nombre de la categoría.").removeClass("hidden");
+            return;
+        }
+
+        $.post('@Url.Action("CrearCategoriaRapida")', { nombre: nombre })
+            .done(function(res) {
+                if (res.success && res.id) {
+                    const newOption = new Option(res.nombre, res.id, true, true);
+                    $select.append(newOption).trigger("change");
+                    bootstrap.Modal.getInstance(document.getElementById('modalCategoria')).hide();
+                    $("#categoria-nombre").val("");
+                } else {
+                    $err.text(res.message || "Error al guardar.").removeClass("hidden");
+                }
+            })
+            .fail(function() {
+                $err.text("Error de conexión.").removeClass("hidden");
+            });
+    }
+</script>

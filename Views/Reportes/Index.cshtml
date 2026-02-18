@@ -14,43 +14,90 @@
 </div>
 
 <!-- Ganancia Neta (Ventas - Gastos = Ganancia Neta) -->
-<div class="card bg-card border-0 border-start border-4 border-primary mb-4">
-    <div class="card-header bg-transparent border-bottom border-secondary py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+<!-- Ganancia Neta (Bento Grid) -->
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row justify-between items-end mb-4">
         <div>
-            <h5 class="text-white fw-bold mb-0">📊 Visualización de Ganancia Neta</h5>
-            <small class="text-secondary">Ganancia Bruta (Ventas) − Gastos Operativos = Ganancia Neta. Mostrando: últimos @Model.PeriodoGananciaMeses @(Model.PeriodoGananciaMeses == 1 ? "mes" : "meses").</small>
+            <h5 class="text-white font-bold text-xl flex items-center gap-2">
+                📊 Ganancia Neta
+                <span class="text-xs font-normal text-gray-500 bg-gray-800 px-2 py-1 rounded-full border border-gray-700">Últimos @Model.PeriodoGananciaMeses meses</span>
+            </h5>
+             <p class="text-gray-400 text-sm mt-1">Tu rentabilidad real (Ventas − Gastos).</p>
         </div>
-        <div class="d-flex gap-2 align-items-center">
-            <span class="text-secondary small">Período:</span>
-            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="1" class="btn btn-sm @(Model.PeriodoGananciaMeses == 1 ? "btn-primary" : "btn-outline-secondary")">Último mes</a>
-            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="3" class="btn btn-sm @(Model.PeriodoGananciaMeses == 3 ? "btn-primary" : "btn-outline-secondary")">3 meses</a>
-            <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="12" class="btn btn-sm @(Model.PeriodoGananciaMeses == 12 ? "btn-primary" : "btn-outline-secondary")">12 meses</a>
+        <div class="flex gap-2 mt-2 md:mt-0">
+             <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="1" 
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 1 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">1 mes</a>
+             <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="3" 
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 3 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">3 meses</a>
+             <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="12" 
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 12 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">12 meses</a>
         </div>
     </div>
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card bg-dark border border-secondary">
-                    <div class="card-body">
-                        <small class="text-secondary text-uppercase fw-bold">Ganancia Bruta (Ventas)</small>
-                        <h3 class="text-success fw-bold mb-0">$@Model.GananciaBrutaVentas.ToString("N2")</h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1: Ganancia Bruta -->
+        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+            <div class="relative p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-blue-500/10 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
+                     <!-- Decorative Sparkline -->
+                     <svg class="w-16 h-8 text-blue-500/20" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M0 35 Q10 15 20 25 T40 15 T60 25 T80 10 T100 20" />
+                     </svg>
+                </div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Ingresos Totales (Ventas)</p>
+                <h3 class="text-3xl font-bold text-white mt-1 group-hover:text-blue-400 transition-colors">$@Model.IngresoTotal.ToString("N2")</h3>
+                <div class="mt-4 flex items-center gap-1 text-xs text-blue-400 bg-blue-500/5 px-2 py-1 rounded-full w-fit">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                    <span>Ingreso Total</span>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-dark border border-secondary">
-                    <div class="card-body">
-                        <small class="text-secondary text-uppercase fw-bold">Gastos Operativos</small>
-                        <h3 class="text-danger fw-bold mb-0">− $@Model.TotalGastosOperativos.ToString("N2")</h3>
+        </div>
+
+        <!-- Card 2: Gastos Operativos -->
+        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+             <!-- Background Texture -->
+            <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition-all"></div>
+
+            <div class="relative p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-red-500/10 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
                     </div>
                 </div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Gastos Operativos</p>
+                <h3 class="text-3xl font-bold text-white mt-1 group-hover:text-red-400 transition-colors">− $@Model.TotalGastosOperativos.ToString("N2")</h3>
+                 <div class="mt-4 flex items-center gap-1 text-xs text-red-400 bg-red-500/5 px-2 py-1 rounded-full w-fit">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
+                    <span>Salida Total</span>
+                </div>
             </div>
-            <div class="col-md-4">
-                <div class="card bg-dark border border-secondary">
-                    <div class="card-body">
-                        <small class="text-secondary text-uppercase fw-bold">Ganancia Neta (Limpia)</small>
-                        <h3 class="fw-bold mb-0 @(Model.GananciaNeta >= 0 ? "text-success" : "text-danger")">$@Model.GananciaNeta.ToString("N2")</h3>
+        </div>
+
+        <!-- Card 3: Ganancia Neta -->
+        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+             <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
+
+            <div class="relative p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="p-2 bg-emerald-500/10 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"></path><path d="M16 12v3.98A2 2 0 0 1 14 18H2.97"></path><path d="M11 12H8a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
                     </div>
+                     <!-- Decorative Sparkline -->
+                     <svg class="w-16 h-8 text-emerald-500/20" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="3">
+                        <path d="M0 30 Q20 30 30 20 T60 20 T90 10" />
+                     </svg>
+                </div>
+                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Ganancia Neta (Limpia)</p>
+                <h3 class="text-3xl font-bold @(Model.GananciaNeta >= 0 ? "text-emerald-400" : "text-red-400") mt-1">$@Model.GananciaNeta.ToString("N2")</h3>
+                <div class="mt-4 flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-full w-fit">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>En el bolsillo</span>
                 </div>
             </div>
         </div>

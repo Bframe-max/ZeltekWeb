@@ -7,6 +7,9 @@ namespace ZeltekWeb.Models
         public string Vendedor { get; set; }
         public string Tracking { get; set; }
         public DateTime Fecha { get; set; }
+        public decimal CostoEnvio { get; set; }
+        public decimal CostoTotal { get; set; }
+        public string EstadoCompra { get; set; }
 
         // La lista de equipos que vienen en esa caja
         public List<ItemEnCompra> Items { get; set; } = new List<ItemEnCompra>();
@@ -20,6 +23,7 @@ namespace ZeltekWeb.Models
         public string Estado { get; set; }
         public string NumeroSerie { get; set; }
         public bool EsAccesorio { get; set; }
+        public bool EsUnico { get; set; }
 
         public string? Procesador { get; set; }
         public int? Ram { get; set; }

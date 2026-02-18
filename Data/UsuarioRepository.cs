@@ -1,5 +1,6 @@
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Models.Entities;
+using ZeltekWeb.Models; // For UserRoles
 
 namespace ZeltekWeb.Data
 {
@@ -15,31 +16,40 @@ namespace ZeltekWeb.Data
 
         public Usuario? ObtenerPorUsuario(string nombreUsuario)
         {
+            // Keep sync method for backward compatibility if needed, or redirect to .Result (bad practice)
+            // Ideally refactor all to Async.
+            // For now, I'll just add Async version.
+            return ObtenerPorUsuarioAsync(nombreUsuario).GetAwaiter().GetResult();
+        }
+
+        public async Task<Usuario?> ObtenerPorUsuarioAsync(string nombreUsuario)
+        {
             nombreUsuario = nombreUsuario.Trim();
 
             using var con = new SqlConnection(_cn);
-            con.Open();
+            await con.OpenAsync();
 
             using var cmd = new SqlCommand(@"
-                SELECT UsuarioID, Usuario, PasswordHash, Rol, Activo
+                SELECT UsuarioID, Usuario, PasswordHash, Rol, Activo, TenantID
                 FROM UsuarioSistema
                 WHERE Usuario = @u
             ", con);
 
             cmd.Parameters.AddWithValue("@u", nombreUsuario);
 
-            using var rd = cmd.ExecuteReader();
+            using var rd = await cmd.ExecuteReaderAsync();
 
-            if (!rd.Read())
+            if (!await rd.ReadAsync())
                 return null;
 
             return new Usuario
             {
                 Id = Convert.ToInt32(rd["UsuarioID"]),
                 NombreUsuario = rd["Usuario"].ToString()!,
-                PasswordHash = rd["PasswordHash"].ToString()!, // 👈 CLAVE
-                Rol = rd["Rol"]?.ToString() ?? "Admin",
-                Activo = Convert.ToBoolean(rd["Activo"])
+                PasswordHash = rd["PasswordHash"].ToString()!,
+                Rol = rd["Rol"]?.ToString() ?? UserRoles.Admin,
+                Activo = Convert.ToBoolean(rd["Activo"]),
+                TenantId = rd["TenantID"] != DBNull.Value ? Convert.ToInt32(rd["TenantID"]) : 0
             };
         }
     }

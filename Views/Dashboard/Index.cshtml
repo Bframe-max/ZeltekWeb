@@ -4,193 +4,230 @@
     ViewData["Title"] = "Inicio";
 }
 
-<div class="mb-4">
-    <h2 class="fw-bold text-white mb-0">🏠 Inicio</h2>
-    <p class="text-secondary small mb-0">El pulso del día — qué está pasando hoy</p>
-</div>
+<!-- Header & Search Bar (IMEI Checker Style) -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
+    <div>
+        <h2 class="text-3xl font-bold text-white tracking-tight">Inicio</h2>
+        <p class="text-gray-400 text-sm mt-1 font-medium">Bienvenido de nuevo, @User.Identity?.Name</p>
+    </div>
 
-<!-- Barra de búsqueda global (serie, nombre, tracking) -->
-<div class="card bg-card border-0 mb-4">
-    <div class="card-body py-4">
-        <form asp-controller="Dashboard" asp-action="Buscar" method="get" class="row justify-content-center">
-            <div class="col-12 col-lg-8 col-xl-6">
-                <div class="input-group input-group-lg rounded-pill overflow-hidden border border-secondary">
-                    <span class="input-group-text bg-dark border-0 text-secondary"><span class="fs-5">🔍</span></span>
-                    <input type="search"
-                           name="q"
-                           class="form-control bg-dark text-white border-0"
-                           placeholder="Buscar en todo: serie, nombre de producto, cliente, tracking…"
-                           value=""
-                           autocomplete="off" />
-                    <button type="submit" class="btn btn-primary px-4 rounded-0">Buscar</button>
+    <div class="w-full md:w-auto relative group">
+        <!-- Glow Effect -->
+        <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+        
+        <form asp-controller="Dashboard" asp-action="Buscar" method="get" class="relative flex items-center">
+            <div class="flex items-center bg-[#24253b] rounded-full shadow-2xl p-1.5 transition-all w-full md:w-[480px] border border-white/5">
+                <div class="pl-4 text-gray-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
-                <small class="text-secondary d-block text-center mt-2">Ventas · Compras · Inventario</small>
+                <input type="search"
+                       name="q"
+                       class="w-full bg-transparent text-white border-0 focus:ring-0 px-4 py-2 placeholder-gray-500 text-sm font-medium"
+                       placeholder="Buscar por IMEI, Serie, Producto..."
+                       value=""
+                       autocomplete="off" />
+                <button type="submit" class="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white px-6 py-2.5 rounded-full transition-all font-medium shadow-lg shadow-purple-500/30 text-sm">
+                    Buscar
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- A. Fila 1: El Pulso del Día (KPIs Diarios) -->
-<div class="card bg-card border-0 mb-4">
-    <div class="card-header bg-transparent border-bottom border-secondary py-2">
-        <h6 class="text-white fw-bold mb-0">⚡ El Pulso del Día</h6>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+    
+    <!-- KPI 1: Ventas Hoy -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
+        <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+        
+        <div class="relative z-10">
+            <div class="flex justify-between items-start mb-4">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-emerald-500/20">Hoy</span>
+            </div>
+            
+            <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">$@Model.VentasHoy.ToString("N0")<span class="text-lg text-gray-500 font-medium">.00</span></h3>
+            <p class="text-gray-400 text-sm font-medium">Ventas totales</p>
+        </div>
     </div>
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-3">
-                <div class="card bg-dark border border-success border-opacity-50 h-100">
-                    <div class="card-body">
-                        <small class="text-secondary text-uppercase fw-bold">Ventas de Hoy</small>
-                        <p class="text-success fw-bold mb-0 fs-4">$@Model.VentasHoy.ToString("N2")</p>
-                        <small class="text-muted">Para saber si ya salió para la comida</small>
+
+    <!-- KPI 2: En Camino -->
+    <a asp-controller="Compras" asp-action="Index" class="block group">
+        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-blue-500/10 transition-all duration-300">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                 </div>
+                
+                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">$@Model.EnCaminoMonto.ToString("N0")<span class="text-lg text-gray-500 font-medium">.00</span></h3>
+                <div class="flex flex-col">
+                    <p class="text-gray-400 text-sm font-medium">Valor en Tránsito</p>
+                    <span class="text-blue-400 text-xs mt-1 font-medium font-mono">@Model.EnCaminoCantidad pedidos</span>
+                </div>
             </div>
-            <div class="col-md-3">
-                <a asp-controller="Compras" asp-action="Index" class="text-decoration-none d-block h-100">
-                    <div class="card bg-dark border border-info border-opacity-50 h-100 hover-card-rápido">
-                        <div class="card-body">
-                            <small class="text-secondary text-uppercase fw-bold">En Camino (eBay)</small>
-                            <p class="text-info fw-bold mb-0 fs-4">@Model.EnCaminoCantidad Equipos</p>
-                            <small class="text-info">$@Model.EnCaminoMonto.ToString("N2") en vuelo →</small>
-                        </div>
+        </div>
+    </a>
+
+    <!-- KPI 3: Por Revisar -->
+    <a asp-controller="Inventario" asp-action="Calidad" class="block group">
+        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-amber-500/10 transition-all duration-300">
+            <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6 3 3 0 000 6zM5 19a2 2 0 01-2-2"/></svg>
+            </div>
+
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                </div>
+                
+                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">@Model.PorRevisarCantidad</h3>
+                <p class="text-gray-400 text-sm font-medium">Mesa de Calidad</p>
+            </div>
+        </div>
+    </a>
+
+    <!-- KPI 4: Stock -->
+    <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="block group">
+        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-purple-500/10 transition-all duration-300">
+            <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
+
+            <div class="relative z-10">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                    </div>
+                </div>
+                
+                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">@Model.StockCantidad</h3>
+                <div class="flex flex-col">
+                    <p class="text-gray-400 text-sm font-medium">En Stock</p>
+                     <span class="text-purple-400 text-xs mt-1 font-medium font-mono">$@Model.StockValor.ToString("N0") total</span>
+                </div>
+            </div>
+        </div>
+    </a>
+
+</div>
+
+<!-- Main Content Grid: Activity & Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Col 1 (Span 2): Activity Table -->
+    <div class="lg:col-span-2">
+        <div class="bg-[#24253b] rounded-2xl p-8 shadow-lg shadow-black/20 border-0 h-full">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-white font-bold text-xl">Actividad Reciente</h3>
+                <a href="#" class="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors">Ver todo</a>
+            </div>
+
+             <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <tbody class="divide-y divide-[#2e2f45]">
+                        @foreach (var a in Model.ActividadReciente)
+                        {
+                            <tr class="group hover:bg-white/[0.02] transition-colors">
+                                <td class="py-4 pr-4">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 @(a.Tipo == "Venta" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20")">
+                                            @(a.Tipo == "Venta" ? "💰" : "🛒")
+                                        </div>
+                                        <div>
+                                            <p class="text-white font-medium text-sm">@a.Descripcion</p>
+                                            <p class="text-gray-500 text-xs mt-0.5">@HaceTiempo(a.Fecha)</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 text-right">
+                                    <span class="font-mono font-bold text-sm @(a.Tipo == "Venta" ? "text-emerald-400" : "text-white")">
+                                        @(a.Tipo == "Venta" ? "+" : "-") $@a.Monto.ToString("N2")
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                 @if (Model.ActividadReciente.Count == 0)
+                {
+                    <div class="text-center py-12 text-gray-500 text-sm">
+                        Aún no hay actividad reciente.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Col 2 (Span 1): Quick Actions (Consolidated Card) -->
+    <div class="lg:col-span-1">
+        <div class="bg-[#24253b] rounded-2xl p-8 shadow-lg shadow-black/20 border-0 h-full">
+            <h3 class="text-white font-bold text-xl mb-6">Accesos Rápidos</h3>
+            
+            <div class="flex flex-col gap-4">
+                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-emerald-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                    <div>
+                        <p class="text-white font-medium text-sm">Nueva Venta</p>
+                        <p class="text-gray-500 text-xs">Desde Stock</p>
                     </div>
                 </a>
-            </div>
-            <div class="col-md-3">
-                <a asp-controller="Inventario" asp-action="Calidad" class="text-decoration-none d-block h-100">
-                    <div class="card bg-dark border border-warning border-opacity-50 h-100 hover-card-rápido">
-                        <div class="card-body">
-                            <small class="text-secondary text-uppercase fw-bold">Por Revisar</small>
-                            <p class="text-warning fw-bold mb-0 fs-4">@Model.PorRevisarCantidad Equipos</p>
-                            <small class="text-muted">Mesa de calidad →</small>
-                        </div>
+
+                <a asp-controller="Compras" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-blue-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                    </div>
+                     <div>
+                        <p class="text-white font-medium text-sm">Registrar Compra</p>
+                        <p class="text-gray-500 text-xs">eBay / Import</p>
                     </div>
                 </a>
-            </div>
-            <div class="col-md-3">
-                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="text-decoration-none d-block h-100">
-                    <div class="card bg-dark border border-teal h-100 hover-card-rápido" style="border-color: #20c997 !important;">
-                        <div class="card-body">
-                            <small class="text-secondary text-uppercase fw-bold">En Bodega (Stock)</small>
-                            <p class="fw-bold mb-0 fs-4" style="color: #20c997;">@Model.StockCantidad Equipos</p>
-                            <small style="color: #20c997;">$@Model.StockValor.ToString("N2") valor total →</small>
-                        </div>
+
+                <a asp-controller="Gastos" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-red-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    </div>
+                     <div>
+                        <p class="text-white font-medium text-sm">Registrar Gasto</p>
+                        <p class="text-gray-500 text-xs">Operativo</p>
+                    </div>
+                </a>
+
+                <a asp-controller="Reportes" asp-action="Index" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-purple-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    </div>
+                     <div>
+                        <p class="text-white font-medium text-sm">Ver Reportes</p>
+                        <p class="text-gray-500 text-xs">Finanzas</p>
                     </div>
                 </a>
             </div>
         </div>
     </div>
+    
 </div>
-
-<!-- C. Accesos Rápidos -->
-<div class="card bg-card border-0 mb-4">
-    <div class="card-header bg-transparent border-bottom border-secondary py-2">
-        <h6 class="text-white fw-bold mb-0">⚡ Accesos Rápidos</h6>
-    </div>
-    <div class="card-body">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="text-decoration-none d-block">
-                    <div class="card bg-success bg-opacity-10 border border-success border-opacity-50 h-100 hover-card-rápido">
-                        <div class="card-body text-center py-4">
-                            <div class="display-4 mb-2">🛒</div>
-                            <h5 class="text-white fw-bold mb-1">Nueva Venta</h5>
-                            <small class="text-success">Desde inventario</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4">
-                <a asp-controller="Compras" asp-action="Create" class="text-decoration-none d-block">
-                    <div class="card bg-primary bg-opacity-10 border border-primary border-opacity-50 h-100 hover-card-rápido">
-                        <div class="card-body text-center py-4">
-                            <div class="display-4 mb-2">➕</div>
-                            <h5 class="text-white fw-bold mb-1">Registrar Compra</h5>
-                            <small class="text-primary">eBay / importación</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-            <div class="col-md-4">
-                <a asp-controller="Gastos" asp-action="Create" class="text-decoration-none d-block">
-                    <div class="card bg-danger bg-opacity-10 border border-danger border-opacity-50 h-100 hover-card-rápido">
-                        <div class="card-body text-center py-4">
-                            <div class="display-4 mb-2">💸</div>
-                            <h5 class="text-white fw-bold mb-1">Registrar Gasto</h5>
-                            <small class="text-danger">Operativo</small>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Actividad Reciente -->
-<div class="card bg-card border-0 mb-4">
-    <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h6 class="text-white fw-bold mb-0">📋 Actividad Reciente</h6>
-        <small class="text-secondary">Últimas 5 transacciones (Ventas y Compras)</small>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="border-bottom: 1px solid var(--border-color);">
-                    <tr>
-                        <th class="ps-4 text-white">Tipo</th>
-                        <th class="text-white">Descripción</th>
-                        <th class="text-white">Fecha</th>
-                        <th class="text-end pe-4 text-white">Monto</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var a in Model.ActividadReciente)
-                    {
-                        <tr>
-                            <td class="ps-4">
-                                @if (a.Tipo == "Venta")
-                                {
-                                    <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25">💰 Venta</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">🛒 Compra</span>
-                                }
-                            </td>
-                            <td class="text-white">@a.Descripcion</td>
-                            <td class="text-secondary">@HaceTiempo(a.Fecha)</td>
-                            <td class="text-end fw-bold @(a.Tipo == "Venta" ? "text-success" : "text-info")">$@a.Monto.ToString("N2")</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        @if (Model.ActividadReciente.Count == 0)
-        {
-            <div class="text-center py-4 text-secondary small">Aún no hay actividad.</div>
-        }
-    </div>
-</div>
-
-<style>
-    .hover-card-rápido {
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .hover-card-rápido:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-    }
-</style>
 
 @functions {
     static string HaceTiempo(DateTime fecha)
     {
         var diff = DateTime.Now - fecha;
         if (diff.TotalMinutes < 1) return "Ahora";
-        if (diff.TotalMinutes < 60) return $"Hace {(int)diff.TotalMinutes} min";
-        if (diff.TotalHours < 24) return $"Hace {(int)diff.TotalHours} h";
-        if (diff.TotalDays < 7) return $"Hace {(int)diff.TotalDays} días";
-        return fecha.ToString("dd/MM/yy HH:mm");
+        if (diff.TotalMinutes < 60) return $"{(int)diff.TotalMinutes}m";
+        if (diff.TotalHours < 24) return $"{(int)diff.TotalHours}h";
+        if (diff.TotalDays < 7) return $"{(int)diff.TotalDays}d";
+        return fecha.ToString("dd/MM");
     }
 }

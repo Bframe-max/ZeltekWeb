@@ -1,122 +1,75 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using ZeltekWeb.Filters;
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using ZeltekWeb.Models;
+using ZeltekWeb.Models.DTOs;
+using ZeltekWeb.Services.Interfaces;
 
 namespace ZeltekWeb.Controllers
 {
     [Authorize]
-    public class GastosController : Controller
+    public class GastosController : BaseController
     {
-        private readonly IConfiguration _config;
+        private readonly IGastoService _gastoService;
+        private readonly ILogger<GastosController> _logger;
 
-        public GastosController(IConfiguration config)
+        public GastosController(IGastoService gastoService, ILogger<GastosController> logger)
         {
-            _config = config;
+            _gastoService = gastoService;
+            _logger = logger;
         }
 
         // =========================
         // LISTADO + RESUMEN
         // =========================
-        public IActionResult Index(DateTime? desde, DateTime? hasta)
+        public async Task<IActionResult> Index(DateTime? desde, DateTime? hasta)
         {
-            var lista = new List<GastoListViewModel>();
-            var resumen = new GastosResumenViewModel();
-
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using var con = new SqlConnection(cadena);
-            con.Open();
-
-            // -------- RESUMEN --------
-            var sqlResumen = @"
-                SELECT
-                    COUNT(*) AS CantidadGastos,
-                    ISNULL(SUM(Monto), 0) AS TotalGastos
-                FROM GastoOperativo
-                WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
-                  AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
-            ";
-
-            using (var cmdResumen = new SqlCommand(sqlResumen, con))
+            try
             {
-                cmdResumen.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-                cmdResumen.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
+                int tenantId = GetTenantId();
 
-                using var drResumen = cmdResumen.ExecuteReader();
-                if (drResumen.Read())
+                // Call service methods in parallel where possible, or sequential
+                var resumenDto = await _gastoService.ObtenerResumenAsync(desde, hasta, tenantId);
+                var listadoDto = await _gastoService.ObtenerListadoAsync(desde, hasta, tenantId);
+                var categoriasDto = await _gastoService.ObtenerPorCategoriaAsync(desde, hasta, tenantId);
+
+                // Map DTOs to ViewModels (Keeping original ViewModels to minimize View changes)
+                var resumen = new GastosResumenViewModel
                 {
-                    resumen.CantidadGastos = drResumen.GetInt32(0);
-                    resumen.TotalGastos = drResumen.GetDecimal(1);
-                }
+                    CantidadGastos = resumenDto.CantidadGastos,
+                    TotalGastos = resumenDto.TotalGastos
+                };
+
+                var lista = listadoDto.Select(g => new GastoListViewModel
+                {
+                    GastoID = g.GastoID,
+                    FechaGasto = g.FechaGasto,
+                    Descripcion = g.Descripcion,
+                    CategoriaGasto = g.CategoriaGasto,
+                    Monto = g.Monto
+                }).ToList();
+
+                var gastosPorCategoria = categoriasDto.Select(c => new GastoPorCategoriaViewModel
+                {
+                    Categoria = c.Categoria,
+                    Total = c.Total
+                }).ToList();
+
+                ViewBag.Resumen = resumen;
+                ViewBag.Desde = desde;
+                ViewBag.Hasta = hasta;
+                ViewBag.GastosPorCategoria = gastosPorCategoria;
+
+                return View(lista);
             }
-
-            // -------- LISTADO --------
-            var sqlListado = @"
-                SELECT
-                    GastoID,
-                    FechaGasto,
-                    Descripcion,
-                    CategoriaGasto,
-                    Monto
-                FROM GastoOperativo
-                WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
-                  AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
-                ORDER BY FechaGasto DESC
-            ";
-
-            using (var cmdListado = new SqlCommand(sqlListado, con))
+            catch (Exception ex)
             {
-                cmdListado.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-                cmdListado.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
-
-                using var dr = cmdListado.ExecuteReader();
-                while (dr.Read())
-                {
-                    lista.Add(new GastoListViewModel
-                    {
-                        GastoID = dr.GetInt32(0),
-                        FechaGasto = dr.GetDateTime(1),
-                        Descripcion = dr.GetString(2),
-                        CategoriaGasto = dr.IsDBNull(3) ? null : dr.GetString(3),
-                        Monto = dr.GetDecimal(4)
-                    });
-                }
+                _logger.LogError(ex, "Error loading Gastos Index");
+                return View("Error", new ErrorViewModel { RequestId = "Error al cargar gastos: " + ex.Message });
             }
-
-            // -------- GASTOS POR CATEGORÍA (para gráfico) --------
-            var gastosPorCategoria = new List<GastoPorCategoriaViewModel>();
-            var sqlCategoria = @"
-                SELECT
-                    ISNULL(CategoriaGasto, 'Sin categoría') AS Categoria,
-                    SUM(Monto) AS Total
-                FROM GastoOperativo
-                WHERE (@Desde IS NULL OR FechaGasto >= @Desde)
-                  AND (@Hasta IS NULL OR FechaGasto <= @Hasta)
-                GROUP BY CategoriaGasto
-                ORDER BY SUM(Monto) DESC";
-
-            using (var cmdCat = new SqlCommand(sqlCategoria, con))
-            {
-                cmdCat.Parameters.AddWithValue("@Desde", (object?)desde ?? DBNull.Value);
-                cmdCat.Parameters.AddWithValue("@Hasta", (object?)hasta ?? DBNull.Value);
-                using var drCat = cmdCat.ExecuteReader();
-                while (drCat.Read())
-                {
-                    gastosPorCategoria.Add(new GastoPorCategoriaViewModel
-                    {
-                        Categoria = drCat.GetString(0),
-                        Total = drCat.GetDecimal(1)
-                    });
-                }
-            }
-
-            ViewBag.Resumen = resumen;
-            ViewBag.Desde = desde;
-            ViewBag.Hasta = hasta;
-            ViewBag.GastosPorCategoria = gastosPorCategoria;
-
-            return View(lista);
         }
 
         // =========================
@@ -125,11 +78,15 @@ namespace ZeltekWeb.Controllers
         public IActionResult Create()
         {
             ViewBag.Categorias = ObtenerCategorias();
-            return View(new GastoCreateViewModel());
+            return View(new GastoCreateViewModel()); // Using existing ViewModel to keep view compatibility or switch to DTO? 
+            // Better stick to ViewModel if View expects it, or use DTO if View is updated.
+            // Requirement said "Usa DTOs para pasar datos a la vista". 
+            // But existing Views use GastoCreateViewModel.
+            // I will map ViewModel <-> DTO in Controller.
         }
 
         [HttpPost]
-        public IActionResult Create(GastoCreateViewModel model)
+        public async Task<IActionResult> Create(GastoCreateViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -137,70 +94,62 @@ namespace ZeltekWeb.Controllers
                 return View(model);
             }
 
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using var con = new SqlConnection(cadena);
-            con.Open();
+            try
+            {
+                int tenantId = GetTenantId();
+                var dto = new GastoCreateDto
+                {
+                    FechaGasto = model.FechaGasto,
+                    Descripcion = model.Descripcion,
+                    CategoriaGasto = model.CategoriaGasto,
+                    Monto = model.Monto
+                };
 
-            var sql = @"
-                INSERT INTO GastoOperativo
-                (FechaGasto, Descripcion, CategoriaGasto, Monto)
-                VALUES
-                (@Fecha, @Descripcion, @Categoria, @Monto)
-            ";
-
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@Fecha", model.FechaGasto);
-            cmd.Parameters.AddWithValue("@Descripcion", model.Descripcion);
-            cmd.Parameters.AddWithValue("@Categoria", (object?)model.CategoriaGasto ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Monto", model.Monto);
-
-            cmd.ExecuteNonQuery();
-
-            return RedirectToAction(nameof(Index));
+                await _gastoService.CrearAsync(dto, tenantId);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al crear gasto: " + ex.Message);
+                ViewBag.Categorias = ObtenerCategorias();
+                return View(model);
+            }
         }
 
         // =========================
         // EDITAR
         // =========================
-        public IActionResult Edit(int id)
+        public async Task<IActionResult> Edit(int id)
         {
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using var con = new SqlConnection(cadena);
-            con.Open();
-
-            var sql = @"
-                SELECT
-                    GastoID,
-                    FechaGasto,
-                    Descripcion,
-                    CategoriaGasto,
-                    Monto
-                FROM GastoOperativo
-                WHERE GastoID = @ID
-            ";
-
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@ID", id);
-
-            using var dr = cmd.ExecuteReader();
-            if (!dr.Read())
-                return NotFound();
-
-            var model = new GastoEditViewModel
+            try
             {
-                GastoID = dr.GetInt32(0),
-                FechaGasto = dr.GetDateTime(1),
-                Descripcion = dr.GetString(2),
-                CategoriaGasto = dr.IsDBNull(3) ? null : dr.GetString(3),
-                Monto = dr.GetDecimal(4)
-            };
+                int tenantId = GetTenantId();
+                var dto = await _gastoService.ObtenerPorIdAsync(id, tenantId);
 
-            ViewBag.Categorias = ObtenerCategorias();
-            return View(model);
+                if (dto == null)
+                    return NotFound();
+
+                var model = new GastoEditViewModel
+                {
+                    GastoID = dto.GastoID,
+                    FechaGasto = dto.FechaGasto,
+                    Descripcion = dto.Descripcion,
+                    CategoriaGasto = dto.CategoriaGasto,
+                    Monto = dto.Monto
+                };
+
+                ViewBag.Categorias = ObtenerCategorias();
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading Gasto for Edit");
+                return View("Error", new ErrorViewModel { RequestId = "Error al cargar gasto." });
+            }
         }
 
         [HttpPost]
-        public IActionResult Edit(GastoEditViewModel model)
+        public async Task<IActionResult> Edit(GastoEditViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -208,49 +157,48 @@ namespace ZeltekWeb.Controllers
                 return View(model);
             }
 
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using var con = new SqlConnection(cadena);
-            con.Open();
+            try
+            {
+                int tenantId = GetTenantId();
+                var dto = new GastoEditDto
+                {
+                    GastoID = model.GastoID,
+                    FechaGasto = model.FechaGasto,
+                    Descripcion = model.Descripcion,
+                    CategoriaGasto = model.CategoriaGasto,
+                    Monto = model.Monto
+                };
 
-            var sql = @"
-                UPDATE GastoOperativo
-                SET
-                    FechaGasto = @Fecha,
-                    Descripcion = @Descripcion,
-                    CategoriaGasto = @Categoria,
-                    Monto = @Monto
-                WHERE GastoID = @ID
-            ";
-
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@Fecha", model.FechaGasto);
-            cmd.Parameters.AddWithValue("@Descripcion", model.Descripcion);
-            cmd.Parameters.AddWithValue("@Categoria", (object?)model.CategoriaGasto ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@Monto", model.Monto);
-            cmd.Parameters.AddWithValue("@ID", model.GastoID);
-
-            cmd.ExecuteNonQuery();
-
-            return RedirectToAction(nameof(Index));
+                await _gastoService.ActualizarAsync(dto, tenantId);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Error al actualizar gasto: " + ex.Message);
+                ViewBag.Categorias = ObtenerCategorias();
+                return View(model);
+            }
         }
 
         // =========================
         // ELIMINAR
         // =========================
         [HttpPost]
-        public IActionResult Delete(int id)
+        [Authorize(Roles = UserRoles.Admin)]
+        public async Task<IActionResult> Delete(int id)
         {
-            var cadena = _config.GetConnectionString("ZeltekDB");
-            using var con = new SqlConnection(cadena);
-            con.Open();
-
-            var sql = "DELETE FROM GastoOperativo WHERE GastoID = @ID";
-
-            using var cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@ID", id);
-            cmd.ExecuteNonQuery();
-
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                int tenantId = GetTenantId();
+                await _gastoService.EliminarAsync(id, tenantId);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                // Should redirect to Index with error message or similar
+                _logger.LogError(ex, "Error deleting Gasto");
+                return RedirectToAction(nameof(Index)); 
+            }
         }
 
         // =========================

@@ -33,7 +33,7 @@ public class AuthController : Controller
         if (!ModelState.IsValid)
             return View(model);
 
-        var usuario = _auth.ValidarUsuario(model.Usuario, model.Password);
+        var usuario = await _auth.ValidarUsuario(model.Usuario, model.Password);
 
         if (usuario == null)
         {
@@ -45,7 +45,8 @@ public class AuthController : Controller
         {
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new Claim(ClaimTypes.Name, usuario.NombreUsuario),
-            new Claim(ClaimTypes.Role, usuario.Rol)
+            new Claim(ClaimTypes.Role, usuario.Rol),
+            new Claim(ZeltekWeb.Constants.AppConstants.TenantIdClaim, usuario.TenantId.ToString())
         };
 
         var identity = new ClaimsIdentity(

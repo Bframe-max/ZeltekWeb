@@ -4,184 +4,378 @@
     ViewData["Title"] = "Inspección de Calidad";
 }
 
-<div class="mb-4">
-    <a asp-action="Calidad" class="btn btn-outline-secondary mb-2">← Volver a Mesa de Calidad</a>
-    <h2 class="text-white fw-bold mb-0">📋 Inspección de: @Model.ProductoNombre</h2>
-    <p class="text-secondary small mb-0">S/N: @Model.NumeroSerie</p>
+<!-- Add SweetAlert2 CDN if not already in Layout -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+    /* Custom styles for larger hit areas */
+    .form-check-input {
+        width: 1.3em;
+        height: 1.3em;
+        margin-top: 0.15em;
+        vertical-align: top;
+        background-color: #2b3035;
+        border-color: #6c757d;
+        cursor: pointer;
+    }
+    .form-check-input:checked {
+        background-color: #198754;
+        border-color: #198754;
+    }
+    .form-check-label {
+        margin-left: 0.5rem;
+        cursor: pointer;
+        padding-top: 2px;
+    }
+    .card-modern {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+</style>
+
+<div class="mb-4 d-flex justify-content-between align-items-center">
+    <div>
+        <a asp-action="Calidad" class="btn btn-outline-secondary btn-sm mb-2 text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Volver a Mesa de Calidad
+        </a>
+        <h2 class="text-white fw-bold mb-0">📋 Inspección de Calidad</h2>
+        <div class="d-flex align-items-center gap-3 mt-1">
+            <span class="badge bg-primary fs-6">@Model.ProductoNombre</span>
+            <span class="text-secondary small font-monospace">S/N: @Model.NumeroSerie</span>
+        </div>
+    </div>
 </div>
 
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="card bg-card border-0 shadow-lg">
-            <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                <h5 class="text-white fw-bold mb-0">Checklist de Ingreso</h5>
+<form asp-action="Inspeccion" asp-route-id="@Model.ItemID" method="post" id="formInspeccion">
+    <input type="hidden" asp-for="ItemID" />
+    <input type="hidden" asp-for="ProductoNombre" />
+    <input type="hidden" asp-for="NumeroSerie" id="hdnSerie" />
+    <input type="hidden" asp-for="EsUnico" />
+    <input type="hidden" asp-for="CantidadTotal" />
+    <input type="hidden" asp-for="CostoUnitario" />
+
+    @if (Model.EsUnico)
+    {
+        <div class="row g-4">
+            <!-- Left Column: Cosmetics & Battery -->
+            <div class="col-lg-5">
+                <div class="card bg-card border-0 shadow-lg card-modern h-100">
+                    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                        <h5 class="text-white fw-bold mb-0"><i class="bi bi-eye-fill me-2"></i>Estado Físico</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <!-- Cosmetics -->
+                        <div class="mb-4">
+                            <label class="form-label text-light fw-bold small mb-3">Grado Cosmético</label>
+                            <div class="d-flex flex-column gap-3">
+                                <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
+                                    <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" required />
+                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionA">
+                                        Grado A <span class="d-block text-secondary small fw-normal">Impecable, sin marcas visibles.</span>
+                                    </label>
+                                </div>
+                                <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
+                                    <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" required />
+                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionB">
+                                        Grado B <span class="d-block text-secondary small fw-normal">Uso normal, marcas leves.</span>
+                                    </label>
+                                </div>
+                                <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
+                                    <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" required />
+                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionC">
+                                        Grado C <span class="d-block text-secondary small fw-normal">Desgaste visible, golpes o rayones.</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="border-secondary opacity-25 my-4" />
+
+                        <!-- Battery -->
+                        <div class="mb-1">
+                            <label asp-for="SaludBateriaPorcentaje" class="form-label text-light fw-bold small">Salud de Batería (%)</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-battery-half"></i></span>
+                                <input asp-for="SaludBateriaPorcentaje" type="number" id="inputBateria" min="0" max="100" class="form-control bg-dark text-white border-secondary fw-bold" placeholder="Ej: 85" required />
+                            </div>
+                        </div>
+                        <!-- Dynamic Alert for Battery -->
+                        <div id="alertaBateria" class="alert alert-danger mt-3 d-none border-danger bg-danger bg-opacity-10 py-2">
+                             <small><i class="bi bi-exclamation-triangle-fill me-1"></i> <strong>Salud insuficiente (&lt;40%):</strong> Este equipo debe ir a reparación.</small>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- Right Column: Functionality & Checklist -->
+            <div class="col-lg-7">
+                <div class="card bg-card border-0 shadow-lg card-modern h-100">
+                    <div class="card-header bg-transparent border-bottom border-secondary py-3">
+                        <h5 class="text-white fw-bold mb-0"><i class="bi bi-check2-square me-2"></i>Funcionalidad & Checklist</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        <div class="row g-4">
+                            <!-- Functional Components -->
+                            <div class="col-12">
+                                <label class="form-label text-light fw-bold small mb-2">Componentes Principales</label>
+                                <div class="row g-3">
+                                    <div class="col-sm-4">
+                                        <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
+                                            <input asp-for="PantallaOk" class="form-check-input check-required" id="checkPantalla" />
+                                            <label asp-for="PantallaOk" class="form-check-label text-white" for="checkPantalla">Pantalla OK</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
+                                            <input asp-for="TecladoOk" class="form-check-input check-required" id="checkTeclado" />
+                                            <label asp-for="TecladoOk" class="form-check-label text-white" for="checkTeclado">Teclado OK</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
+                                            <input asp-for="AudioOk" class="form-check-input check-required" id="checkAudio" />
+                                            <label asp-for="AudioOk" class="form-check-label text-white" for="checkAudio">Audio OK</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Final Checklist -->
+                            <div class="col-12 mt-4">
+                                <label class="form-label text-light fw-bold small mb-2">Verificación Final</label>
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="form-check w-100 mb-2">
+                                        <input asp-for="EncendioCorrectamente" class="form-check-input check-required" id="checkEncendio" />
+                                        <label asp-for="EncendioCorrectamente" class="form-check-label text-secondary" for="checkEncendio">El equipo encendió y arrancó SO correctamente</label>
+                                    </div>
+                                    <div class="form-check w-100 mb-2">
+                                        <input asp-for="PantallaSinManchas" class="form-check-input check-required" id="checkManchas" />
+                                        <label asp-for="PantallaSinManchas" class="form-check-label text-secondary" for="checkManchas">Pantalla sin manchas ni pixeles muertos</label>
+                                    </div>
+                                    <div class="form-check w-100 mb-2">
+                                        <input asp-for="TecladoFuncional" class="form-check-input check-required" id="checkTeclas" />
+                                        <label asp-for="TecladoFuncional" class="form-check-label text-secondary" for="checkTeclas">Todas las teclas responden</label>
+                                    </div>
+                                    <div class="form-check w-100 mb-2">
+                                        <input asp-for="CargadorIncluido" class="form-check-input check-required" id="checkCargador" />
+                                        <label asp-for="CargadorIncluido" class="form-check-label text-secondary" for="checkCargador">Cargador original (o compatible de calidad) incluido</label>
+                                    </div>
+                                    <div class="form-check w-100 mb-2">
+                                        <input asp-for="LimpiezaRealizada" class="form-check-input check-required" id="checkLimpieza" />
+                                        <label asp-for="LimpiezaRealizada" class="form-check-label text-secondary" for="checkLimpieza">Limpieza estética realizada</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notes & Actions -->
+        <div class="card bg-card border-0 shadow-lg mt-4 card-modern">
             <div class="card-body p-4">
-                <form asp-action="Inspeccion" asp-route-id="@Model.ItemID" method="post" id="formInspeccion">
-                    <input type="hidden" asp-for="ItemID" />
-                    <input type="hidden" asp-for="ProductoNombre" />
-                    <input type="hidden" asp-for="NumeroSerie" />
-                    <input type="hidden" asp-for="EsUnico" />
-                    <input type="hidden" asp-for="CantidadTotal" />
-                    <input type="hidden" asp-for="CostoUnitario" />
+                <div class="mb-4">
+                    <label asp-for="NotasInspeccion" class="form-label text-light fw-bold small">Notas de Inspección</label>
+                    <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary rounded-3" rows="3" placeholder="Detalles adicionales, observaciones sobre la cosmética, etc."></textarea>
+                </div>
 
-                    @if (Model.EsUnico)
-                    {
-                        <!-- PANEL PARA ITEMS ÚNICOS (LAPTOPS/CELULARES) -->
-                        <div class="mb-4">
-                            <label class="form-label text-secondary small fw-bold">Cosmética</label>
-                            <div class="d-flex gap-2 flex-wrap">
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" />
-                                    <label class="form-check-label text-secondary" for="CondicionA">Grado A</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" />
-                                    <label class="form-check-label text-secondary" for="CondicionB">Grado B</label>
-                                </div>
-                                <div class="form-check form-check-inline">
-                                    <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" />
-                                    <label class="form-check-label text-secondary" for="CondicionC">Grado C</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="SaludBateriaPorcentaje" class="form-label text-secondary small fw-bold">Batería (%)</label>
-                            <input asp-for="SaludBateriaPorcentaje" type="number" min="0" max="100" class="form-control bg-dark text-white border-secondary w-25" placeholder="85" />
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-secondary small fw-bold">Funciona todo</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check">
-                                    <input asp-for="PantallaOk" class="form-check-input" />
-                                    <label asp-for="PantallaOk" class="form-check-label text-secondary">Pantalla</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="TecladoOk" class="form-check-input" />
-                                    <label asp-for="TecladoOk" class="form-check-label text-secondary">Teclado</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="AudioOk" class="form-check-input" />
-                                    <label asp-for="AudioOk" class="form-check-label text-secondary">Audio</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label text-secondary small fw-bold">Checklist</label>
-                            <div class="d-flex flex-wrap gap-3">
-                                <div class="form-check">
-                                    <input asp-for="EncendioCorrectamente" class="form-check-input" />
-                                    <label asp-for="EncendioCorrectamente" class="form-check-label text-secondary">Encendió correctamente</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="PantallaSinManchas" class="form-check-input" />
-                                    <label asp-for="PantallaSinManchas" class="form-check-label text-secondary">Pantalla sin manchas</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="TecladoFuncional" class="form-check-input" />
-                                    <label asp-for="TecladoFuncional" class="form-check-label text-secondary">Teclado funcional</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="CargadorIncluido" class="form-check-input" />
-                                    <label asp-for="CargadorIncluido" class="form-check-label text-secondary">Cargador original incluido</label>
-                                </div>
-                                <div class="form-check">
-                                    <input asp-for="LimpiezaRealizada" class="form-check-input" />
-                                    <label asp-for="LimpiezaRealizada" class="form-check-label text-secondary">Limpieza realizada</label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label asp-for="NotasInspeccion" class="form-label text-secondary small fw-bold">Notas</label>
-                            <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary" rows="2" placeholder="Ej: Vino sucio, se limpió. Cargador genérico."></textarea>
-                        </div>
-
-                        <hr class="border-secondary my-4" />
-
-                        <div class="d-flex gap-3 flex-wrap">
-                            <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
-                                ✅ Aprobar y pasar a Stock
-                            </button>
-                            <button type="submit" name="resultado" value="reparacion" class="btn btn-warning btn-lg fw-bold">
-                                ⚠️ Enviar a Reparación
-                            </button>
-                        </div>
-                    }
-                    else
-                    {
-                        <!-- PANEL PARA LOTES / ACCESORIOS -->
-                        <div class="alert alert-info border-info bg-dark text-info">
-                            <i class="bi bi-box-seam me-2"></i> Inspección de Lote / Accesorios
-                        </div>
-
+                <div class="d-flex gap-3 justify-content-end">
+                    <button type="button" id="btnReparar" class="btn btn-warning fw-bold px-4 py-2 border-0" style="color: #000;">
+                        <i class="bi bi-tools me-2"></i>Enviar a Reparación
+                    </button>
+                    <!-- Button name="resultado" value="aprobar" is handled via JS or direct submit if valid -->
+                    <button type="submit" name="resultado" value="aprobar" id="btnAprobar" class="btn btn-success fw-bold px-5 py-2" disabled>
+                        <i class="bi bi-check-circle-fill me-2"></i>Aprobar y Pasar a Stock
+                    </button>
+                </div>
+                <!-- Hidden input for reparacion submit -->
+                 <input type="hidden" name="resultado" id="inputResultado" value="" />
+            </div>
+        </div>
+    }
+    else
+    {
+         <!-- PANEL PARA LOTES / ACCESORIOS (Keep mostly original but styled) -->
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card bg-card border-0 shadow-lg card-modern">
+                    <div class="card-header bg-info bg-opacity-10 border-bottom border-info py-3">
+                         <h5 class="text-info fw-bold mb-0"><i class="bi bi-box-seam me-2"></i>Inspección de Lote / Accesorios</h5>
+                    </div>
+                    <div class="card-body p-4">
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small fw-bold">Total Recibido</label>
                                 <input type="text" readonly class="form-control-plaintext text-white fw-bold fs-4" value="@Model.CantidadTotal" />
                             </div>
                             <div class="col-md-4">
-                                <label asp-for="CantidadAprobada" class="form-label text-success small fw-bold">Cantidad Aprobada (Stock)</label>
-                                <input asp-for="CantidadAprobada" type="number" min="0" max="@Model.CantidadTotal" class="form-control bg-dark text-white border-success fw-bold" id="inputAprobada" />
+                                <label asp-for="CantidadAprobada" class="form-label text-success small fw-bold">U. Aprobadas</label>
+                                <input asp-for="CantidadAprobada" type="number" min="0" max="@Model.CantidadTotal" class="form-control bg-dark text-white border-success fw-bold p-3" id="inputAprobada" />
                             </div>
                             <div class="col-md-4">
-                                <label class="form-label text-danger small fw-bold">Rechazados (Pérdida)</label>
-                                <input type="text" readonly class="form-control bg-dark text-danger border-danger fw-bold" id="inputRechazada" value="0" />
+                                <label class="form-label text-danger small fw-bold">U. Rechazadas</label>
+                                <input type="text" readonly class="form-control bg-dark text-danger border-danger fw-bold p-3" id="inputRechazada" value="0" />
                             </div>
                         </div>
 
                         <div class="mb-4 d-none" id="divMotivo">
                             <label asp-for="MotivoRechazo" class="form-label text-danger small fw-bold">Motivo del Rechazo (Merma)</label>
-                            <textarea asp-for="MotivoRechazo" class="form-control bg-dark text-white border-danger" rows="2" placeholder="Ej: 2 unidades rotas, 1 no carga..."></textarea>
+                            <textarea asp-for="MotivoRechazo" id="MotivoRechazo" class="form-control bg-dark text-white border-danger" rows="3" placeholder="Ej: 2 unidades rotas, 1 no carga..."></textarea>
                         </div>
 
-                        <hr class="border-secondary my-4" />
-
-                        <div class="d-grid">
-                            <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold">
-                                ✅ Confirmar Inspección Lote
+                        <div class="d-grid mt-5">
+                            <button type="submit" name="resultado" value="aprobar" class="btn btn-success btn-lg fw-bold rounded-3">
+                                <i class="bi bi-check2-all me-2"></i>Confirmar Inspección Lote
                             </button>
                         </div>
-                    }
-                </form>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    }
+</form>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var total = @(Model.CantidadTotal);
-        var inputAprobada = document.getElementById('inputAprobada');
-        var inputRechazada = document.getElementById('inputRechazada');
-        var divMotivo = document.getElementById('divMotivo');
+@if (Model.EsUnico)
+{
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // -- REFERENCIAS --
+            const form = document.getElementById('formInspeccion');
+            const btnAprobar = document.getElementById('btnAprobar');
+            const btnReparar = document.getElementById('btnReparar');
+            const inputResultado = document.getElementById('inputResultado');
+            
+            // Inputs
+            const radiosCondicion = document.querySelectorAll('input[name="Condicion"]');
+            const inputBateria = document.getElementById('inputBateria');
+            const alertaBateria = document.getElementById('alertaBateria');
+            const checkboxes = document.querySelectorAll('.check-required');
+            
+            // -- LOGICA DE VALIDACION --
+            function validarFormulario() {
+                let valido = true;
 
-        if(inputAprobada && inputRechazada) {
-            function calcular() {
-                var aprob = parseInt(inputAprobada.value) || 0;
-                if(aprob > total) aprob = total;
-                if(aprob < 0) aprob = 0;
-                // inputAprobada.value = aprob; // Evitar loop de escritura si se quiere permitir borrado
-                
-                var rech = total - aprob;
-                inputRechazada.value = rech;
+                // 1. Cosmética seleccionada
+                let condicionSeleccionada = false;
+                radiosCondicion.forEach(r => { if(r.checked) condicionSeleccionada = true; });
+                if(!condicionSeleccionada) valido = false;
 
-                if(rech > 0) {
-                    divMotivo.classList.remove('d-none');
-                    document.getElementById('MotivoRechazo').setAttribute('required', 'required');
+                // 2. Batería >= 40
+                const batVal = parseInt(inputBateria.value) || 0;
+                if(batVal < 40) {
+                    valido = false; 
+                }
+
+                // Alerta visual batería
+                if(inputBateria.value && batVal < 40 && batVal > 0) {
+                    alertaBateria.classList.remove('d-none');
                 } else {
-                    divMotivo.classList.add('d-none');
-                    document.getElementById('MotivoRechazo').removeAttribute('required');
-                    document.getElementById('MotivoRechazo').value = '';
+                    alertaBateria.classList.add('d-none');
+                }
+
+                // 3. Todos los checkboxes marcados
+                checkboxes.forEach(chk => {
+                    if(!chk.checked) valido = false;
+                });
+
+                // Habilitar/Deshabilitar botón Aprobar
+                btnAprobar.disabled = !valido;
+                if(valido) {
+                    btnAprobar.classList.remove('btn-secondary');
+                    btnAprobar.classList.add('btn-success');
+                } else {
+                    // Opcional: Estilo visual de disabled
                 }
             }
-            
-            inputAprobada.addEventListener('input', calcular);
-            calcular(); // init
-        }
-    });
-</script>
 
+            // Event Listeners
+            radiosCondicion.forEach(r => r.addEventListener('change', validarFormulario));
+            inputBateria.addEventListener('input', validarFormulario);
+            checkboxes.forEach(c => c.addEventListener('change', validarFormulario));
+
+            // Run once on load
+            validarFormulario();
+
+            // -- SWEETALERT REPARACION --
+            if(btnReparar) {
+                btnReparar.addEventListener('click', function() {
+                    let modelo = '@Html.Raw(Model.ProductoNombre)';
+                    let serie = '@Html.Raw(Model.NumeroSerie)';
+
+                    Swal.fire({
+                        title: '¿Enviar a Reparación?',
+                        html: `¿Realmente deseas enviar la <strong>${modelo}</strong> (S/N: <code>${serie}</code>) a reparación?<br><br>
+                               <span class="text-warning small"><i class="bi bi-exclamation-circle"></i> El equipo saldrá de la mesa de calidad hacia el taller.</span>`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ffc107',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="bi bi-tools"></i> Confirmar Envío',
+                        cancelButtonText: 'Cancelar',
+                        background: '#343a40',
+                        color: '#fff'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Set value to reparacion and submit
+                            // We need to bypass validation for repair? Usually yes, repairs don't need checklist.
+                            // But we need to make sure backend receives "resultado" = "reparacion"
+                            
+                            // Remove required attributes to allow submit
+                            radiosCondicion.forEach(r => r.removeAttribute('required'));
+                            inputBateria.removeAttribute('required');
+                            checkboxes.forEach(c => c.classList.remove('check-required')); // logic handled, but HTML required might exist if added
+
+                            // Create a hidden input for 'resultado' since button click won't send it if we submit() via JS
+                            inputResultado.value = 'reparacion';
+                            
+                            form.submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+}
+else
+{
+    <!-- Script para Lotes (Mantenido funcional) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var total = @(Model.CantidadTotal);
+            var inputAprobada = document.getElementById('inputAprobada');
+            var inputRechazada = document.getElementById('inputRechazada');
+            var divMotivo = document.getElementById('divMotivo');
+            var motivoRechazo = document.getElementById('MotivoRechazo');
+
+            if(inputAprobada && inputRechazada) {
+                function calcular() {
+                    var aprob = parseInt(inputAprobada.value) || 0;
+                    if(aprob > total) aprob = total;
+                    if(aprob < 0) aprob = 0;
+                    
+                    var rech = total - aprob;
+                    inputRechazada.value = rech;
+
+                    if(rech > 0) {
+                        divMotivo.classList.remove('d-none');
+                        if(motivoRechazo) motivoRechazo.setAttribute('required', 'required');
+                    } else {
+                        divMotivo.classList.add('d-none');
+                        if(motivoRechazo) {
+                            motivoRechazo.removeAttribute('required');
+                            motivoRechazo.value = '';
+                        }
+                    }
+                }
+                
+                inputAprobada.addEventListener('input', calcular);
+                calcular();
+            }
+        });
+    </script>
+}

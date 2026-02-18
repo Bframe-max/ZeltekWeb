@@ -1,52 +1,102 @@
 @model List<ZeltekWeb.Models.ItemPorRevisarViewModel>
-
 @{
     ViewData["Title"] = "Mesa de Calidad";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<!-- Header & KPI -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
     <div>
-        <h2 class="fw-bold text-white mb-0">🕵️‍♂️ Recepción y Calidad</h2>
-        <p class="text-secondary small mb-0">Equipos en estado Por Revisar — checklist de ingreso</p>
+        <h2 class="text-3xl font-bold text-white tracking-tight">Control de Calidad</h2>
+        <p class="text-gray-400 text-sm mt-1">Inspección técnica de equipos entrantes</p>
     </div>
-    <a asp-controller="Dashboard" asp-action="Index" class="btn btn-outline-secondary">← Volver al Inicio</a>
+    
+    <div class="flex items-center gap-4">
+        <div class="px-4 py-2 rounded-lg bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-sm font-bold flex items-center gap-2">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+            </span>
+            Pendientes: @Model.Count Equipos
+        </div>
+        <a asp-controller="Dashboard" asp-action="Index" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors text-sm font-medium">Volver a Inicio</a>
+    </div>
 </div>
 
-<div class="card bg-card border-0 border-start border-4 border-warning">
-    <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h5 class="text-white fw-bold mb-0">Control de Calidad</h5>
-        <small class="text-secondary">Selecciona un equipo para abrir el formulario de inspección.</small>
-    </div>
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead style="border-bottom: 1px solid var(--border-color);">
-                    <tr>
-                        <th class="ps-4 text-white">Producto</th>
-                        <th class="text-white">Serie / ID</th>
-                        <th class="text-end pe-4 text-white">Acción</th>
+<!-- Main Content Container -->
+<div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+    
+    @if (Model.Any())
+    {
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
+                        <th class="p-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                        <th class="p-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Origen / Antigüedad</th>
+                        <th class="p-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Acción</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="divide-y divide-[#2e2f45]">
                     @foreach (var item in Model)
                     {
-                        <tr>
-                            <td class="ps-4 fw-bold text-white">@item.ProductoNombre</td>
-                            <td><span class="badge bg-dark text-info font-monospace">@item.NumeroSerie</span></td>
-                            <td class="text-end pe-4">
-                                <a asp-action="Inspeccion" asp-route-id="@item.ItemID" class="btn btn-sm btn-warning">📋 Inspeccionar</a>
+                        <tr class="group hover:bg-white/[0.02] transition-colors">
+                            <td class="p-6 align-middle">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 rounded-full bg-gray-700/50 flex items-center justify-center text-white border border-white/10 shrink-0">
+                                        <svg class="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-white font-bold text-lg mb-0.5">@item.ProductoNombre</p>
+                                        <p class="text-gray-500 text-xs font-mono">S/N: @item.NumeroSerie</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="p-6 align-middle">
+                                <div class="flex flex-col">
+                                    <span class="text-white font-medium text-sm">
+                                        @if(item.FechaRecepcion.HasValue) {
+                                            @HaceTiempo(item.FechaRecepcion.Value)
+                                        } else {
+                                            <span class="text-amber-500 flex items-center gap-1">
+                                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                                Fecha no registrada
+                                            </span>
+                                        }
+                                    </span>
+                                    <span class="text-gray-500 text-xs mt-1">@(item.FechaRecepcion.HasValue ? item.FechaRecepcion.Value.ToString("dd MMM yyyy, HH:mm") : "Datos antiguos")</span>
+                                </div>
+                            </td>
+                            <td class="p-6 align-middle text-right">
+                                <a asp-action="Inspeccion" asp-route-id="@item.ItemID" 
+                                   class="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-yellow-500/20 transition-all transform hover:scale-105">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                                    Inspeccionar
+                                </a>
                             </td>
                         </tr>
                     }
                 </tbody>
             </table>
         </div>
-        @if (Model.Count == 0)
-        {
-            <div class="text-center py-5 text-secondary">
-                <i class="bi bi-check-circle fs-1 d-block mb-2"></i>
-                No hay equipos pendientes de revisión. En Compras, usa el botón «Recibir» en una compra en tránsito (sin marcar «Omitir Revisión») para que aparezcan aquí.
+    }
+    else
+    {
+        <div class="flex flex-col items-center justify-center py-20 px-4 text-center">
+            <div class="w-24 h-24 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 ring-1 ring-emerald-500/20">
+                <svg class="w-12 h-12 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
             </div>
-        }
-    </div>
+            <h3 class="text-2xl font-bold text-white mb-2">¡Todo al día!</h3>
+            <p class="text-gray-400 max-w-md">No hay equipos pendientes de revisión técnica en este momento. Buen trabajo.</p>
+        </div>
+    }
 </div>
+
+@functions {
+    string HaceTiempo(DateTime fecha)
+    {
+        var diff = DateTime.Now - fecha;
+        if (diff.TotalDays < 1) return "Recibido hoy";
+        if (diff.TotalDays < 2) return "Recibido ayer";
+        return $"Recibido hace {(int)diff.TotalDays} días";
+    }
+}

@@ -4,79 +4,105 @@
     ViewData["Title"] = "Productos";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">📦 Catálogo de Productos</h2>
-    <a asp-action="Create" class="btn btn-primary fw-bold shadow-sm">
-        <i class="bi bi-plus-lg me-2"></i>Nuevo Producto
+<!-- Header & Actions -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+    <div>
+        <h2 class="text-3xl font-bold text-white tracking-tight">Catálogo de Productos</h2>
+        <p class="text-gray-400 text-sm mt-1">Gestión del inventario maestro</p>
+    </div>
+    <a asp-action="Create" class="group flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105">
+        <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        Nuevo Producto
     </a>
 </div>
 
-<div class="row g-3 mb-4">
-    <div class="col-md-6">
-        <div class="card bg-card border-start border-4 border-primary">
-            <div class="card-body">
-                <small class="text-secondary text-uppercase fw-bold">Total Productos</small>
-                <h3 class="text-white fw-bold mb-0">@Model.Count</h3>
-                <small class="text-secondary">En catálogo activo</small>
+<!-- KPIs / Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <!-- Total Products -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                </div>
+                <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Total Productos</h3>
             </div>
+            <p class="text-4xl font-bold text-white mb-1">@Model.Count</p>
+            <p class="text-blue-400 text-xs font-medium">En catálogo activo</p>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card bg-card border-start border-4 border-info">
-            <div class="card-body">
-                <small class="text-secondary text-uppercase fw-bold">Con serial</small>
-                <h3 class="text-info fw-bold mb-0">@Model.Count(p => p.EsUnico)</h3>
-                <small class="text-secondary">Laptops, iPhones, etc.</small>
+
+    <!-- With Serial -->
+    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <svg class="w-24 h-24 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v1m6 11h2m-6 0h-2v4h-4v-4H8m13-9v2m-3-2v2m-3-2v2m-3-2v2m-3-2v2m-3-2v2m-3-2v2m-3-2v2m-3-2v2"></path></svg>
+        </div>
+        <div class="relative z-10">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                </div>
+                <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Con Serial</h3>
             </div>
+            <p class="text-4xl font-bold text-white mb-1">@Model.Count(p => p.EsUnico)</p>
+            <p class="text-emerald-400 text-xs font-medium">Equipos únicos (Laptops, Celulares)</p>
         </div>
     </div>
 </div>
 
-<div class="card bg-card border-0">
-    <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0">
-            <thead style="border-bottom: 1px solid var(--border-color);">
-                <tr>
-                    <th class="ps-4 text-white">ID</th>
-                    <th class="text-white">Nombre</th>
-                    <th class="text-white">Marca</th>
-                    <th class="text-white">Categoría</th>
-                    <th class="text-center text-white">Tipo</th>
-                    <th class="text-end pe-4 text-white">Acciones</th>
+<!-- Product Table -->
+<div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider pl-6">ID</th>
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider">Nombre</th>
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider">Marca</th>
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Tipo</th>
+                    <th class="p-5 text-xs font-medium text-gray-500 uppercase tracking-wider text-right pr-6">Acciones</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-[#2e2f45]">
                 @foreach (var p in Model)
                 {
-                    <tr>
-                        <td class="ps-4 text-secondary">#@p.ProductoID</td>
-                        <td>
-                            <span class="fw-bold text-white">@p.Nombre</span>
+                    <tr class="group hover:bg-white/[0.02] transition-colors">
+                        <td class="p-5 align-middle pl-6 text-gray-500 font-mono text-sm">#@p.ProductoID</td>
+                        <td class="p-5 align-middle">
+                            <span class="text-white font-bold text-base block">@p.Nombre</span>
                         </td>
-                        <td>
-                            <span class="badge bg-dark text-info border border-info border-opacity-25 px-3">@p.Marca</span>
+                        <td class="p-5 align-middle">
+                            <span class="px-3 py-1 rounded-full bg-gray-700 text-gray-200 text-xs font-semibold border border-gray-600">@p.Marca</span>
                         </td>
-                        <td class="text-secondary">@p.Categoria</td>
-                        <td class="text-center">
+                        <td class="p-5 align-middle text-gray-400 text-sm">@p.Categoria</td>
+                        <td class="p-5 align-middle text-center">
                             @if (p.EsUnico)
                             {
-                                <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 px-3">📱 Con serial</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                                    Con serial
+                                </span>
                             }
                             else
                             {
-                                <span class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 px-3">📦 Accesorio</span>
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                    Accesorio
+                                </span>
                             }
                         </td>
-                        <td class="text-end pe-4">
-                            <div class="btn-group">
-                                <a asp-action="Edit" asp-route-id="@p.ProductoID"
-                                   class="btn btn-sm btn-outline-warning" title="Editar">
-                                    <i class="bi bi-pencil-fill"></i>
+                        <td class="p-5 align-middle text-right pr-6">
+                            <div class="flex items-center justify-end gap-3">
+                                <a asp-action="Edit" asp-route-id="@p.ProductoID" 
+                                   class="text-gray-400 hover:text-blue-400 transition-colors p-2 hover:bg-blue-500/10 rounded-lg" title="Editar">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </a>
-                                <a asp-action="Delete" asp-route-id="@p.ProductoID"
-                                   class="btn btn-sm btn-outline-danger" title="Eliminar"
+                                <a asp-action="Delete" asp-route-id="@p.ProductoID" 
+                                   class="text-gray-400 hover:text-red-400 transition-colors p-2 hover:bg-red-500/10 rounded-lg" title="Eliminar"
                                    onclick="return confirm('¿Seguro que desea eliminar este producto?');">
-                                    <i class="bi bi-trash-fill"></i>
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </a>
                             </div>
                         </td>
@@ -85,9 +111,12 @@
                 @if (Model.Count == 0)
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-5 text-secondary">
-                            <i class="bi bi-box-seam fs-1 d-block mb-2"></i>
-                            No hay productos registrados. Crea el primero.
+                        <td colspan="6" class="text-center py-12 text-gray-500">
+                            <div class="mb-4">
+                                <svg class="w-16 h-16 mx-auto text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                            </div>
+                            <p class="text-lg font-medium text-gray-400">No hay productos registrados</p>
+                            <p class="text-sm">Comienza agregando uno nuevo al catálogo.</p>
                         </td>
                     </tr>
                 }

@@ -4,6 +4,6 @@ namespace ZeltekWeb.Services.Interfaces
 {
     public interface IAuthService
     {
-        Usuario? ValidarUsuario(string usuario, string password);
+        Task<Usuario?> ValidarUsuario(string usuario, string password);
     }
 }

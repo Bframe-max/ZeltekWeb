@@ -7,5 +7,6 @@
         public string PasswordHash { get; set; } = null!;
         public string Rol { get; set; } = "Admin";
         public bool Activo { get; set; }
+        public int TenantId { get; set; }
     }
 }
