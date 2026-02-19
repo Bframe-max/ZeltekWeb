@@ -28,6 +28,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddScoped<UsuarioRepository>();
 // builder.Services.AddSingleton<IConnectionFactory, ConnectionFactory>(); // Removed old one
+builder.Services.AddScoped<DapperContext>();
 builder.Services.AddScoped<IDbConnectionFactory, SqlConnectionFactory>(); // Correct new one
 builder.Services.AddScoped<IVentaRepository, VentaRepository>();
 builder.Services.AddScoped<IInventarioRepository, InventarioRepository>();
