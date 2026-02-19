@@ -43,7 +43,7 @@ namespace ZeltekWeb.Data
                 // We use Dapper or SqlCommand. Since Dapper is used elsewhere, let's use SqlCommand to avoid dependency if not imported, 
                 // BUT this file imports System.Data. Let's use SqlCommand for raw speed/simplicity here.
                 using var cmd = connection.CreateCommand();
-                cmd.CommandText = "EXEC sp_set_session_context @key=N'TenantID', @value=@TenantId";
+                cmd.CommandText = "EXEC sp_set_session_context @key=N'TenantId', @value=@TenantId";
                 var param = cmd.CreateParameter();
                 param.ParameterName = "@TenantId";
                 param.Value = tenantId;

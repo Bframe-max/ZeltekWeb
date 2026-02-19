@@ -46,7 +46,7 @@ public class AuthController : Controller
             new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
             new Claim(ClaimTypes.Name, usuario.NombreUsuario),
             new Claim(ClaimTypes.Role, usuario.Rol),
-            new Claim(ZeltekWeb.Constants.AppConstants.TenantIdClaim, usuario.TenantId.ToString())
+            new Claim("TenantId", usuario.TenantId.ToString())
         };
 
         var identity = new ClaimsIdentity(
