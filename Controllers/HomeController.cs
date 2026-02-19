@@ -22,6 +22,7 @@ namespace ZeltekWeb.Controllers
             return View();
         }
 
+        [Microsoft.AspNetCore.Authorization.Authorize]
         public async Task<IActionResult> TestConnection()
         {
             using var connection = await _context.CreateConnectionAsync();
