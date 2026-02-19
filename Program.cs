@@ -21,10 +21,19 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.LogoutPath = "/Auth/Logout";
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // 🔒 Force HTTPS/Secure
-        options.Cookie.SameSite = SameSiteMode.Strict; // 🔒 Prevent CSRF
+        options.Cookie.HttpOnly = true; // ✅ Security: Javascript cannot access cookie
+        options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest; // ✅ Works on HTTP and HTTPS
+        options.Cookie.SameSite = SameSiteMode.Lax; // ✅ Relaxed CSRF for HTTP/Dev
     });
+
+// ... (Services)
+
+// Configure ForwardedHeaders for Nginx/Apache Proxy
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | 
+                               Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto;
+});
 
 builder.Services.AddScoped<UsuarioRepository>();
 // builder.Services.AddSingleton<IConnectionFactory, ConnectionFactory>(); // Removed old one
@@ -48,12 +57,16 @@ builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
 builder.Services.AddScoped<IReporteService, ReporteService>();
 builder.Services.AddScoped<IGastoRepository, GastoRepository>();
 builder.Services.AddScoped<IGastoService, GastoService>();
+
 // En Program.cs, antes del builder.Build()
 var app = builder.Build();
 
 // =======================
 // Middleware
 // =======================
+
+// ✅ Use Forwarded Headers Middleware (MUST be before others like HttpsRedirection)
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
@@ -62,7 +75,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// ✅ Habilitar HTTPS Redirect
+// ✅ Habilitar HTTPS Redirect (Optional if handling on Proxy, but good to keep)
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
