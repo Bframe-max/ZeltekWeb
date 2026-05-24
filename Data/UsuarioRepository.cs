@@ -1,6 +1,6 @@
 using Microsoft.Data.SqlClient;
 using ZeltekWeb.Models.Entities;
-using ZeltekWeb.Models; // For UserRoles
+using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Data
 {
@@ -10,15 +10,12 @@ namespace ZeltekWeb.Data
 
         public UsuarioRepository(IConfiguration config)
         {
-            _cn = config.GetConnectionString("DefaultConnection") ?? config.GetConnectionString("ZeltekDB")
+            _cn = config.GetConnectionString("ZeltekDB") ?? config.GetConnectionString("DefaultConnection")
                 ?? throw new InvalidOperationException("No se encontró DefaultConnection ni ZeltekDB en ConnectionStrings.");
         }
 
         public Usuario? ObtenerPorUsuario(string nombreUsuario)
         {
-            // Keep sync method for backward compatibility if needed, or redirect to .Result (bad practice)
-            // Ideally refactor all to Async.
-            // For now, I'll just add Async version.
             return ObtenerPorUsuarioAsync(nombreUsuario).GetAwaiter().GetResult();
         }
 
@@ -30,7 +27,7 @@ namespace ZeltekWeb.Data
             await con.OpenAsync();
 
             using var cmd = new SqlCommand(@"
-                SELECT UsuarioID, Usuario, PasswordHash, Rol, Activo, TenantID
+                SELECT UsuarioID, Usuario, PasswordHash, Rol, Activo
                 FROM UsuarioSistema
                 WHERE Usuario = @u
             ", con);
@@ -48,8 +45,7 @@ namespace ZeltekWeb.Data
                 NombreUsuario = rd["Usuario"].ToString()!,
                 PasswordHash = rd["PasswordHash"].ToString()!,
                 Rol = rd["Rol"]?.ToString() ?? UserRoles.Admin,
-                Activo = Convert.ToBoolean(rd["Activo"]),
-                TenantId = rd["TenantID"] != DBNull.Value ? Convert.ToInt32(rd["TenantID"]) : 0
+                Activo = Convert.ToBoolean(rd["Activo"])
             };
         }
     }

@@ -17,15 +17,12 @@ namespace ZeltekWeb.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar, int tenantId)
+        public async Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar)
         {
             using var db = _connectionFactory.CreateConnection();
 
-            // ? SOLUCIÓN: Usamos la VISTA 'vw_GarantiasVigentes'.
-            // Esta vista ya tiene los Joins hechos, los nombres corregidos (Cliente, Producto)
-            // y la lógica de fecha de vencimiento real.
             var sql = @"
-                SELECT 
+                SELECT
                     Cliente,
                     Telefono,
                     Producto,
@@ -39,23 +36,20 @@ namespace ZeltekWeb.Repositories
                     Almacenamiento_GB,
                     Estado
                 FROM vw_GarantiasVigentes
-                WHERE TenantId = @TenantId
-                AND IsDeleted = 0";
+                WHERE 1=1";
 
-            // Lógica de Búsqueda
             if (!string.IsNullOrWhiteSpace(buscar))
             {
                 sql += @" AND (
-                    Cliente LIKE '%' + @Buscar + '%' OR 
-                    Producto LIKE '%' + @Buscar + '%' OR 
+                    Cliente LIKE '%' + @Buscar + '%' OR
+                    Producto LIKE '%' + @Buscar + '%' OR
                     NumeroSerie LIKE '%' + @Buscar + '%'
                 )";
             }
 
-            // Ordenamos por las que están por vencer primero
             sql += " ORDER BY DiasRestantes ASC";
 
-            return await db.QueryAsync<GarantiaVigenteDto>(sql, new { TenantId = tenantId, Buscar = buscar });
+            return await db.QueryAsync<GarantiaVigenteDto>(sql, new { Buscar = buscar });
         }
     }
 }

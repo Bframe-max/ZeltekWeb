@@ -16,46 +16,31 @@ namespace ZeltekWeb.Services
             _gastoRepo = gastoRepo;
         }
 
-        public Task<IEnumerable<GastoListDto>> ObtenerListadoAsync(DateTime? desde, DateTime? hasta, int tenantId)
+        public Task<IEnumerable<GastoListDto>> ObtenerListadoAsync(DateTime? desde, DateTime? hasta)
+            => _gastoRepo.ObtenerGastosAsync(desde, hasta);
+
+        public Task<GastoResumenDto> ObtenerResumenAsync(DateTime? desde, DateTime? hasta)
+            => _gastoRepo.ObtenerResumenAsync(desde, hasta);
+
+        public Task<IEnumerable<GastoPorCategoriaDto>> ObtenerPorCategoriaAsync(DateTime? desde, DateTime? hasta)
+            => _gastoRepo.ObtenerGastosPorCategoriaAsync(desde, hasta);
+
+        public Task<GastoEditDto?> ObtenerPorIdAsync(int id)
+            => _gastoRepo.ObtenerPorIdAsync(id);
+
+        public Task<int> CrearAsync(GastoCreateDto dto)
         {
-            return _gastoRepo.ObtenerGastosAsync(desde, hasta, tenantId);
+            if (dto.Monto <= 0) throw new ArgumentException("El monto debe ser positivo.");
+            return _gastoRepo.CrearAsync(dto);
         }
 
-        public Task<GastoResumenDto> ObtenerResumenAsync(DateTime? desde, DateTime? hasta, int tenantId)
+        public Task ActualizarAsync(GastoEditDto dto)
         {
-            return _gastoRepo.ObtenerResumenAsync(desde, hasta, tenantId);
+            if (dto.Monto <= 0) throw new ArgumentException("El monto debe ser positivo.");
+            return _gastoRepo.ActualizarAsync(dto);
         }
 
-        public Task<IEnumerable<GastoPorCategoriaDto>> ObtenerPorCategoriaAsync(DateTime? desde, DateTime? hasta, int tenantId)
-        {
-            return _gastoRepo.ObtenerGastosPorCategoriaAsync(desde, hasta, tenantId);
-        }
-
-        public Task<GastoEditDto?> ObtenerPorIdAsync(int id, int tenantId)
-        {
-            return _gastoRepo.ObtenerPorIdAsync(id, tenantId);
-        }
-
-        public Task<int> CrearAsync(GastoCreateDto dto, int tenantId)
-        {
-            // Business logic for validation could go here
-            if (dto.Monto <= 0)
-                throw new ArgumentException("El monto debe ser positivo.");
-
-            return _gastoRepo.CrearAsync(dto, tenantId);
-        }
-
-        public Task ActualizarAsync(GastoEditDto dto, int tenantId)
-        {
-            if (dto.Monto <= 0)
-                throw new ArgumentException("El monto debe ser positivo.");
-
-            return _gastoRepo.ActualizarAsync(dto, tenantId);
-        }
-
-        public Task EliminarAsync(int id, int tenantId)
-        {
-            return _gastoRepo.EliminarAsync(id, tenantId);
-        }
+        public Task EliminarAsync(int id)
+            => _gastoRepo.EliminarAsync(id);
     }
 }

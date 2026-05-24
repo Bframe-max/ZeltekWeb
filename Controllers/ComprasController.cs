@@ -13,20 +13,16 @@ namespace ZeltekWeb.Controllers
     {
         private readonly ICompraService _compraService;
         private readonly IProductoService _productoService;
-        
+
         public ComprasController(ICompraService compraService, IProductoService productoService)
         {
             _compraService = compraService;
             _productoService = productoService;
         }
 
-        // ==========================================
-        // 1. LISTADO (Index)
-        // ==========================================
         public async Task<IActionResult> Index(string buscar, string viewType = "transit")
         {
-            int tenantId = GetTenantId();
-            var (items, kpiActivos, kpiInversion) = await _compraService.ObtenerHistorialAsync(buscar, viewType, tenantId);
+            var (items, kpiActivos, kpiInversion) = await _compraService.ObtenerHistorialAsync(buscar, viewType);
 
             var viewModels = items.Select(dto => new CompraListViewModel
             {
@@ -49,56 +45,36 @@ namespace ZeltekWeb.Controllers
             return View(viewModels);
         }
 
-        // ==========================================
-        // API: VERIFICAR SI TRACKING YA EXISTE
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> VerificarTracking(string tracking)
         {
-            int tenantId = GetTenantId();
-            bool existe = await _compraService.VerificarTrackingAsync(tracking, null, tenantId);
+            bool existe = await _compraService.VerificarTrackingAsync(tracking, null);
             return Json(existe);
         }
 
-        // ==========================================
-        // API: GET ITEM INFO
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> GetItemInfo(int itemId)
         {
-            int tenantId = GetTenantId();
-            var (esAccesorio, nombre) = await _compraService.GetItemInfoAsync(itemId, tenantId);
+            var (esAccesorio, nombre) = await _compraService.GetItemInfoAsync(itemId);
             return Json(new { esAccesorio, productoNombre = nombre });
         }
 
-        // ==========================================
-        // API: VERIFICAR SERIAL
-        // ==========================================
         [HttpGet]
         public async Task<IActionResult> VerificarSerial(string serial)
         {
-            int tenantId = GetTenantId();
-            bool existe = await _compraService.VerificarSerialAsync(serial, null, tenantId);
+            bool existe = await _compraService.VerificarSerialAsync(serial, null);
             return Json(existe);
         }
 
-        // ==========================================
-        // 2. CREAR (GET)
-        // ==========================================
         public async Task<IActionResult> Create()
         {
             await CargarListaProductos();
             return View(new CompraCreateViewModel());
         }
 
-        // ==========================================
-        // 3. GUARDAR (POST)
-        // ==========================================
         [HttpPost]
         public async Task<IActionResult> Create(CompraCreateViewModel model)
         {
-            int tenantId = GetTenantId();
-
             if (model.Cantidad <= 0) ModelState.AddModelError("Cantidad", "La cantidad debe ser mayor a 0.");
             if (model.CostoTotalCompra <= 0) ModelState.AddModelError("CostoTotalCompra", "El costo total de la compra debe ser mayor a 0.");
             if ((model.CostoEnvioTotal ?? 0) < 0) ModelState.AddModelError("CostoEnvioTotal", "El costo de envío no puede ser negativo.");
@@ -111,7 +87,7 @@ namespace ZeltekWeb.Controllers
 
             if (!string.IsNullOrWhiteSpace(model.TrackingProveedor))
             {
-                if (await _compraService.VerificarTrackingAsync(model.TrackingProveedor, null, tenantId))
+                if (await _compraService.VerificarTrackingAsync(model.TrackingProveedor, null))
                 {
                     ModelState.AddModelError("TrackingProveedor", "Este tracking ya fue registrado.");
                     await CargarListaProductos();
@@ -133,7 +109,7 @@ namespace ZeltekWeb.Controllers
                     Usuario = User.Identity?.Name ?? "System"
                 };
 
-                await _compraService.CrearCompraAsync(dto, tenantId);
+                await _compraService.CrearCompraAsync(dto);
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -144,14 +120,9 @@ namespace ZeltekWeb.Controllers
             }
         }
 
-        // ==========================================
-        // 4. VER DETALLE (Details)
-        // ==========================================
         public async Task<IActionResult> Details(int id)
         {
-            int tenantId = GetTenantId();
-            var compra = await _compraService.ObtenerPorIdAsync(id, tenantId);
-            
+            var compra = await _compraService.ObtenerPorIdAsync(id);
             if (compra == null) return NotFound();
 
             var modelo = new CompraDetalleViewModel
@@ -165,8 +136,8 @@ namespace ZeltekWeb.Controllers
                 EstadoCompra = compra.EstadoCompra
             };
 
-            var items = await _compraService.ObtenerItemsPorCompraAsync(id, tenantId);
-            foreach(var item in items)
+            var items = await _compraService.ObtenerItemsPorCompraAsync(id);
+            foreach (var item in items)
             {
                 modelo.Items.Add(new ItemEnCompra
                 {
@@ -187,43 +158,20 @@ namespace ZeltekWeb.Controllers
             return View(modelo);
         }
 
-        // ==========================================
-        // 5. ACCIÓN: RECIBIR ITEM
-        // ==========================================
         [HttpPost]
-        public async Task<IActionResult> RecibirItem(
-            int itemId,
-            int compraIdRetorno,
-            bool productoNuevo,
-            string serieReal,
-            decimal costoEnvio,
-            decimal costoReparacion,
-            string condicion,
-            string bateria,
-            int? ram,
-            int? almacenamiento,
-            string procesador
-        )
+        public async Task<IActionResult> RecibirItem(int itemId, int compraIdRetorno, bool productoNuevo, string serieReal,
+            decimal costoEnvio, decimal costoReparacion, string condicion, string bateria, int? ram, int? almacenamiento, string procesador)
         {
-            int tenantId = GetTenantId();
             bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
             var dto = new RecibirItemDto
             {
-                ItemID = itemId,
-                CompraID = compraIdRetorno,
-                ProductoNuevo = productoNuevo,
-                SerieReal = serieReal,
-                CostoEnvio = costoEnvio,
-                CostoReparacion = costoReparacion,
-                Condicion = condicion,
-                Bateria = bateria,
-                Ram = ram,
-                Almacenamiento = almacenamiento,
-                Procesador = procesador
+                ItemID = itemId, CompraID = compraIdRetorno, ProductoNuevo = productoNuevo,
+                SerieReal = serieReal, CostoEnvio = costoEnvio, CostoReparacion = costoReparacion,
+                Condicion = condicion, Bateria = bateria, Ram = ram, Almacenamiento = almacenamiento, Procesador = procesador
             };
 
-            var result = await _compraService.RecibirItemAsync(dto, tenantId);
+            var result = await _compraService.RecibirItemAsync(dto);
 
             if (!result.Success)
             {
@@ -236,46 +184,28 @@ namespace ZeltekWeb.Controllers
             return RedirectToAction("Details", new { id = compraIdRetorno });
         }
 
-        // ==========================================
-        // 6. EDITAR SEGUIMIENTO (GET)
-        // ==========================================
         public async Task<IActionResult> Edit(int id)
         {
-            int tenantId = GetTenantId();
-            var compra = await _compraService.ObtenerPorIdAsync(id, tenantId);
+            var compra = await _compraService.ObtenerPorIdAsync(id);
             if (compra == null) return NotFound();
 
-            var model = new CompraCreateViewModel
-            {
-                Vendedor = compra.VendedorOnline,
-                TrackingProveedor = compra.TrackingProveedor ?? ""
-            };
-            
+            var model = new CompraCreateViewModel { Vendedor = compra.VendedorOnline, TrackingProveedor = compra.TrackingProveedor ?? "" };
             ViewBag.CompraID = id;
             ViewBag.EstadoActual = compra.EstadoCompra;
             ViewBag.CostoTotal = compra.CostoTotal;
-            
             return View(model);
         }
 
-        // ==========================================
-        // 7. GUARDAR EDICIÓN (POST)
-        // ==========================================
         [HttpPost]
         public async Task<IActionResult> Edit(int id, string? tracking, string estado, decimal costoTotal)
         {
-            int tenantId = GetTenantId();
             var trackingTrim = tracking?.Trim() ?? "";
 
             if (!string.IsNullOrEmpty(trackingTrim))
             {
-                if (await _compraService.VerificarTrackingAsync(trackingTrim, id, tenantId))
+                if (await _compraService.VerificarTrackingAsync(trackingTrim, id))
                 {
-                     var model = new CompraCreateViewModel
-                    {
-                        TrackingProveedor = trackingTrim,
-                        Vendedor = ""
-                    };
+                    var model = new CompraCreateViewModel { TrackingProveedor = trackingTrim, Vendedor = "" };
                     ViewBag.CompraID = id;
                     ViewBag.EstadoActual = estado;
                     ViewBag.CostoTotal = costoTotal;
@@ -284,30 +214,21 @@ namespace ZeltekWeb.Controllers
                 }
             }
 
-            var updateDto = new UpdateCompraDto
+            await _compraService.ActualizarCompraAsync(new UpdateCompraDto
             {
-                CompraID = id,
-                TrackingProveedor = trackingTrim,
-                EstadoCompra = estado,
-                CostoTotal = costoTotal
-            };
-
-            await _compraService.ActualizarCompraAsync(updateDto, tenantId);
+                CompraID = id, TrackingProveedor = trackingTrim, EstadoCompra = estado, CostoTotal = costoTotal
+            });
             return RedirectToAction("Index");
         }
 
-        // ==========================================
-        // 8. ELIMINAR COMPRA
-        // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> Eliminar(int id)
         {
-            int tenantId = GetTenantId();
             try
             {
-                await _compraService.EliminarCompraAsync(id, tenantId);
+                await _compraService.EliminarCompraAsync(id);
                 TempData["SuccessEliminar"] = "Compra eliminada correctamente.";
             }
             catch (Exception ex)
@@ -317,45 +238,26 @@ namespace ZeltekWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        // ==========================================
-        // 9. FORZAR CIERRE
-        // ==========================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> ForzarCierre(int id)
         {
-            int tenantId = GetTenantId();
-            await _compraService.ForzarCierreAsync(id, tenantId);
-            TempData["SuccessEliminar"] = "Compra cerrada manualmente (marcada como Completada)."; 
+            await _compraService.ForzarCierreAsync(id);
+            TempData["SuccessEliminar"] = "Compra cerrada manualmente (marcada como Completada).";
             return RedirectToAction("Index");
         }
 
-        // ==========================================
-        // PRIVATE HELPERS
-        // ==========================================
         private async Task CargarListaProductos()
         {
-            int tenantId = GetTenantId();
-            var productos = await _productoService.ObtenerTodosAsync(tenantId);
-            
-            ViewBag.Productos = productos.Select(p => new SelectListItem
-            {
-                Value = p.ProductoID.ToString(),
-                Text = p.Nombre
-            }).ToList();
+            var productos = await _productoService.ObtenerTodosAsync();
+            ViewBag.Productos = productos.Select(p => new SelectListItem { Value = p.ProductoID.ToString(), Text = p.Nombre }).ToList();
         }
 
         private async Task CargarCargadores()
         {
-            int tenantId = GetTenantId();
-            var cargadores = await _productoService.ObtenerCargadoresYAccesoriosAsync(tenantId);
-            
-            ViewBag.Cargadores = cargadores.Select(c => new SelectListItem
-            {
-                Value = c.ProductoID.ToString(),
-                Text = c.Nombre
-            }).ToList();
+            var cargadores = await _productoService.ObtenerCargadoresYAccesoriosAsync();
+            ViewBag.Cargadores = cargadores.Select(c => new SelectListItem { Value = c.ProductoID.ToString(), Text = c.Nombre }).ToList();
         }
     }
 }

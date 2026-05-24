@@ -4,23 +4,19 @@ namespace ZeltekWeb.Services
 {
     public interface ICompraService
     {
-        Task<(IEnumerable<CompraListDto> Items, int Activos, decimal InversionFlotante)> ObtenerHistorialAsync(string? buscar, string viewType, int tenantId);
-        Task<CompraDto?> ObtenerPorIdAsync(int id, int tenantId);
-        Task<IEnumerable<ItemCompraDto>> ObtenerItemsPorCompraAsync(int compraId, int tenantId);
-        Task<int> CrearCompraAsync(CreateCompraDto dto, int tenantId);
-        Task ActualizarCompraAsync(UpdateCompraDto dto, int tenantId);
-        Task EliminarCompraAsync(int id, int tenantId);
-        Task ForzarCierreAsync(int id, int tenantId);
-
-        // Validations
-        Task<bool> VerificarTrackingAsync(string tracking, int? excluirCompraId, int tenantId);
-        Task<bool> VerificarSerialAsync(string serial, int? excluirItemId, int tenantId);
-        
-        // Complex Logic
-        Task<RecibirItemResult> RecibirItemAsync(RecibirItemDto dto, int tenantId);
-        Task<(bool EsAccesorio, string ProductoNombre)> GetItemInfoAsync(int itemId, int tenantId);
+        Task<(IEnumerable<CompraListDto> Items, int Activos, decimal InversionFlotante)> ObtenerHistorialAsync(string? buscar, string viewType);
+        Task<CompraDto?> ObtenerPorIdAsync(int id);
+        Task<IEnumerable<ItemCompraDto>> ObtenerItemsPorCompraAsync(int compraId);
+        Task<int> CrearCompraAsync(CreateCompraDto dto);
+        Task ActualizarCompraAsync(UpdateCompraDto dto);
+        Task EliminarCompraAsync(int id);
+        Task ForzarCierreAsync(int id);
+        Task<bool> VerificarTrackingAsync(string tracking, int? excluirCompraId);
+        Task<bool> VerificarSerialAsync(string serial, int? excluirItemId);
+        Task<RecibirItemResult> RecibirItemAsync(RecibirItemDto dto);
+        Task<(bool EsAccesorio, string ProductoNombre)> GetItemInfoAsync(int itemId);
     }
-    
+
     public class RecibirItemResult
     {
         public bool Success { get; set; }

@@ -6,6 +6,6 @@ namespace ZeltekWeb.Repositories.Interfaces
 {
     public interface IGarantiaRepository
     {
-        Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar, int tenantId);
+        Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar);
     }
 }

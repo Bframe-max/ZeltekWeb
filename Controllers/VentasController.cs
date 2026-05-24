@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ZeltekWeb.Models.DTOs;
-using ZeltekWeb.Repositories; // For IVentaRepository (History)
-using ZeltekWeb.Services.Interfaces; // For IVentaService
+using ZeltekWeb.Services.Interfaces;
 
 namespace ZeltekWeb.Controllers
 {
@@ -21,14 +20,11 @@ namespace ZeltekWeb.Controllers
             if (!fechaInicio.HasValue) fechaInicio = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
             if (!fechaFin.HasValue) fechaFin = DateTime.Now;
 
-            int tenantId = GetTenantId();
+            var resumen = await _ventaService.ObtenerHistorialAsync(buscar, fechaInicio, fechaFin);
 
-            var resumen = await _ventaService.ObtenerHistorialAsync(buscar, fechaInicio, fechaFin, tenantId);
-            
             ViewBag.TotalVendido = resumen.TotalVendido;
             ViewBag.TotalGanancia = resumen.TotalGanancia;
             ViewBag.TotalEquipos = resumen.TotalEquipos;
-
             ViewData["Busqueda"] = buscar;
             ViewData["FechaInicio"] = fechaInicio.Value.ToString("yyyy-MM-dd");
             ViewData["FechaFin"] = fechaFin.Value.ToString("yyyy-MM-dd");
@@ -41,16 +37,15 @@ namespace ZeltekWeb.Controllers
         {
             if (!ModelState.IsValid)
             {
-                 var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
-                 return Json(new { success = false, message = "⚠️ " + errors });
+                var errors = string.Join(" | ", ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage));
+                return Json(new { success = false, message = "⚠️ " + errors });
             }
 
             dto.Usuario = User.Identity?.Name ?? "Sistema";
-            int tenantId = GetTenantId();
 
             try
             {
-                await _ventaService.RegistrarVentaRapidaAsync(dto, tenantId);
+                await _ventaService.RegistrarVentaRapidaAsync(dto);
                 return Json(new { success = true, message = "✅ Venta registrada correctamente." });
             }
             catch (Exception ex)
@@ -63,16 +58,14 @@ namespace ZeltekWeb.Controllers
         public async Task<IActionResult> GetProductoInfo(int id)
         {
             if (id <= 0) return Json(null);
-            int tenantId = GetTenantId();
-            var info = await _ventaService.ObtenerProductoInfoAsync(id, tenantId);
+            var info = await _ventaService.ObtenerProductoInfoAsync(id);
             return Json(info);
         }
 
         [HttpGet]
         public async Task<IActionResult> BuscarClientes(string termino)
         {
-            int tenantId = GetTenantId();
-            var clientes = await _ventaService.BuscarClientesAsync(termino, tenantId);
+            var clientes = await _ventaService.BuscarClientesAsync(termino);
             return Json(clientes);
         }
     }

@@ -15,36 +15,23 @@ namespace ZeltekWeb.Services
             _repository = repository;
         }
 
-        public async Task<DashboardViewModel> GetDashboardMetricsAsync(int tenantId)
+        public async Task<DashboardViewModel> GetDashboardMetricsAsync()
         {
             var model = new DashboardViewModel();
+            model.VentasHoy = await _repository.GetVentasHoyAsync();
 
-            // 1. Ventas de Hoy
-            model.VentasHoy = await _repository.GetVentasHoyAsync(tenantId);
-            
-            // 2. En Camino Metrics
-            var excludedStatuses = new[] 
-            { 
-                PurchaseStatus.Completado, 
-                PurchaseStatus.Recibida, 
-                "Recibido", 
-                PurchaseStatus.Cancelada, 
-                "Cancelado"
-            };
-            var enCamino = await _repository.GetEnCaminoMetricsAsync(excludedStatuses, tenantId);
+            var excludedStatuses = new[] { PurchaseStatus.Completado, PurchaseStatus.Recibida, "Recibido", PurchaseStatus.Cancelada, "Cancelado" };
+            var enCamino = await _repository.GetEnCaminoMetricsAsync(excludedStatuses);
             model.EnCaminoCantidad = enCamino.Cantidad;
             model.EnCaminoMonto = enCamino.Monto;
 
-            // 3. Por Revisar Count
-            model.PorRevisarCantidad = await _repository.GetPorRevisarCountAsync(InventoryStatus.PorRevisar, tenantId); 
+            model.PorRevisarCantidad = await _repository.GetPorRevisarCountAsync(InventoryStatus.PorRevisar);
 
-            // 4. Stock Metrics
-            var stock = await _repository.GetStockMetricsAsync(InventoryStatus.EnStock, tenantId);
+            var stock = await _repository.GetStockMetricsAsync(InventoryStatus.EnStock);
             model.StockCantidad = stock.Cantidad;
             model.StockValor = stock.Valor;
 
-            // 5. Actividad Reciente
-            var actividadDtos = await _repository.GetRecienteActividadAsync(5, tenantId);
+            var actividadDtos = await _repository.GetRecienteActividadAsync(5);
             model.ActividadReciente = actividadDtos.Select(dto => new ActividadRecienteViewModel
             {
                 Tipo = dto.Tipo,
@@ -56,44 +43,31 @@ namespace ZeltekWeb.Services
             return model;
         }
 
-        public async Task<BusquedaGlobalViewModel> BuscarGlobalAsync(string query, int tenantId)
+        public async Task<BusquedaGlobalViewModel> BuscarGlobalAsync(string query)
         {
             var viewModel = new BusquedaGlobalViewModel { Query = query ?? "" };
             if (string.IsNullOrWhiteSpace(viewModel.Query)) return viewModel;
 
             var term = viewModel.Query.Trim();
 
-            // Execute in parallel
-            var taskVentas = _repository.BuscarEnVentasAsync(term, tenantId);
-            var taskCompras = _repository.BuscarEnComprasAsync(term, tenantId);
-            var taskInventario = _repository.BuscarEnInventarioAsync(term, tenantId);
-
+            var taskVentas = _repository.BuscarEnVentasAsync(term);
+            var taskCompras = _repository.BuscarEnComprasAsync(term);
+            var taskInventario = _repository.BuscarEnInventarioAsync(term);
             await Task.WhenAll(taskVentas, taskCompras, taskInventario);
 
-            // Map DTOs to ViewModels
-            viewModel.Ventas = (await taskVentas).Select(v => new ResultadoBusquedaVenta 
-            { 
-                VentaID = v.Id, 
-                ClienteNombre = v.Header, 
-                Fecha = v.Date ?? DateTime.MinValue, 
-                Total = v.Amount ?? 0 
+            viewModel.Ventas = (await taskVentas).Select(v => new ResultadoBusquedaVenta
+            {
+                VentaID = v.Id, ClienteNombre = v.Header, Fecha = v.Date ?? DateTime.MinValue, Total = v.Amount ?? 0
             }).ToList();
 
             viewModel.Compras = (await taskCompras).Select(c => new ResultadoBusquedaCompra
             {
-                CompraID = c.Id,
-                Tracking = c.Header,
-                ProductoPrincipal = c.SubHeader,
-                Fecha = c.Date ?? DateTime.MinValue,
-                Total = c.Amount ?? 0
+                CompraID = c.Id, Tracking = c.Header, ProductoPrincipal = c.SubHeader, Fecha = c.Date ?? DateTime.MinValue, Total = c.Amount ?? 0
             }).ToList();
 
             viewModel.Inventario = (await taskInventario).Select(i => new ResultadoBusquedaInventario
             {
-                ItemID = i.Id,
-                ProductoNombre = i.Header,
-                NumeroSerie = i.SubHeader,
-                Estado = i.Status
+                ItemID = i.Id, ProductoNombre = i.Header, NumeroSerie = i.SubHeader, Estado = i.Status
             }).ToList();
 
             return viewModel;

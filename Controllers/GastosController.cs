@@ -1,9 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using ZeltekWeb.Models;
 using ZeltekWeb.Models.DTOs;
 using ZeltekWeb.Services.Interfaces;
@@ -22,47 +18,28 @@ namespace ZeltekWeb.Controllers
             _logger = logger;
         }
 
-        // =========================
-        // LISTADO + RESUMEN
-        // =========================
         public async Task<IActionResult> Index(DateTime? desde, DateTime? hasta)
         {
             try
             {
-                int tenantId = GetTenantId();
+                var resumenDto = await _gastoService.ObtenerResumenAsync(desde, hasta);
+                var listadoDto = await _gastoService.ObtenerListadoAsync(desde, hasta);
+                var categoriasDto = await _gastoService.ObtenerPorCategoriaAsync(desde, hasta);
 
-                // Call service methods in parallel where possible, or sequential
-                var resumenDto = await _gastoService.ObtenerResumenAsync(desde, hasta, tenantId);
-                var listadoDto = await _gastoService.ObtenerListadoAsync(desde, hasta, tenantId);
-                var categoriasDto = await _gastoService.ObtenerPorCategoriaAsync(desde, hasta, tenantId);
-
-                // Map DTOs to ViewModels (Keeping original ViewModels to minimize View changes)
-                var resumen = new GastosResumenViewModel
-                {
-                    CantidadGastos = resumenDto.CantidadGastos,
-                    TotalGastos = resumenDto.TotalGastos
-                };
+                var resumen = new GastosResumenViewModel { CantidadGastos = resumenDto.CantidadGastos, TotalGastos = resumenDto.TotalGastos };
 
                 var lista = listadoDto.Select(g => new GastoListViewModel
                 {
-                    GastoID = g.GastoID,
-                    FechaGasto = g.FechaGasto,
-                    Descripcion = g.Descripcion,
-                    CategoriaGasto = g.CategoriaGasto,
-                    Monto = g.Monto
+                    GastoID = g.GastoID, FechaGasto = g.FechaGasto,
+                    Descripcion = g.Descripcion, CategoriaGasto = g.CategoriaGasto, Monto = g.Monto
                 }).ToList();
 
-                var gastosPorCategoria = categoriasDto.Select(c => new GastoPorCategoriaViewModel
-                {
-                    Categoria = c.Categoria,
-                    Total = c.Total
-                }).ToList();
+                var gastosPorCategoria = categoriasDto.Select(c => new GastoPorCategoriaViewModel { Categoria = c.Categoria, Total = c.Total }).ToList();
 
                 ViewBag.Resumen = resumen;
                 ViewBag.Desde = desde;
                 ViewBag.Hasta = hasta;
                 ViewBag.GastosPorCategoria = gastosPorCategoria;
-
                 return View(lista);
             }
             catch (Exception ex)
@@ -72,40 +49,21 @@ namespace ZeltekWeb.Controllers
             }
         }
 
-        // =========================
-        // CREAR
-        // =========================
         public IActionResult Create()
         {
             ViewBag.Categorias = ObtenerCategorias();
-            return View(new GastoCreateViewModel()); // Using existing ViewModel to keep view compatibility or switch to DTO? 
-            // Better stick to ViewModel if View expects it, or use DTO if View is updated.
-            // Requirement said "Usa DTOs para pasar datos a la vista". 
-            // But existing Views use GastoCreateViewModel.
-            // I will map ViewModel <-> DTO in Controller.
+            return View(new GastoCreateViewModel());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create(GastoCreateViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Categorias = ObtenerCategorias();
-                return View(model);
-            }
+            if (!ModelState.IsValid) { ViewBag.Categorias = ObtenerCategorias(); return View(model); }
 
             try
             {
-                int tenantId = GetTenantId();
-                var dto = new GastoCreateDto
-                {
-                    FechaGasto = model.FechaGasto,
-                    Descripcion = model.Descripcion,
-                    CategoriaGasto = model.CategoriaGasto,
-                    Monto = model.Monto
-                };
-
-                await _gastoService.CrearAsync(dto, tenantId);
+                var dto = new GastoCreateDto { FechaGasto = model.FechaGasto, Descripcion = model.Descripcion, CategoriaGasto = model.CategoriaGasto, Monto = model.Monto };
+                await _gastoService.CrearAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -116,28 +74,18 @@ namespace ZeltekWeb.Controllers
             }
         }
 
-        // =========================
-        // EDITAR
-        // =========================
         public async Task<IActionResult> Edit(int id)
         {
             try
             {
-                int tenantId = GetTenantId();
-                var dto = await _gastoService.ObtenerPorIdAsync(id, tenantId);
-
-                if (dto == null)
-                    return NotFound();
+                var dto = await _gastoService.ObtenerPorIdAsync(id);
+                if (dto == null) return NotFound();
 
                 var model = new GastoEditViewModel
                 {
-                    GastoID = dto.GastoID,
-                    FechaGasto = dto.FechaGasto,
-                    Descripcion = dto.Descripcion,
-                    CategoriaGasto = dto.CategoriaGasto,
-                    Monto = dto.Monto
+                    GastoID = dto.GastoID, FechaGasto = dto.FechaGasto,
+                    Descripcion = dto.Descripcion, CategoriaGasto = dto.CategoriaGasto, Monto = dto.Monto
                 };
-
                 ViewBag.Categorias = ObtenerCategorias();
                 return View(model);
             }
@@ -151,25 +99,16 @@ namespace ZeltekWeb.Controllers
         [HttpPost]
         public async Task<IActionResult> Edit(GastoEditViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                ViewBag.Categorias = ObtenerCategorias();
-                return View(model);
-            }
+            if (!ModelState.IsValid) { ViewBag.Categorias = ObtenerCategorias(); return View(model); }
 
             try
             {
-                int tenantId = GetTenantId();
                 var dto = new GastoEditDto
                 {
-                    GastoID = model.GastoID,
-                    FechaGasto = model.FechaGasto,
-                    Descripcion = model.Descripcion,
-                    CategoriaGasto = model.CategoriaGasto,
-                    Monto = model.Monto
+                    GastoID = model.GastoID, FechaGasto = model.FechaGasto,
+                    Descripcion = model.Descripcion, CategoriaGasto = model.CategoriaGasto, Monto = model.Monto
                 };
-
-                await _gastoService.ActualizarAsync(dto, tenantId);
+                await _gastoService.ActualizarAsync(dto);
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
@@ -180,43 +119,18 @@ namespace ZeltekWeb.Controllers
             }
         }
 
-        // =========================
-        // ELIMINAR
-        // =========================
         [HttpPost]
         [Authorize(Roles = UserRoles.Admin)]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                int tenantId = GetTenantId();
-                await _gastoService.EliminarAsync(id, tenantId);
-                return RedirectToAction(nameof(Index));
-            }
-            catch (Exception ex)
-            {
-                // Should redirect to Index with error message or similar
-                _logger.LogError(ex, "Error deleting Gasto");
-                return RedirectToAction(nameof(Index)); 
-            }
+            try { await _gastoService.EliminarAsync(id); }
+            catch (Exception ex) { _logger.LogError(ex, "Error deleting Gasto"); }
+            return RedirectToAction(nameof(Index));
         }
 
-        // =========================
-        // CATEGORÍAS
-        // =========================
-        private static string[] ObtenerCategorias()
+        private static string[] ObtenerCategorias() => new[]
         {
-            return new[]
-            {
-                "Logística",
-                "Servicios",
-                "Marketing",
-                "Insumos",
-                "Mantenimiento",
-                "Comisiones",
-                "Impuestos",
-                "Otros"
-            };
-        }
+            "Logística", "Servicios", "Marketing", "Insumos", "Mantenimiento", "Comisiones", "Impuestos", "Otros"
+        };
     }
 }

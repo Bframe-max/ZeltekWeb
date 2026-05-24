@@ -1,6 +1,5 @@
 using Dapper;
 using System.Data;
-using ZeltekWeb.Constants;
 using ZeltekWeb.Data;
 using ZeltekWeb.Models;
 using ZeltekWeb.Models.DTOs;
@@ -17,33 +16,20 @@ namespace ZeltekWeb.Repositories
             _connectionFactory = connectionFactory;
         }
 
-        public async Task<(IEnumerable<InventarioItemDto> Items, int TotalLaptops, int TotalAccesorios)> ObtenerInventarioAsync(string? buscar, string filtro, int tenantId)
+        public async Task<(IEnumerable<InventarioItemDto> Items, int TotalLaptops, int TotalAccesorios)> ObtenerInventarioAsync(string? buscar, string filtro)
         {
             using var db = _connectionFactory.CreateConnection();
-            string condicionEstado;
-            
-            // Map UI filter strings to SQL conditions
-            switch (filtro)
+            string condicionEstado = filtro switch
             {
-                case "Vendido":
-                    condicionEstado = "i.Estado = 'Vendido'";
-                    break;
-                case "Transito":
-                    condicionEstado = "i.Estado IN ('En Camino', 'En Transito', 'En Miami', 'En Aduana')"; // Align with other modules
-                    break;
-                case "Reparacion":
-                    condicionEstado = "i.Estado IN ('En Reparación', 'EnReparacion')";
-                    break;
-                case "Stock":
-                default:
-                    condicionEstado = "i.Estado = 'En Stock'";
-                    break;
-            }
+                "Vendido" => "i.Estado = 'Vendido'",
+                "Transito" => "i.Estado IN ('En Camino', 'En Transito', 'En Miami', 'En Aduana')",
+                "Reparacion" => "i.Estado IN ('En Reparación', 'EnReparacion')",
+                _ => "i.Estado = 'En Stock'"
+            };
 
             string sql = $@"
-                SELECT 
-                    i.ItemID,
-                    i.ProductoID,
+                SELECT
+                    i.ItemID, i.ProductoID,
                     p.Nombre AS ProductoNombre,
                     ISNULL(i.NumeroSerie, '') AS NumeroSerie,
                     i.Estado,
@@ -58,16 +44,14 @@ namespace ZeltekWeb.Repositories
                     ISNULL(i.Color, '') AS Color
                 FROM ItemInventario i
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE {condicionEstado}
-                AND i.TenantID = @TenantId "; // STRICT TENANT FILTER
+                WHERE {condicionEstado}";
 
             var parameters = new DynamicParameters();
-            parameters.Add("TenantId", tenantId);
 
             if (!string.IsNullOrEmpty(buscar))
             {
                 sql += @" AND (
-                    p.Nombre LIKE '%' + @Buscar + '%' 
+                    p.Nombre LIKE '%' + @Buscar + '%'
                     OR i.NumeroSerie LIKE '%' + @Buscar + '%'
                 )";
                 parameters.Add("Buscar", buscar);
@@ -76,24 +60,15 @@ namespace ZeltekWeb.Repositories
             sql += " ORDER BY i.ItemID DESC";
 
             var allItems = await db.QueryAsync<InventarioItemDto>(sql, parameters);
-            
-            // Calculate totals in-memory or via SQL? In-memory is fine for now as pagination isn't strictly requested yet but listing logic implies full load.
-            // But let's verify if user wants specific counts. The View separates Laptops vs Accesorios.
-            // The return tuple matches what Controller needs.
-            
-            var laptopsCount = allItems.Count(x => x.EsUnico);
-            var accesoriosCount = allItems.Count(x => !x.EsUnico);
-
-            return (allItems, laptopsCount, accesoriosCount);
+            return (allItems, allItems.Count(x => x.EsUnico), allItems.Count(x => !x.EsUnico));
         }
 
-        public async Task<InventarioItemDto?> ObtenerPorIdAsync(int id, int tenantId)
+        public async Task<InventarioItemDto?> ObtenerPorIdAsync(int id)
         {
             using var db = _connectionFactory.CreateConnection();
             string sql = @"
-                SELECT 
-                    i.ItemID,
-                    i.ProductoID,
+                SELECT
+                    i.ItemID, i.ProductoID,
                     p.Nombre AS ProductoNombre,
                     ISNULL(i.NumeroSerie, '') AS NumeroSerie,
                     i.Estado,
@@ -108,12 +83,11 @@ namespace ZeltekWeb.Repositories
                     ISNULL(i.Color, '') AS Color
                 FROM ItemInventario i
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE i.ItemID = @ID AND i.TenantID = @TenantId";
-            
-            return await db.QueryFirstOrDefaultAsync<InventarioItemDto>(sql, new { ID = id, TenantId = tenantId });
+                WHERE i.ItemID = @ID";
+            return await db.QueryFirstOrDefaultAsync<InventarioItemDto>(sql, new { ID = id });
         }
 
-        public async Task RecibirProductoAsync(RecepcionProductoDto dto, int tenantId)
+        public async Task RecibirProductoAsync(RecepcionProductoDto dto)
         {
             using var db = _connectionFactory.CreateConnection();
             db.Open();
@@ -121,82 +95,33 @@ namespace ZeltekWeb.Repositories
 
             try
             {
-                string estadoFinal = (dto.Condicion == "Nuevo" || dto.Condicion == "Nuevo/Accesorio") ? "En Stock" : "Por Revisar";
-                // If it's explicitly set via logic:
-                // Actually the business logic from controller was:
-                // If "Accesorios/Lotes" -> "Nuevo/Accesorio" implied "En Stock" usually, but technically "Por Revisar" is safer if not fully trusted.
-                // However, previous controller set Estado based on `Condicion`. 
-                // Let's trust the logic from Service Layer to pass correct params, but here we just update.
-                // WAIT: The previous logic had a `RecibirCompra` generic method too.
-                // Here we are receiving specific items.
-                
-                // Let's rely on standard logic: if it's new it might skip revision, if used it goes to revision.
-                // But the `sp_RecibirLaptopConAccesorios` did both updates. 
-                // We will implement direct SQL update here to be more transparent and multi-tenant safe.
+                string estado = "Por Revisar";
+                if (dto.Condicion != null && dto.Condicion.Contains("Nuevo", StringComparison.OrdinalIgnoreCase))
+                    estado = "En Stock";
 
                 var sql = @"
-                    UPDATE ItemInventario 
-                    SET 
-                        NumeroSerie = @Serie,
-                        Estado = @Estado,
-                        Condicion = @Condicion,
-                        Procesador = @Cpu,
-                        RAM_GB = @Ram,
-                        Almacenamiento_GB = @Rom,
-                        Color = @Color,
-                        CostoEnvio = @Envio,
-                        CostoOtros = @Otros,
+                    UPDATE ItemInventario
+                    SET NumeroSerie = @Serie, Estado = @Estado, Condicion = @Condicion,
+                        Procesador = @Cpu, RAM_GB = @Ram, Almacenamiento_GB = @Rom,
+                        Color = @Color, CostoEnvio = @Envio, CostoOtros = @Otros,
                         FechaRecepcion = GETDATE()
-                    WHERE ItemID = @ItemID AND TenantID = @TenantId";
-
-                // Logic: if Condicion is "Nuevo" or we want to skip revision...
-                // The Controller passed `model.Condicion`. 
-                // Let's assume if it is "Nuevo", it goes "En Stock"??
-                // Controller `Recibir` method was calling `sp_RecibirLaptopConAccesorios` which probably handled status?
-                // Actually, the `RecibirCompra` action handles bulk status update.
-                // The individual receive might just set details but keep it "En Camino" until whole box is received? 
-                // NO, `sp_RecibirLaptopConAccesorios` updated status to 'En Stock' or 'Por Revisar'.
-                // Let's assume 'Por Revisar' is default safely unless strictly new.
-                
-                // Correction: The Service layer should decide the status. 
-                // I will add `Estado` to DTO or assume a default. 
-                // Let's stick to "Por Revisar" for safety, or check condition.
-                
-                string estado = "Por Revisar"; 
-                if (dto.Condicion != null && dto.Condicion.Contains("Nuevo", StringComparison.OrdinalIgnoreCase)) 
-                    estado = "En Stock";
+                    WHERE ItemID = @ItemID";
 
                 await db.ExecuteAsync(sql, new
                 {
-                    Serie = dto.NumeroSerie,
-                    Estado = estado,
-                    Condicion = dto.Condicion,
-                    Cpu = dto.Procesador,
-                    Ram = dto.Ram,
-                    Rom = dto.Almacenamiento,
-                    Color = dto.Color,
-                    Envio = dto.CostoEnvio,
-                    Otros = dto.CostoOtros,
-                    ItemID = dto.ItemID,
-                    TenantId = tenantId
+                    Serie = dto.NumeroSerie, Estado = estado, Condicion = dto.Condicion,
+                    Cpu = dto.Procesador, Ram = dto.Ram, Rom = dto.Almacenamiento,
+                    Color = dto.Color, Envio = dto.CostoEnvio, Otros = dto.CostoOtros,
+                    ItemID = dto.ItemID
                 }, tx);
 
-                // Handle Charger Logic if needed (Updating another item to be "Sold/Used" or "Attached")
-                // Previous SP `sp_RecibirLaptopConAccesorios` likely handled decreasing stock of chargers if `RequiereCargadorDeStock` is true.
                 if (dto.RequiereCargadorDeStock && dto.IdCargador.HasValue)
                 {
-                    // Logic: Find a charger of that type in stock and link it or mark it?
-                    // Usually it decreases quantity of the charger stack.
-                    // "Unlink" one from stock.
                     var sqlCargador = @"
-                        UPDATE ItemInventario 
-                        SET CantidadActual = CantidadActual - 1 
-                        WHERE ProductoID = @CargadorID 
-                        AND Estado = 'En Stock' 
-                        AND CantidadActual > 0
-                        AND TenantID = @TenantId";
-                        
-                    await db.ExecuteAsync(sqlCargador, new { CargadorID = dto.IdCargador.Value, TenantId = tenantId }, tx);
+                        UPDATE ItemInventario
+                        SET CantidadActual = CantidadActual - 1
+                        WHERE ProductoID = @CargadorID AND Estado = 'En Stock' AND CantidadActual > 0";
+                    await db.ExecuteAsync(sqlCargador, new { CargadorID = dto.IdCargador.Value }, tx);
                 }
 
                 tx.Commit();
@@ -208,263 +133,188 @@ namespace ZeltekWeb.Repositories
             }
         }
 
-        public async Task<bool> ActualizarEstadoCompraSiCompletaAsync(int compraId, int tenantId)
+        public async Task<bool> ActualizarEstadoCompraSiCompletaAsync(int compraId)
         {
             using var db = _connectionFactory.CreateConnection();
             string sqlCheck = @"
-                SELECT COUNT(*) 
-                FROM ItemInventario 
-                WHERE CompraID = @CompraID 
-                AND Estado IN ('En Camino', 'En Transito', 'En Transito USA', 'En Miami', 'Viajando a NIC', 'En Aduana')
-                AND TenantID = @TenantId"; // Check if any pending items exist
+                SELECT COUNT(*)
+                FROM ItemInventario
+                WHERE CompraID = @CompraID
+                AND Estado IN ('En Camino', 'En Transito', 'En Transito USA', 'En Miami', 'Viajando a NIC', 'En Aduana')";
 
-            int pending = await db.ExecuteScalarAsync<int>(sqlCheck, new { CompraID = compraId, TenantId = tenantId });
+            int pending = await db.ExecuteScalarAsync<int>(sqlCheck, new { CompraID = compraId });
 
             if (pending == 0)
             {
-                string sqlUpdate = "UPDATE Compra SET EstadoCompra = 'Recibida' WHERE CompraID = @ID AND TenantID = @TenantId";
-                await db.ExecuteAsync(sqlUpdate, new { ID = compraId, TenantId = tenantId });
+                await db.ExecuteAsync("UPDATE Compra SET EstadoCompra = 'Recibida' WHERE CompraID = @ID", new { ID = compraId });
                 return true;
             }
             return false;
         }
 
-        public async Task MarcarCompraRecibidaManualAsync(int compraId, bool omitirRevision, int tenantId)
+        public async Task MarcarCompraRecibidaManualAsync(int compraId, bool omitirRevision)
         {
-             using var db = _connectionFactory.CreateConnection();
-             string nuevoEstado = omitirRevision ? "En Stock" : "Por Revisar";
-             
-             string sql = @"
-                UPDATE ItemInventario 
-                SET Estado = @Estado
-                WHERE CompraID = @CompraID 
-                AND Estado IN ('En Camino', 'En Transito', 'En Transito USA', 'En Miami', 'Viajando a NIC', 'En Aduana')
-                AND TenantID = @TenantId";
+            using var db = _connectionFactory.CreateConnection();
+            string nuevoEstado = omitirRevision ? "En Stock" : "Por Revisar";
 
-             await db.ExecuteAsync(sql, new { Estado = nuevoEstado, CompraID = compraId, TenantId = tenantId });
-             
-             // Also update Compra Header
-             await db.ExecuteAsync("UPDATE Compra SET EstadoCompra = 'Recibida' WHERE CompraID = @ID AND TenantID = @TenantId", 
-                new { ID = compraId, TenantId = tenantId });
+            await db.ExecuteAsync(@"
+                UPDATE ItemInventario SET Estado = @Estado
+                WHERE CompraID = @CompraID
+                AND Estado IN ('En Camino', 'En Transito', 'En Transito USA', 'En Miami', 'Viajando a NIC', 'En Aduana')",
+                new { Estado = nuevoEstado, CompraID = compraId });
+
+            await db.ExecuteAsync("UPDATE Compra SET EstadoCompra = 'Recibida' WHERE CompraID = @ID", new { ID = compraId });
         }
 
-        public async Task<IEnumerable<ItemPorRevisarViewModel>> ObtenerPorRevisarAsync(int tenantId)
+        public async Task<IEnumerable<ItemPorRevisarViewModel>> ObtenerPorRevisarAsync()
         {
             using var db = _connectionFactory.CreateConnection();
             string sql = @"
-                SELECT 
-                    i.ItemID, 
-                    p.Nombre AS ProductoNombre, 
-                    ISNULL(i.NumeroSerie, 'S/N') AS NumeroSerie,
-                    i.FechaRecepcion
+                SELECT i.ItemID, p.Nombre AS ProductoNombre, ISNULL(i.NumeroSerie, 'S/N') AS NumeroSerie, i.FechaRecepcion
                 FROM ItemInventario i
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE i.Estado = 'Por Revisar' AND i.TenantID = @TenantId
+                WHERE i.Estado = 'Por Revisar'
                 ORDER BY i.ItemID DESC";
-
-            return await db.QueryAsync<ItemPorRevisarViewModel>(sql, new { TenantId = tenantId });
+            return await db.QueryAsync<ItemPorRevisarViewModel>(sql);
         }
 
-        public async Task ProcesarInspeccionAsync(InspeccionCalidadDto dto, int tenantId)
+        public async Task ProcesarInspeccionAsync(InspeccionCalidadDto dto)
         {
             using var db = _connectionFactory.CreateConnection();
             db.Open();
             using var tx = db.BeginTransaction();
-            try 
+            try
             {
                 if (dto.EsUnico)
                 {
-                    // Logic for Unique Items (Laptops/Phones)
-                    bool irAReparacion = !string.IsNullOrEmpty(dto.NotasInspeccion) || (!string.IsNullOrEmpty(dto.Condicion) && dto.Condicion.Contains("Dañado")); 
-                    // Or explicit flag? DTO doesn't have "Outcome". Logic usually implied by "NotasInspeccion" or specific button.
-                    // Controller had `string resultado`. We should probably pass that or infer it.
-                    // Let's assume passed in DTO or handled by Service logic calling this method with correct params.
-                    // Let's assume if MotivoRechazo is present -> Reparacion? 
-                    // Actually Controller logic: `irAReparacion = !string.Equals(resultado, "aprobar")`.
-                    // We need to know if we are approving or rejecting.
-                    
-                    // Let's use `MotivoRechazo` as the trigger for Reparation in Unique items too?
-                    // Controller used `NotasInspeccion` for Reparation Detail.
-                    
-                    // Let's assume: If `MotivoRechazo` or `NotasInspeccion` is populated AND we aren't approving... 
-                    // Wait, `InspeccionCalidadDto` is new.
-                    // I'll assume Service layer decides and sets status on DTO or we pass status?
-                    // Refactor: Let's trust "Condicion". If "Para Reparacion", etc.
-                    // But simpler: If "NotasInspeccion" has content -> Repair? No, notes can be "Good condition".
-                    
-                    // Let's trust `MotivoRechazo` as "ProblemaReportado".
-                    bool isRepair = !string.IsNullOrEmpty(dto.MotivoRechazo); 
-                    
+                    bool isRepair = !string.IsNullOrEmpty(dto.MotivoRechazo);
                     string nuevoEstado = isRepair ? "En Reparación" : "En Stock";
-                    
+
                     if (isRepair)
                     {
-                         var sqlRep = @"
-                            INSERT INTO Reparaciones (ItemID, ProblemaReportado, Estado, TenantID)
-                            VALUES (@ItemID, @Problema, 'En Taller', @TenantId)";
-                         await db.ExecuteAsync(sqlRep, new { ItemID = dto.ItemID, Problema = dto.MotivoRechazo, TenantId = tenantId }, tx);
+                        await db.ExecuteAsync(
+                            "INSERT INTO Reparaciones (ItemID, ProblemaReportado, Estado) VALUES (@ItemID, @Problema, 'En Taller')",
+                            new { ItemID = dto.ItemID, Problema = dto.MotivoRechazo }, tx);
                     }
 
-                    var sqlUpdate = @"
-                        UPDATE ItemInventario
-                        SET Estado = @Estado,
-                            Condicion = @Condicion,
-                            SaludBateria = @Bateria
-                        WHERE ItemID = @ID AND TenantID = @TenantId";
-                    
-                    await db.ExecuteAsync(sqlUpdate, new 
-                    { 
-                        Estado = nuevoEstado, 
-                        Condicion = dto.Condicion, 
-                        Bateria = dto.SaludBateriaPorcentaje.HasValue ? dto.SaludBateriaPorcentaje.ToString() : null,
-                        ID = dto.ItemID,
-                        TenantId = tenantId
-                    }, tx);
+                    await db.ExecuteAsync(@"
+                        UPDATE ItemInventario SET Estado = @Estado, Condicion = @Condicion, SaludBateria = @Bateria
+                        WHERE ItemID = @ID",
+                        new { Estado = nuevoEstado, Condicion = dto.Condicion,
+                              Bateria = dto.SaludBateriaPorcentaje.HasValue ? dto.SaludBateriaPorcentaje.ToString() : null,
+                              ID = dto.ItemID }, tx);
                 }
-                else 
+                else
                 {
-                    // Lote / Accesorio
                     int rejected = dto.CantidadTotal - dto.CantidadAprobada;
-                    
-                    // Update Stock
-                    var sqlUpdate = @"
-                        UPDATE ItemInventario
-                        SET Estado = 'En Stock',
-                            CantidadActual = @CantidadAprobada,
-                            Condicion = 'Nuevo/Accesorio'
-                        WHERE ItemID = @ID AND TenantID = @TenantId";
-                        
-                    await db.ExecuteAsync(sqlUpdate, new { CantidadAprobada = dto.CantidadAprobada, ID = dto.ItemID, TenantId = tenantId }, tx);
+
+                    await db.ExecuteAsync(@"
+                        UPDATE ItemInventario SET Estado = 'En Stock', CantidadActual = @CantidadAprobada, Condicion = 'Nuevo/Accesorio'
+                        WHERE ItemID = @ID",
+                        new { CantidadAprobada = dto.CantidadAprobada, ID = dto.ItemID }, tx);
 
                     if (rejected > 0)
                     {
-                        var sqlGasto = @"
-                            INSERT INTO GastoOperativo (FechaGasto, Descripcion, CategoriaGasto, Monto, TenantID)
-                            VALUES (GETDATE(), @Desc, 'Merma/Daño', @Monto, @TenantId)";
-                            
                         decimal loss = rejected * dto.CostoUnitario;
                         string desc = $"Merma/Rechazo en Inspección Lote #{dto.ItemID}: {rejected} unidades. Motivo: {dto.MotivoRechazo}";
-                        
-                        await db.ExecuteAsync(sqlGasto, new { Desc = desc, Monto = loss, TenantId = tenantId }, tx);
+                        await db.ExecuteAsync(
+                            "INSERT INTO GastoOperativo (FechaGasto, Descripcion, CategoriaGasto, Monto) VALUES (GETDATE(), @Desc, 'Merma/Daño', @Monto)",
+                            new { Desc = desc, Monto = loss }, tx);
                     }
                 }
-                
+
                 tx.Commit();
             }
-            catch 
+            catch
             {
                 tx.Rollback();
                 throw;
             }
         }
 
-        public async Task<IEnumerable<ItemEnReparacionViewModel>> ObtenerReparacionesActivasAsync(int tenantId)
+        public async Task<IEnumerable<ItemEnReparacionViewModel>> ObtenerReparacionesActivasAsync()
         {
             using var db = _connectionFactory.CreateConnection();
             string sql = @"
                 SELECT r.ItemID, p.Nombre AS ProductoNombre, ISNULL(i.NumeroSerie, 'S/N') AS NumeroSerie,
-                       r.ProblemaReportado,
-                       r.FechaIngreso
+                       r.ProblemaReportado, r.FechaIngreso
                 FROM Reparaciones r
                 INNER JOIN ItemInventario i ON r.ItemID = i.ItemID
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE r.Estado = 'En Taller' AND r.TenantID = @TenantId
+                WHERE r.Estado = 'En Taller'
                 ORDER BY r.ReparacionID DESC";
-            
-            return await db.QueryAsync<ItemEnReparacionViewModel>(sql, new { TenantId = tenantId });
+            return await db.QueryAsync<ItemEnReparacionViewModel>(sql);
         }
 
-        public async Task FinalizarReparacionAsync(FinalizarReparacionDto dto, int tenantId)
+        public async Task FinalizarReparacionAsync(FinalizarReparacionDto dto)
         {
             using var db = _connectionFactory.CreateConnection();
             db.Open();
             using var tx = db.BeginTransaction();
-            try 
+            try
             {
-                 // Update Reparaciones
-                 var sqlRep = @"
-                    UPDATE Reparaciones
-                    SET CostoRepuestos = @Repuestos,
-                        CostoManoObra = @ManoObra,
-                        TrabajoRealizado = @Notas,
-                        FechaSalida = GETDATE(),
-                        Estado = 'Finalizada'
-                    WHERE ItemID = @ItemID AND Estado = 'En Taller' AND TenantID = @TenantId";
-                    
-                 await db.ExecuteAsync(sqlRep, new 
-                 {
-                     Repuestos = dto.CostoRepuestos,
-                     ManoObra = dto.CostoManoObra,
-                     Notas = dto.NotasReparacion,
-                     ItemID = dto.ItemID,
-                     TenantId = tenantId
-                 }, tx);
+                await db.ExecuteAsync(@"
+                    UPDATE Reparaciones SET CostoRepuestos = @Repuestos, CostoManoObra = @ManoObra,
+                        TrabajoRealizado = @Notas, FechaSalida = GETDATE(), Estado = 'Finalizada'
+                    WHERE ItemID = @ItemID AND Estado = 'En Taller'",
+                    new { Repuestos = dto.CostoRepuestos, ManoObra = dto.CostoManoObra,
+                          Notas = dto.NotasReparacion, ItemID = dto.ItemID }, tx);
 
-                 // Update ItemInventario
-                 var total = dto.CostoRepuestos + dto.CostoManoObra;
-                 var sqlItem = @"
-                    UPDATE ItemInventario
-                    SET Estado = 'En Stock',
-                        CostoReparacion = ISNULL(CostoReparacion, 0) + @Total
-                    WHERE ItemID = @ItemID AND TenantID = @TenantId";
-                    
-                 await db.ExecuteAsync(sqlItem, new { Total = total, ItemID = dto.ItemID, TenantId = tenantId }, tx);
+                var total = dto.CostoRepuestos + dto.CostoManoObra;
+                await db.ExecuteAsync(@"
+                    UPDATE ItemInventario SET Estado = 'En Stock', CostoReparacion = ISNULL(CostoReparacion, 0) + @Total
+                    WHERE ItemID = @ItemID",
+                    new { Total = total, ItemID = dto.ItemID }, tx);
 
-                 tx.Commit();
+                tx.Commit();
             }
-            catch 
+            catch
             {
                 tx.Rollback();
                 throw;
             }
         }
 
-        public async Task RegistrarPerdidaReparacionAsync(int itemId, string motivo, int tenantId)
+        public async Task RegistrarPerdidaReparacionAsync(int itemId, string motivo)
         {
             using var db = _connectionFactory.CreateConnection();
             db.Open();
             using var tx = db.BeginTransaction();
-            try 
+            try
             {
-                // Get Cost
-                var sqlGet = "SELECT (CostoCompra + ISNULL(CostoEnvio, 0) + ISNULL(CostoReparacion, 0)) FROM ItemInventario WHERE ItemID = @ID AND TenantID = @TenantId";
-                decimal costo = await db.ExecuteScalarAsync<decimal>(sqlGet, new { ID = itemId, TenantId = tenantId }, tx);
+                var sqlGet = "SELECT (CostoCompra + ISNULL(CostoEnvio, 0) + ISNULL(CostoReparacion, 0)) FROM ItemInventario WHERE ItemID = @ID";
+                decimal costo = await db.ExecuteScalarAsync<decimal>(sqlGet, new { ID = itemId }, tx);
 
-                // Mark Item Lost
-                await db.ExecuteAsync("UPDATE ItemInventario SET Estado = 'Perdida' WHERE ItemID = @ID AND TenantID = @TenantId", new { ID = itemId, TenantId = tenantId }, tx);
-
-                // Cancel Repair
-                var sqlRep = "UPDATE Reparaciones SET Estado = 'Cancelada', TrabajoRealizado = @Motivo WHERE ItemID = @ID AND Estado = 'En Taller' AND TenantID = @TenantId";
-                await db.ExecuteAsync(sqlRep, new { ID = itemId, Motivo = "DECLARADA PÉRDIDA TOTAL: " + motivo, TenantId = tenantId }, tx);
-
-                // Log Expense
-                var sqlGasto = @"
-                    INSERT INTO GastoOperativo (FechaGasto, Descripcion, CategoriaGasto, Monto, TenantID)
-                    VALUES (GETDATE(), @Desc, 'Merma/Daño', @Monto, @TenantId)";
-                await db.ExecuteAsync(sqlGasto, new { Desc = $"Pérdida Total en Reparación Item #{itemId}. Motivo: {motivo}", Monto = costo, TenantId = tenantId }, tx);
+                await db.ExecuteAsync("UPDATE ItemInventario SET Estado = 'Perdida' WHERE ItemID = @ID", new { ID = itemId }, tx);
+                await db.ExecuteAsync(
+                    "UPDATE Reparaciones SET Estado = 'Cancelada', TrabajoRealizado = @Motivo WHERE ItemID = @ID AND Estado = 'En Taller'",
+                    new { ID = itemId, Motivo = "DECLARADA PÉRDIDA TOTAL: " + motivo }, tx);
+                await db.ExecuteAsync(
+                    "INSERT INTO GastoOperativo (FechaGasto, Descripcion, CategoriaGasto, Monto) VALUES (GETDATE(), @Desc, 'Merma/Daño', @Monto)",
+                    new { Desc = $"Pérdida Total en Reparación Item #{itemId}. Motivo: {motivo}", Monto = costo }, tx);
 
                 tx.Commit();
             }
-            catch 
+            catch
             {
-                 tx.Rollback();
-                 throw;
+                tx.Rollback();
+                throw;
             }
         }
 
-        public async Task<bool> ActualizarPrecioAsync(int itemId, decimal nuevoPrecio, int tenantId)
+        public async Task<bool> ActualizarPrecioAsync(int itemId, decimal nuevoPrecio)
         {
             using var db = _connectionFactory.CreateConnection();
-            var sql = "UPDATE ItemInventario SET PrecioVenta = @Precio WHERE ItemID = @ID AND TenantID = @TenantId";
-            var rows = await db.ExecuteAsync(sql, new { Precio = nuevoPrecio, ID = itemId, TenantId = tenantId });
+            var rows = await db.ExecuteAsync("UPDATE ItemInventario SET PrecioVenta = @Precio WHERE ItemID = @ID", new { Precio = nuevoPrecio, ID = itemId });
             return rows > 0;
         }
 
-        public async Task<bool> ExisteItemEnCompraAsync(int itemId, int compraId, int tenantId)
+        public async Task<bool> ExisteItemEnCompraAsync(int itemId, int compraId)
         {
-             using var db = _connectionFactory.CreateConnection();
-             var sql = "SELECT 1 FROM ItemInventario WHERE ItemID = @ItemID AND CompraID = @CompraID AND TenantID = @TenantId";
-             return await db.ExecuteScalarAsync<int?>(sql, new { ItemID = itemId, CompraID = compraId, TenantId = tenantId }) != null;
+            using var db = _connectionFactory.CreateConnection();
+            return await db.ExecuteScalarAsync<int?>(
+                "SELECT 1 FROM ItemInventario WHERE ItemID = @ItemID AND CompraID = @CompraID",
+                new { ItemID = itemId, CompraID = compraId }) != null;
         }
     }
 }

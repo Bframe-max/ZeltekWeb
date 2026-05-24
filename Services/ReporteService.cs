@@ -15,7 +15,7 @@ namespace ZeltekWeb.Services
             _reporteRepo = reporteRepo;
         }
 
-        public async Task<ReporteDashboardDto> ObtenerDashboardAsync(int mesesTendencia, int periodoGananciaMeses, int tenantId)
+        public async Task<ReporteDashboardDto> ObtenerDashboardAsync(int mesesTendencia, int periodoGananciaMeses)
         {
             var dashboard = new ReporteDashboardDto
             {
@@ -23,19 +23,15 @@ namespace ZeltekWeb.Services
                 PeriodoGananciaMeses = periodoGananciaMeses
             };
 
-            // Aggregating data.
-            // If any of these fail (e.g. missing Gasto table), we might want to catch it individually if we want partial dashboard.
-            // For now, let it bubble and Controller catches it.
-            
-            dashboard.Tendencia = (await _reporteRepo.ObtenerTendenciaVentasAsync(mesesTendencia, tenantId)).ToList();
-            dashboard.TopProductos = (await _reporteRepo.ObtenerTopProductosAsync(tenantId)).ToList();
-            dashboard.ResumenFinanciero = await _reporteRepo.ObtenerResumenFinancieroAsync(periodoGananciaMeses, tenantId);
-            
-            decimal valorInventario = await _reporteRepo.ObtenerValorInventarioActualAsync(tenantId);
+            dashboard.Tendencia = (await _reporteRepo.ObtenerTendenciaVentasAsync(mesesTendencia)).ToList();
+            dashboard.TopProductos = (await _reporteRepo.ObtenerTopProductosAsync()).ToList();
+            dashboard.ResumenFinanciero = await _reporteRepo.ObtenerResumenFinancieroAsync(periodoGananciaMeses);
+
+            decimal valorInventario = await _reporteRepo.ObtenerValorInventarioActualAsync();
             dashboard.ValorInventario = new ValorInventarioDto { TotalValor = valorInventario };
-            
-            dashboard.InventarioDormido = (await _reporteRepo.ObtenerInventarioDormidoAsync(tenantId)).ToList();
-            dashboard.TopRevendedores = (await _reporteRepo.ObtenerTopRevendedoresAsync(tenantId)).ToList();
+
+            dashboard.InventarioDormido = (await _reporteRepo.ObtenerInventarioDormidoAsync()).ToList();
+            dashboard.TopRevendedores = (await _reporteRepo.ObtenerTopRevendedoresAsync()).ToList();
 
             return dashboard;
         }

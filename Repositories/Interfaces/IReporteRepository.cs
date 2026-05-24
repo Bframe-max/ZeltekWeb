@@ -6,11 +6,11 @@ namespace ZeltekWeb.Repositories.Interfaces
 {
     public interface IReporteRepository
     {
-        Task<IEnumerable<TendenciaVentasDto>> ObtenerTendenciaVentasAsync(int meses, int tenantId);
-        Task<IEnumerable<TopProductoDto>> ObtenerTopProductosAsync(int tenantId);
-        Task<ResumenFinancieroDto> ObtenerResumenFinancieroAsync(int periodoMeses, int tenantId);
-        Task<decimal> ObtenerValorInventarioActualAsync(int tenantId);
-        Task<IEnumerable<InventarioDormidoDto>> ObtenerInventarioDormidoAsync(int tenantId);
-        Task<IEnumerable<TopRevendedorDto>> ObtenerTopRevendedoresAsync(int tenantId);
+        Task<IEnumerable<TendenciaVentasDto>> ObtenerTendenciaVentasAsync(int meses);
+        Task<IEnumerable<TopProductoDto>> ObtenerTopProductosAsync();
+        Task<ResumenFinancieroDto> ObtenerResumenFinancieroAsync(int periodoMeses);
+        Task<decimal> ObtenerValorInventarioActualAsync();
+        Task<IEnumerable<InventarioDormidoDto>> ObtenerInventarioDormidoAsync();
+        Task<IEnumerable<TopRevendedorDto>> ObtenerTopRevendedoresAsync();
     }
 }

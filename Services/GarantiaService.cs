@@ -15,10 +15,7 @@ namespace ZeltekWeb.Services
             _garantiaRepo = garantiaRepo;
         }
 
-        public async Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar, int tenantId)
-        {
-            // Business logic could be added here (e.g. specialized filtering or enrichment)
-            return await _garantiaRepo.ObtenerGarantiasVigentesAsync(buscar, tenantId);
-        }
+        public async Task<IEnumerable<GarantiaVigenteDto>> ObtenerGarantiasVigentesAsync(string? buscar)
+            => await _garantiaRepo.ObtenerGarantiasVigentesAsync(buscar);
     }
 }

@@ -4,27 +4,19 @@ namespace ZeltekWeb.Repositories.Interfaces
 {
     public interface IProductoRepository
     {
-        Task<IEnumerable<ProductoDto>> ObtenerTodosAsync(int tenantId);
-        Task<ProductoDto?> ObtenerPorIdAsync(int id, int tenantId);
-        Task<int> CrearAsync(CreateProductoDto dto, int tenantId);
-        Task ActualizarAsync(UpdateProductoDto dto, int tenantId);
-        Task EliminarAsync(int id, int tenantId);
-        Task ReactivarAsync(int id, int tenantId);
-        
-        // Lookups
-        Task<IEnumerable<MarcaDto>> ObtenerMarcasAsync(int tenantId);
-        Task<IEnumerable<CategoriaDto>> ObtenerCategoriasAsync(int tenantId);
-        
-        // Custom Lookups
-        Task<IEnumerable<ProductoDto>> ObtenerCargadoresYAccesoriosAsync(int tenantId);
-        
-        // Validation / Helpers
-        Task<bool> ExisteNombreAsync(string nombre, int? excludeId, int tenantId);
-        Task<bool> ExisteMarcaAsync(string nombre, int tenantId);
-        Task<bool> ExisteCategoriaAsync(string nombre, int tenantId);
-        
-        // Quick Create
-        Task<int> CrearMarcaRapidaAsync(string nombre, int tenantId);
-        Task<int> CrearCategoriaRapidaAsync(string nombre, int tenantId);
+        Task<IEnumerable<ProductoDto>> ObtenerTodosAsync();
+        Task<ProductoDto?> ObtenerPorIdAsync(int id);
+        Task<int> CrearAsync(CreateProductoDto dto);
+        Task ActualizarAsync(UpdateProductoDto dto);
+        Task EliminarAsync(int id);
+        Task ReactivarAsync(int id);
+        Task<IEnumerable<MarcaDto>> ObtenerMarcasAsync();
+        Task<IEnumerable<CategoriaDto>> ObtenerCategoriasAsync();
+        Task<IEnumerable<ProductoDto>> ObtenerCargadoresYAccesoriosAsync();
+        Task<bool> ExisteNombreAsync(string nombre, int? excludeId);
+        Task<bool> ExisteMarcaAsync(string nombre);
+        Task<bool> ExisteCategoriaAsync(string nombre);
+        Task<int> CrearMarcaRapidaAsync(string nombre);
+        Task<int> CrearCategoriaRapidaAsync(string nombre);
     }
 }

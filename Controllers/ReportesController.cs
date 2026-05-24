@@ -30,11 +30,9 @@ namespace ZeltekWeb.Controllers
             if (meses != 6 && meses != 12) meses = 12;
             if (periodoGanancia != 1 && periodoGanancia != 3 && periodoGanancia != 12) periodoGanancia = 1;
 
-            int tenantId = GetTenantId();
-            
             try
             {
-                var dashDto = await _reporteService.ObtenerDashboardAsync(meses, periodoGanancia, tenantId);
+                var dashDto = await _reporteService.ObtenerDashboardAsync(meses, periodoGanancia);
                 
                 // Manual mapping to ViewModel to decouple View from DTOs
                 var model = new ReporteIndexViewModel
@@ -86,7 +84,7 @@ namespace ZeltekWeb.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error generating report dashboard for Tenant {TenantId}", tenantId);
+                _logger.LogError(ex, "Error generating report dashboard");
                 // Return a friendly error view instead of crash
                 return View("Error", new ErrorViewModel { RequestId = "Error loading reports: " + ex.Message });
             }

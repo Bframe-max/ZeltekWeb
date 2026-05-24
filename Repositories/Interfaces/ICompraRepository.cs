@@ -5,19 +5,17 @@ namespace ZeltekWeb.Repositories
 {
     public interface ICompraRepository
     {
-        Task<(IEnumerable<CompraListDto> Items, int Activos, decimal InversionFlotante)> ObtenerHistorialAsync(string? buscar, string viewType, int tenantId);
-        Task<CompraDto?> ObtenerPorIdAsync(int id, int tenantId);
-        Task<IEnumerable<ItemCompraDto>> ObtenerItemsPorCompraAsync(int compraId, int tenantId);
-        Task<bool> VerificarTrackingAsync(string tracking, int? excluirCompraId, int tenantId);
-        Task<int> CrearCompraAsync(CreateCompraDto dto, int tenantId);
-        Task ActualizarCompraAsync(UpdateCompraDto dto, int tenantId);
-        Task EliminarCompraAsync(int id, int tenantId);
-        Task ForzarCierreAsync(int id, int tenantId);
-        
-        // Item Operations
-        Task<bool> VerificarSerialAsync(string serial, int? excluirItemId, int tenantId);
-        Task RecibirItemAsync(RecibirItemDto dto, int tenantId);
-        Task<(string Nombre, string Categoria)> GetItemInfoAsync(int itemId, int tenantId);
-        Task ActualizarCostosItemsAsync(int compraId, decimal costoUnitario, int tenantId, IDbTransaction? transaction = null);
+        Task<(IEnumerable<CompraListDto> Items, int Activos, decimal InversionFlotante)> ObtenerHistorialAsync(string? buscar, string viewType);
+        Task<CompraDto?> ObtenerPorIdAsync(int id);
+        Task<IEnumerable<ItemCompraDto>> ObtenerItemsPorCompraAsync(int compraId);
+        Task<bool> VerificarTrackingAsync(string tracking, int? excluirCompraId);
+        Task<int> CrearCompraAsync(CreateCompraDto dto);
+        Task ActualizarCompraAsync(UpdateCompraDto dto);
+        Task EliminarCompraAsync(int id);
+        Task ForzarCierreAsync(int id);
+        Task<bool> VerificarSerialAsync(string serial, int? excluirItemId);
+        Task RecibirItemAsync(RecibirItemDto dto);
+        Task<(string Nombre, string Categoria)> GetItemInfoAsync(int itemId);
+        Task ActualizarCostosItemsAsync(int compraId, decimal costoUnitario, IDbTransaction? transaction = null);
     }
 }

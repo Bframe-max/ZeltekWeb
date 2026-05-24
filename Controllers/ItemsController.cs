@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using ZeltekWeb.Filters;
 using ZeltekWeb.Models;
 
 namespace ZeltekWeb.Controllers
@@ -23,14 +22,12 @@ namespace ZeltekWeb.Controllers
         {
             var lista = new List<ItemListViewModel>();
             var cadena = _config.GetConnectionString("ZeltekDB");
-            int tenantId = GetTenantId();
 
             using SqlConnection con = new SqlConnection(cadena);
             con.Open();
 
-            // 🔒 Security: Added TenantID filter
             var sql = @"
-                SELECT 
+                SELECT
                     i.ItemID,
                     p.Nombre AS Producto,
                     i.NumeroSerie,
@@ -39,12 +36,11 @@ namespace ZeltekWeb.Controllers
                     i.Estado
                 FROM ItemInventario i
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE i.CompraID = @CompraID AND i.TenantID = @TenantID
+                WHERE i.CompraID = @CompraID
                 ORDER BY i.ItemID DESC";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@CompraID", compraId);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
 
             using SqlDataReader dr = cmd.ExecuteReader();
             while (dr.Read())
@@ -71,20 +67,17 @@ namespace ZeltekWeb.Controllers
         {
             var productos = new List<ProductoSelectViewModel>();
             var cadena = _config.GetConnectionString("ZeltekDB");
-            int tenantId = GetTenantId();
 
             using SqlConnection con = new SqlConnection(cadena);
             con.Open();
 
-            // 🔒 Security: Added TenantID filter
             var sql = @"
                 SELECT ProductoID, Nombre
                 FROM Producto
-                WHERE IsDeleted = 0 AND TenantID = @TenantID
+                WHERE IsDeleted = 0
                 ORDER BY Nombre";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
             using SqlDataReader dr = cmd.ExecuteReader();
 
             while (dr.Read())
@@ -115,20 +108,16 @@ namespace ZeltekWeb.Controllers
                 return View(model);
 
             var cadena = _config.GetConnectionString("ZeltekDB");
-            int tenantId = GetTenantId();
 
             using SqlConnection con = new SqlConnection(cadena);
             con.Open();
 
-            // 🔒 Validar serial duplicado (Tenant check implied by uniqueness?)
-            // Ideally explicit tenant check or unique index per tenant.
             if (!string.IsNullOrWhiteSpace(model.NumeroSerie))
             {
                 using var checkCmd = new SqlCommand(
-                    "SELECT COUNT(1) FROM ItemInventario WHERE NumeroSerie = @NumeroSerie AND TenantID = @TenantID", con);
+                    "SELECT COUNT(1) FROM ItemInventario WHERE NumeroSerie = @NumeroSerie", con);
 
                 checkCmd.Parameters.AddWithValue("@NumeroSerie", model.NumeroSerie);
-                checkCmd.Parameters.AddWithValue("@TenantID", tenantId);
 
                 if ((int)checkCmd.ExecuteScalar() > 0)
                 {
@@ -137,17 +126,12 @@ namespace ZeltekWeb.Controllers
                 }
             }
 
-            // 🔒 Security: Ensure CompraID belongs to Tenant
-            using var checkCompraCmd = new SqlCommand("SELECT COUNT(1) FROM Compra WHERE CompraID = @CompraID AND TenantID = @TenantID", con);
+            using var checkCompraCmd = new SqlCommand("SELECT COUNT(1) FROM Compra WHERE CompraID = @CompraID", con);
             checkCompraCmd.Parameters.AddWithValue("@CompraID", model.CompraID);
-            checkCompraCmd.Parameters.AddWithValue("@TenantID", tenantId);
-             
-            if ((int)checkCompraCmd.ExecuteScalar() == 0)
-            {
-                 return Forbid(); // Or NotFound
-            }
 
-            // 1️⃣ Insertar Item
+            if ((int)checkCompraCmd.ExecuteScalar() == 0)
+                return NotFound();
+
             var sqlInsert = @"
                 INSERT INTO ItemInventario
                 (
@@ -156,8 +140,7 @@ namespace ZeltekWeb.Controllers
                     NumeroSerie,
                     CostoCompra,
                     PrecioVenta,
-                    Estado,
-                    TenantID
+                    Estado
                 )
                 VALUES
                 (
@@ -166,8 +149,7 @@ namespace ZeltekWeb.Controllers
                     @NumeroSerie,
                     @CostoCompra,
                     @PrecioVenta,
-                    @Estado,
-                    @TenantID
+                    @Estado
                 )";
 
             using SqlCommand cmd = new SqlCommand(sqlInsert, con);
@@ -177,14 +159,10 @@ namespace ZeltekWeb.Controllers
             cmd.Parameters.AddWithValue("@CostoCompra", model.CostoCompra);
             cmd.Parameters.AddWithValue("@PrecioVenta", model.PrecioVenta);
             cmd.Parameters.AddWithValue("@Estado", model.Estado);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
             cmd.ExecuteNonQuery();
 
-            // 2️⃣ Recalcular total de la compra
-            RecalcularTotalCompra(con, model.CompraID, tenantId);
-
-            // 3️⃣ Cambiar estado a Confirmada si estaba Creada
-            ConfirmarCompraSiTieneItems(con, model.CompraID, tenantId);
+            RecalcularTotalCompra(con, model.CompraID);
+            ConfirmarCompraSiTieneItems(con, model.CompraID);
 
             return RedirectToAction("Index", new { compraId = model.CompraID });
         }
@@ -195,12 +173,11 @@ namespace ZeltekWeb.Controllers
         public IActionResult Edit(int id)
         {
             var cadena = _config.GetConnectionString("ZeltekDB");
-            int tenantId = GetTenantId();
             using SqlConnection con = new SqlConnection(cadena);
             con.Open();
 
             var sql = @"
-                SELECT 
+                SELECT
                     i.ItemID,
                     i.CompraID,
                     p.Nombre,
@@ -210,11 +187,10 @@ namespace ZeltekWeb.Controllers
                     i.Estado
                 FROM ItemInventario i
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE i.ItemID = @ItemID AND i.TenantID = @TenantID";
+                WHERE i.ItemID = @ItemID";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@ItemID", id);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
 
             using SqlDataReader dr = cmd.ExecuteReader();
             if (!dr.Read())
@@ -241,7 +217,6 @@ namespace ZeltekWeb.Controllers
         public IActionResult Edit(ItemEditViewModel model)
         {
             var cadena = _config.GetConnectionString("ZeltekDB");
-            int tenantId = GetTenantId();
             using SqlConnection con = new SqlConnection(cadena);
             con.Open();
 
@@ -252,7 +227,7 @@ namespace ZeltekWeb.Controllers
                     CostoCompra = @CostoCompra,
                     PrecioVenta = @PrecioVenta,
                     Estado = @Estado
-                WHERE ItemID = @ItemID AND TenantID = @TenantID";
+                WHERE ItemID = @ItemID";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@NumeroSerie", (object?)model.NumeroSerie ?? DBNull.Value);
@@ -260,49 +235,44 @@ namespace ZeltekWeb.Controllers
             cmd.Parameters.AddWithValue("@PrecioVenta", model.PrecioVenta);
             cmd.Parameters.AddWithValue("@Estado", model.Estado);
             cmd.Parameters.AddWithValue("@ItemID", model.ItemID);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
             int rows = cmd.ExecuteNonQuery();
-            
+
             if (rows == 0) return NotFound();
 
-            // 🔄 Recalcular total por si cambió el costo
-            RecalcularTotalCompra(con, model.CompraID, tenantId);
+            RecalcularTotalCompra(con, model.CompraID);
 
             return RedirectToAction("Index", new { compraId = model.CompraID });
         }
 
         // =========================
-        // 🔧 HELPERS
+        // HELPERS
         // =========================
-        private void RecalcularTotalCompra(SqlConnection con, int compraId, int tenantId)
+        private void RecalcularTotalCompra(SqlConnection con, int compraId)
         {
             var sql = @"
                 UPDATE Compra
                 SET CostoTotal = (
                     SELECT ISNULL(SUM(CostoCompra), 0)
                     FROM ItemInventario
-                    WHERE CompraID = @CompraID AND TenantID = @TenantID
+                    WHERE CompraID = @CompraID
                 )
-                WHERE CompraID = @CompraID AND TenantID = @TenantID";
+                WHERE CompraID = @CompraID";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@CompraID", compraId);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
             cmd.ExecuteNonQuery();
         }
 
-        private void ConfirmarCompraSiTieneItems(SqlConnection con, int compraId, int tenantId)
+        private void ConfirmarCompraSiTieneItems(SqlConnection con, int compraId)
         {
             var sql = @"
                 UPDATE Compra
                 SET EstadoCompra = 'Confirmada'
                 WHERE CompraID = @CompraID
-                  AND EstadoCompra = 'Creada'
-                  AND TenantID = @TenantID";
+                  AND EstadoCompra = 'Creada'";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@CompraID", compraId);
-            cmd.Parameters.AddWithValue("@TenantID", tenantId);
             cmd.ExecuteNonQuery();
         }
     }
