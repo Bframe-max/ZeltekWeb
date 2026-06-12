@@ -27,22 +27,21 @@ namespace ZeltekWeb.Repositories
                 SELECT
                     FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes,
                     FORMAT(MIN(v.FechaVenta), 'MMM yy') AS MesLabel,
-                    SUM(d.PrecioUnitario) AS TotalVentas,
+                    SUM(d.PrecioUnitario * d.Cantidad) AS TotalVentas,
                     COUNT(DISTINCT v.VentaID) AS CantidadVentas
                 FROM Venta v
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                WHERE v.IsDeleted = 0
-                AND v.FechaVenta >= @FechaInicio
+                WHERE v.FechaVenta >= @FechaInicio
                 GROUP BY FORMAT(v.FechaVenta, 'yyyy-MM')
                 ORDER BY FORMAT(v.FechaVenta, 'yyyy-MM')";
 
             var tendencias = (await db.QueryAsync<TendenciaVentasDto>(sqlVentas, new { FechaInicio = fechaInicio })).ToList();
 
             string sqlEquipos = @"
-                SELECT FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes, COUNT(*) AS Cantidad
+                SELECT FORMAT(v.FechaVenta, 'yyyy-MM') AS Mes, SUM(d.Cantidad) AS Cantidad
                 FROM Venta v
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
-                WHERE v.IsDeleted = 0 AND v.FechaVenta >= @FechaInicio
+                WHERE v.FechaVenta >= @FechaInicio
                 GROUP BY FORMAT(v.FechaVenta, 'yyyy-MM')";
 
             var equipos = await db.QueryAsync<(string Mes, int Cantidad)>(sqlEquipos, new { FechaInicio = fechaInicio });
@@ -61,15 +60,14 @@ namespace ZeltekWeb.Repositories
             string sql = @"
                 SELECT TOP 10
                     p.Nombre AS ProductoNombre,
-                    COUNT(*) AS CantidadVentas,
-                    SUM(d.PrecioUnitario) AS TotalVendido
+                    SUM(d.Cantidad) AS CantidadVentas,
+                    SUM(d.PrecioUnitario * d.Cantidad) AS TotalVendido
                 FROM DetalleVenta d
                 INNER JOIN Venta v ON d.VentaID = v.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
                 INNER JOIN Producto p ON i.ProductoID = p.ProductoID
-                WHERE v.IsDeleted = 0
                 GROUP BY p.ProductoID, p.Nombre
-                ORDER BY COUNT(*) DESC";
+                ORDER BY SUM(d.Cantidad) DESC";
             return await db.QueryAsync<TopProductoDto>(sql);
         }
 
@@ -80,12 +78,17 @@ namespace ZeltekWeb.Repositories
 
             string sqlVentas = @"
                 SELECT
-                    ISNULL(SUM(d.PrecioUnitario), 0) as IngresoTotal,
-                    ISNULL(SUM(d.PrecioUnitario - (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0))), 0) as GananciaBruta
+                    ISNULL(SUM(d.PrecioUnitario * d.Cantidad), 0) as IngresoTotal,
+                    ISNULL(SUM((d.PrecioUnitario * d.Cantidad) -
+                        (CASE WHEN ISNULL(p.EsUnico, 1) = 1
+                              THEN (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0))
+                              ELSE (i.CostoCompra / NULLIF(i.CantidadInicial, 0)) * d.Cantidad
+                         END)), 0) as GananciaBruta
                 FROM Venta v
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                WHERE v.IsDeleted = 0 AND v.FechaVenta >= @FechaInicio";
+                INNER JOIN Producto p ON i.ProductoID = p.ProductoID
+                WHERE v.FechaVenta >= @FechaInicio";
 
             var ventasResult = await db.QueryFirstOrDefaultAsync<(decimal IngresoTotal, decimal GananciaBruta)>(sqlVentas, new { FechaInicio = fechaInicio });
 
@@ -138,15 +141,15 @@ namespace ZeltekWeb.Repositories
             string sql = @"
                 SELECT
                     c.NombreCompleto AS NombreCliente, c.TipoCliente,
-                    COUNT(v.VentaID) AS CantidadCompras,
-                    ISNULL(SUM(d.PrecioUnitario), 0) AS TotalComprado,
-                    ISNULL(SUM(d.PrecioUnitario - (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0))), 0) AS GananciaGenerada,
+                    COUNT(DISTINCT v.VentaID) AS CantidadCompras,
+                    ISNULL(SUM(d.PrecioUnitario * d.Cantidad), 0) AS TotalComprado,
+                    ISNULL(SUM((d.PrecioUnitario * d.Cantidad) - (i.CostoCompra + ISNULL(i.CostoEnvio, 0) + ISNULL(i.CostoReparacion, 0))), 0) AS GananciaGenerada,
                     MAX(v.FechaVenta) AS UltimaCompra
                 FROM Cliente c
                 INNER JOIN Venta v ON c.ClienteID = v.ClienteID
                 INNER JOIN DetalleVenta d ON v.VentaID = d.VentaID
                 INNER JOIN ItemInventario i ON d.ItemID = i.ItemID
-                WHERE v.IsDeleted = 0 AND LOWER(LTRIM(RTRIM(ISNULL(c.TipoCliente,'')))) = 'revendedor'
+                WHERE LOWER(LTRIM(RTRIM(ISNULL(c.TipoCliente,'')))) = 'revendedor'
                 GROUP BY c.ClienteID, c.NombreCompleto, c.TipoCliente
                 ORDER BY TotalComprado DESC";
             return await db.QueryAsync<TopRevendedorDto>(sql);

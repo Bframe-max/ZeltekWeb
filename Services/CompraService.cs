@@ -30,7 +30,8 @@ namespace ZeltekWeb.Services
         public async Task EliminarCompraAsync(int id)
         {
             var compra = await _compraRepo.ObtenerPorIdAsync(id);
-            if (compra != null && (compra.EstadoCompra == "Completado" || compra.EstadoCompra == "Recibido" || compra.EstadoCompra == "Cancelado"))
+            var estadosCerrados = new[] { "Completado", "Recibido", "Recibida", "Cancelado", "Cancelada" };
+            if (compra != null && estadosCerrados.Contains(compra.EstadoCompra))
                 throw new InvalidOperationException("No se puede eliminar una compra ya completada o cancelada.");
             await _compraRepo.EliminarCompraAsync(id);
         }

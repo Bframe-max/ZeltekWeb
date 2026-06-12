@@ -35,17 +35,15 @@ namespace ZeltekWeb.Repositories
         public async Task<int> CrearClienteAsync(string nombre, string telefono, string cedula, string correo, string direccion, string tipo, IDbTransaction? transaction = null)
         {
             var sql = @"
-                INSERT INTO Cliente (NombreCompleto, Telefono, Cedula, Email, Direccion, TipoCliente, FechaRegistro)
+                INSERT INTO Cliente (NombreCompleto, Telefono, Cedula, TipoCliente, CreationDate)
                 OUTPUT INSERTED.ClienteID
-                VALUES (@Nombre, @Telefono, @Cedula, @Correo, @Direccion, @Tipo, GETDATE())";
+                VALUES (@Nombre, @Telefono, @Cedula, @Tipo, GETDATE())";
 
             var parameters = new
             {
                 Nombre = nombre,
                 Telefono = telefono ?? "",
                 Cedula = cedula ?? "",
-                Correo = correo ?? "",
-                Direccion = direccion ?? "",
                 Tipo = tipo ?? "Cliente Final"
             };
 

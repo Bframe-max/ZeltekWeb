@@ -103,7 +103,7 @@ namespace ZeltekWeb.Repositories
                     UPDATE ItemInventario
                     SET NumeroSerie = @Serie, Estado = @Estado, Condicion = @Condicion,
                         Procesador = @Cpu, RAM_GB = @Ram, Almacenamiento_GB = @Rom,
-                        Color = @Color, CostoEnvio = @Envio, CostoOtros = @Otros,
+                        Color = @Color, CostoEnvio = @Envio, CostoReparacion = ISNULL(CostoReparacion, 0) + @Otros,
                         FechaRecepcion = GETDATE()
                     WHERE ItemID = @ItemID";
 

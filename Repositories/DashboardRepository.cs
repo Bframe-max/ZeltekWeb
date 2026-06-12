@@ -131,7 +131,7 @@ namespace ZeltekWeb.Repositories
                 SELECT i.ItemID as Id,
                        p.Nombre as Header,
                        ISNULL(i.NumeroSerie, 'S/N') as SubHeader,
-                       i.FechaRegistro as Date,
+                       i.FechaRecepcion as Date,
                        NULL as Amount,
                        i.Estado as Status,
                        'Inventario' as Type

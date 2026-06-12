@@ -21,7 +21,7 @@ namespace ZeltekWeb.Repositories
             string sqlKPI = @"
                 SELECT COUNT(*), ISNULL(SUM(CostoTotal), 0)
                 FROM Compra
-                WHERE EstadoCompra NOT IN ('Recibido', 'Completado', 'Cancelado')";
+                WHERE EstadoCompra NOT IN ('Recibido', 'Recibida', 'Completado', 'Cancelado', 'Cancelada')";
 
             int activos = 0;
             decimal inversion = 0;
@@ -70,9 +70,9 @@ namespace ZeltekWeb.Repositories
             }
 
             if (viewType == "history")
-                sql += " AND c.EstadoCompra IN ('Recibido', 'Completado', 'Cancelado')";
+                sql += " AND c.EstadoCompra IN ('Recibido', 'Recibida', 'Completado', 'Cancelado', 'Cancelada')";
             else
-                sql += " AND c.EstadoCompra NOT IN ('Recibido', 'Completado', 'Cancelado')";
+                sql += " AND c.EstadoCompra NOT IN ('Recibido', 'Recibida', 'Completado', 'Cancelado', 'Cancelada')";
 
             sql += " ORDER BY c.FechaCompra DESC";
 
@@ -156,8 +156,8 @@ namespace ZeltekWeb.Repositories
                 {
                     decimal costoUnitario = dto.CostoTotalCompra / dto.Cantidad;
                     var sqlItem = @"
-                        INSERT INTO ItemInventario (ProductoID, CompraID, Estado, CostoCompra, FechaRegistro)
-                        VALUES (@ProductoID, @CompraID, 'En Transito', @CostoUnitario, GETDATE())";
+                        INSERT INTO ItemInventario (ProductoID, CompraID, Estado, CostoCompra, PrecioVenta)
+                        VALUES (@ProductoID, @CompraID, 'En Transito', @CostoUnitario, 0)";
 
                     for (int i = 0; i < dto.Cantidad; i++)
                     {

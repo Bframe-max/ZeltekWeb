@@ -66,8 +66,15 @@ namespace ZeltekWeb.Services
                 }
                 else
                 {
+                    if (string.IsNullOrWhiteSpace(dto.ClienteNombre))
+                        throw new ArgumentException("El nombre del cliente es obligatorio.");
+
+                    var telefono = (dto.ClienteCelular ?? "").Trim();
+                    if (!System.Text.RegularExpressions.Regex.IsMatch(telefono, @"^[2578]\d{7}$"))
+                        throw new ArgumentException("El teléfono debe tener 8 dígitos y comenzar con 2, 5, 7 u 8 (ej: 88123456).");
+
                     clienteId = await _clienteRepo.CrearClienteAsync(
-                        dto.ClienteNombre, dto.ClienteCelular, dto.ClienteCedula,
+                        dto.ClienteNombre, telefono, dto.ClienteCedula,
                         "", "", dto.TipoVenta, transaction);
                 }
 
