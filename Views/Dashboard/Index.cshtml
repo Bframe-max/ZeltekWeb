@@ -7,26 +7,26 @@
 <!-- Header & Search Bar (IMEI Checker Style) -->
 <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
     <div>
-        <h2 class="text-3xl font-bold text-white tracking-tight">Inicio</h2>
-        <p class="text-gray-400 text-sm mt-1 font-medium">Bienvenido de nuevo, @User.Identity?.Name</p>
+        <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Inicio</h2>
+        <p class="text-slate-500 text-sm mt-1 font-medium">Bienvenido de nuevo, @User.Identity?.Name</p>
     </div>
 
     <div class="w-full md:w-auto relative group">
         <!-- Glow Effect -->
-        <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+        <div class="absolute -inset-0.5 bg-indigo-600 hover:bg-indigo-700 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
         
         <form asp-controller="Dashboard" asp-action="Buscar" method="get" class="relative flex items-center">
-            <div class="flex items-center bg-[#24253b] rounded-full shadow-2xl p-1.5 transition-all w-full md:w-[480px] border border-white/5">
-                <div class="pl-4 text-gray-400">
+            <div class="flex items-center bg-white rounded-full shadow-2xl p-1.5 transition-all w-full md:w-[480px] border border-slate-100">
+                <div class="pl-4 text-slate-500">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <input type="search"
                        name="q"
-                       class="w-full bg-transparent text-white border-0 focus:ring-0 px-4 py-2 placeholder-gray-500 text-sm font-medium"
+                       class="w-full bg-transparent text-slate-800 border-0 focus:ring-0 px-4 py-2 placeholder-slate-400 text-sm font-medium"
                        placeholder="Buscar por IMEI, Serie, Producto..."
                        value=""
                        autocomplete="off" />
-                <button type="submit" class="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white px-6 py-2.5 rounded-full transition-all font-medium shadow-lg shadow-purple-500/30 text-sm">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-full transition-all font-medium shadow-lg shadow-purple-500/30 text-sm">
                     Buscar
                 </button>
             </div>
@@ -38,42 +38,42 @@
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
     
     <!-- KPI 1: Ventas Hoy -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] relative overflow-hidden group hover:shadow-2xl transition-all duration-300">
         <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-            <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            <svg class="w-24 h-24 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         </div>
         
         <div class="relative z-10">
             <div class="flex justify-between items-start mb-4">
-                <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                <div class="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-500/20">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <span class="bg-emerald-500/10 text-emerald-400 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-emerald-500/20">Hoy</span>
+                <span class="bg-emerald-500/10 text-emerald-600 text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider border border-emerald-500/20">Hoy</span>
             </div>
             
-            <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">$@Model.VentasHoy.ToString("N0")<span class="text-lg text-gray-500 font-medium">.00</span></h3>
-            <p class="text-gray-400 text-sm font-medium">Ventas totales</p>
+            <h3 class="text-3xl font-bold text-slate-800 mb-1 tracking-tight">$@Model.VentasHoy.ToString("N0")<span class="text-lg text-slate-400 font-medium">.00</span></h3>
+            <p class="text-slate-500 text-sm font-medium">Ventas totales</p>
         </div>
     </div>
 
     <!-- KPI 2: En Camino -->
     <a asp-controller="Compras" asp-action="Index" class="block group">
-        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-blue-500/10 transition-all duration-300">
+        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] relative overflow-hidden h-full hover:shadow-blue-500/10 transition-all duration-300">
             <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
+                <svg class="w-24 h-24 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"></path></svg>
             </div>
 
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20">
+                    <div class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                 </div>
                 
-                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">$@Model.EnCaminoMonto.ToString("N0")<span class="text-lg text-gray-500 font-medium">.00</span></h3>
+                <h3 class="text-3xl font-bold text-slate-800 mb-1 tracking-tight">$@Model.EnCaminoMonto.ToString("N0")<span class="text-lg text-slate-400 font-medium">.00</span></h3>
                 <div class="flex flex-col">
-                    <p class="text-gray-400 text-sm font-medium">Valor en Tránsito</p>
-                    <span class="text-blue-400 text-xs mt-1 font-medium font-mono">@Model.EnCaminoCantidad pedidos</span>
+                    <p class="text-slate-500 text-sm font-medium">Valor en Tránsito</p>
+                    <span class="text-blue-600 text-xs mt-1 font-medium font-mono">@Model.EnCaminoCantidad pedidos</span>
                 </div>
             </div>
         </div>
@@ -81,40 +81,40 @@
 
     <!-- KPI 3: Por Revisar -->
     <a asp-controller="Inventario" asp-action="Calidad" class="block group">
-        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-amber-500/10 transition-all duration-300">
+        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] relative overflow-hidden h-full hover:shadow-amber-500/10 transition-all duration-300">
             <div class="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <svg class="w-24 h-24 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6 3 3 0 000 6zM5 19a2 2 0 01-2-2"/></svg>
+                <svg class="w-24 h-24 text-slate-800" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6 3 3 0 000 6zM5 19a2 2 0 01-2-2"/></svg>
             </div>
 
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 border border-amber-500/20">
+                    <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600 border border-amber-500/20">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     </div>
                 </div>
                 
-                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">@Model.PorRevisarCantidad</h3>
-                <p class="text-gray-400 text-sm font-medium">Mesa de Calidad</p>
+                <h3 class="text-3xl font-bold text-slate-800 mb-1 tracking-tight">@Model.PorRevisarCantidad</h3>
+                <p class="text-slate-500 text-sm font-medium">Mesa de Calidad</p>
             </div>
         </div>
     </a>
 
     <!-- KPI 4: Stock -->
     <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="block group">
-        <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border-0 relative overflow-hidden h-full hover:shadow-purple-500/10 transition-all duration-300">
+        <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] relative overflow-hidden h-full hover:shadow-purple-500/10 transition-all duration-300">
             <div class="absolute -bottom-4 -right-4 w-32 h-32 bg-purple-500/20 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
 
             <div class="relative z-10">
                 <div class="flex justify-between items-start mb-4">
-                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-400 border border-purple-500/20">
+                    <div class="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center text-purple-600 border border-purple-500/20">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
                     </div>
                 </div>
                 
-                <h3 class="text-3xl font-bold text-white mb-1 tracking-tight">@Model.StockCantidad</h3>
+                <h3 class="text-3xl font-bold text-slate-800 mb-1 tracking-tight">@Model.StockCantidad</h3>
                 <div class="flex flex-col">
-                    <p class="text-gray-400 text-sm font-medium">En Stock</p>
-                     <span class="text-purple-400 text-xs mt-1 font-medium font-mono">$@Model.StockValor.ToString("N0") total</span>
+                    <p class="text-slate-500 text-sm font-medium">En Stock</p>
+                     <span class="text-purple-600 text-xs mt-1 font-medium font-mono">$@Model.StockValor.ToString("N0") total</span>
                 </div>
             </div>
         </div>
@@ -127,31 +127,31 @@
     
     <!-- Col 1 (Span 2): Activity Table -->
     <div class="lg:col-span-2">
-        <div class="bg-[#24253b] rounded-2xl p-8 shadow-lg shadow-black/20 border-0 h-full">
+        <div class="bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] h-full">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-white font-bold text-xl">Actividad Reciente</h3>
-                <a href="#" class="text-sm text-purple-400 hover:text-purple-300 font-medium transition-colors">Ver todo</a>
+                <h3 class="text-slate-800 font-bold text-xl">Actividad Reciente</h3>
+                <a href="#" class="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors">Ver todo</a>
             </div>
 
              <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
-                    <tbody class="divide-y divide-[#2e2f45]">
+                    <tbody class="divide-y divide-slate-100">
                         @foreach (var a in Model.ActividadReciente)
                         {
-                            <tr class="group hover:bg-white/[0.02] transition-colors">
+                            <tr class="group hover:bg-slate-50 transition-colors">
                                 <td class="py-4 pr-4">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 @(a.Tipo == "Venta" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" : "bg-blue-500/10 text-blue-400 border border-blue-500/20")">
+                                        <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 @(a.Tipo == "Venta" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" : "bg-blue-500/10 text-blue-600 border border-blue-500/20")">
                                             @(a.Tipo == "Venta" ? "💰" : "🛒")
                                         </div>
                                         <div>
-                                            <p class="text-white font-medium text-sm">@a.Descripcion</p>
-                                            <p class="text-gray-500 text-xs mt-0.5">@HaceTiempo(a.Fecha)</p>
+                                            <p class="text-slate-800 font-medium text-sm">@a.Descripcion</p>
+                                            <p class="text-slate-400 text-xs mt-0.5">@HaceTiempo(a.Fecha)</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="py-4 text-right">
-                                    <span class="font-mono font-bold text-sm @(a.Tipo == "Venta" ? "text-emerald-400" : "text-white")">
+                                    <span class="font-mono font-bold text-sm @(a.Tipo == "Venta" ? "text-emerald-600" : "text-slate-800")">
                                         @(a.Tipo == "Venta" ? "+" : "-") $@a.Monto.ToString("N2")
                                     </span>
                                 </td>
@@ -161,7 +161,7 @@
                 </table>
                  @if (Model.ActividadReciente.Count == 0)
                 {
-                    <div class="text-center py-12 text-gray-500 text-sm">
+                    <div class="text-center py-12 text-slate-400 text-sm">
                         Aún no hay actividad reciente.
                     </div>
                 }
@@ -171,47 +171,47 @@
 
     <!-- Col 2 (Span 1): Quick Actions (Consolidated Card) -->
     <div class="lg:col-span-1">
-        <div class="bg-[#24253b] rounded-2xl p-8 shadow-lg shadow-black/20 border-0 h-full">
-            <h3 class="text-white font-bold text-xl mb-6">Accesos Rápidos</h3>
+        <div class="bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/60 border border-[#e6e9f2] h-full">
+            <h3 class="text-slate-800 font-bold text-xl mb-6">Accesos Rápidos</h3>
             
             <div class="flex flex-col gap-4">
-                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-emerald-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 group-hover:scale-110 transition-transform">
+                <a asp-controller="Inventario" asp-action="Index" asp-route-filtro="Stock" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-500/30 hover:bg-slate-100 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                     </div>
                     <div>
-                        <p class="text-white font-medium text-sm">Nueva Venta</p>
-                        <p class="text-gray-500 text-xs">Desde Stock</p>
+                        <p class="text-slate-800 font-medium text-sm">Nueva Venta</p>
+                        <p class="text-slate-400 text-xs">Desde Stock</p>
                     </div>
                 </a>
 
-                <a asp-controller="Compras" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-blue-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
-                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 group-hover:scale-110 transition-transform">
+                <a asp-controller="Compras" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-500/30 hover:bg-slate-100 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                     </div>
                      <div>
-                        <p class="text-white font-medium text-sm">Registrar Compra</p>
-                        <p class="text-gray-500 text-xs">eBay / Import</p>
+                        <p class="text-slate-800 font-medium text-sm">Registrar Compra</p>
+                        <p class="text-slate-400 text-xs">eBay / Import</p>
                     </div>
                 </a>
 
-                <a asp-controller="Gastos" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-red-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
-                    <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-400 group-hover:scale-110 transition-transform">
+                <a asp-controller="Gastos" asp-action="Create" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-red-500/30 hover:bg-slate-100 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center text-red-600 group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
                     </div>
                      <div>
-                        <p class="text-white font-medium text-sm">Registrar Gasto</p>
-                        <p class="text-gray-500 text-xs">Operativo</p>
+                        <p class="text-slate-800 font-medium text-sm">Registrar Gasto</p>
+                        <p class="text-slate-400 text-xs">Operativo</p>
                     </div>
                 </a>
 
-                <a asp-controller="Reportes" asp-action="Index" class="flex items-center gap-4 p-4 rounded-xl bg-[#1a1b2e] border border-[#2e2f45] hover:border-purple-500/30 hover:bg-[#1a1b2e]/80 transition-all group shadow-sm">
-                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 group-hover:scale-110 transition-transform">
+                <a asp-controller="Reportes" asp-action="Index" class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200 hover:border-purple-500/30 hover:bg-slate-100 transition-all group shadow-sm">
+                    <div class="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
                     </div>
                      <div>
-                        <p class="text-white font-medium text-sm">Ver Reportes</p>
-                        <p class="text-gray-500 text-xs">Finanzas</p>
+                        <p class="text-slate-800 font-medium text-sm">Ver Reportes</p>
+                        <p class="text-slate-400 text-xs">Finanzas</p>
                     </div>
                 </a>
             </div>

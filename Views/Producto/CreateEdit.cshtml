@@ -7,17 +7,17 @@
 
 <div class="max-w-4xl mx-auto mt-8">
     <!-- Card Container -->
-    <div class="bg-[#24253b] rounded-2xl shadow-2xl overflow-hidden border border-white/5">
+    <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-100">
         
         <!-- Header -->
-        <div class="px-8 py-6 border-b border-gray-700/50 bg-[#1a1b2e]/50 flex justify-between items-center">
+        <div class="px-8 py-6 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
             <div>
-                <h2 class="text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                <h2 class="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
                     @if (esEdicion) { <span>✏️ Editar Producto</span> } else { <span>📦 Nuevo Producto</span> }
                 </h2>
-                <p class="text-gray-400 text-sm mt-1">Ingresa la información básica del artículo.</p>
+                <p class="text-slate-500 text-sm mt-1">Ingresa la información básica del artículo.</p>
             </div>
-            <a asp-action="Index" class="text-gray-400 hover:text-white transition-colors text-sm font-medium flex items-center gap-1">
+            <a asp-action="Index" class="text-slate-500 hover:text-slate-900 transition-colors text-sm font-medium flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 Cancelar
             </a>
@@ -29,7 +29,7 @@
                 
                 @if (!ViewData.ModelState.IsValid)
                 {
-                    <div class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3">
+                    <div class="bg-red-500/10 border border-red-500/20 text-red-600 p-4 rounded-xl mb-6 flex items-start gap-3">
                         <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         <div>
                             <h4 class="font-bold">Errores al guardar</h4>
@@ -47,16 +47,16 @@
                     
                     <!-- Row 1: Product Name -->
                     <div>
-                        <label asp-for="Nombre" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre del Producto</label>
-                        <input asp-for="Nombre" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="Ej: MacBook Pro 14 M3" autocomplete="off" />
-                        <span asp-validation-for="Nombre" class="text-red-400 text-xs mt-1 block"></span>
+                        <label asp-for="Nombre" class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Nombre del Producto</label>
+                        <input asp-for="Nombre" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 outline-none transition-all" placeholder="Ej: MacBook Pro 14 M3" autocomplete="off" />
+                        <span asp-validation-for="Nombre" class="text-red-600 text-xs mt-1 block"></span>
                         
                         <!-- Duplicate Alert -->
                         <div id="alert-duplicado" class="hidden mt-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-3 flex items-start gap-3">
                             <svg class="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                             <div>
                                 <span id="msg-duplicado" class="text-yellow-500 text-sm font-medium block">Este producto ya existe.</span>
-                                <button type="button" id="btn-reactivar-producto" class="text-yellow-400 hover:text-yellow-300 text-xs font-bold underline mt-1 hidden">Click aquí para reactivarlo</button>
+                                <button type="button" id="btn-reactivar-producto" class="text-yellow-600 hover:text-yellow-700 text-xs font-bold underline mt-1 hidden">Click aquí para reactivarlo</button>
                             </div>
                         </div>
                     </div>
@@ -65,26 +65,26 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <!-- Brand -->
                         <div>
-                            <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Marca</label>
+                            <label class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Marca</label>
                             <div class="flex gap-2">
-                                <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white appearance-none outline-none transition-all">
+                                <select asp-for="MarcaID" asp-items="ViewBag.Marcas" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 appearance-none outline-none transition-all">
                                     <option value="">-- Seleccione --</option>
                                 </select>
-                                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white rounded-xl px-3 border border-gray-600 transition-colors" data-bs-toggle="modal" data-bs-target="#modalMarca" title="Nueva Marca">
+                                <button type="button" class="bg-slate-100 hover:bg-slate-100 text-slate-800 rounded-xl px-3 border border-slate-200 transition-colors" data-bs-toggle="modal" data-bs-target="#modalMarca" title="Nueva Marca">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                             </div>
-                            <span asp-validation-for="MarcaID" class="text-red-400 text-xs mt-1 block"></span>
+                            <span asp-validation-for="MarcaID" class="text-red-600 text-xs mt-1 block"></span>
                         </div>
 
                         <!-- Category -->
                         <div>
-                            <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Categoría</label>
+                            <label class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Categoría</label>
                             <div class="flex gap-2">
-                                <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white appearance-none outline-none transition-all">
+                                <select asp-for="CategoriaID" asp-items="ViewBag.Categorias" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 appearance-none outline-none transition-all">
                                     <option value="">-- Sin categoría --</option>
                                 </select>
-                                <button type="button" class="bg-gray-700 hover:bg-gray-600 text-white rounded-xl px-3 border border-gray-600 transition-colors" data-bs-toggle="modal" data-bs-target="#modalCategoria" title="Nueva Categoría">
+                                <button type="button" class="bg-slate-100 hover:bg-slate-100 text-slate-800 rounded-xl px-3 border border-slate-200 transition-colors" data-bs-toggle="modal" data-bs-target="#modalCategoria" title="Nueva Categoría">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                                 </button>
                             </div>
@@ -92,8 +92,8 @@
 
                         <!-- Model -->
                         <div>
-                            <label asp-for="Modelo" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Modelo (Opcional)</label>
-                            <input asp-for="Modelo" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="Ej: A2442" />
+                            <label asp-for="Modelo" class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Modelo (Opcional)</label>
+                            <input asp-for="Modelo" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 outline-none transition-all" placeholder="Ej: A2442" />
                         </div>
                     </div>
 
@@ -101,38 +101,38 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                          <!-- Reference Cost -->
                         <div>
-                            <label asp-for="CostoReferencia" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Costo Referencia</label>
+                            <label asp-for="CostoReferencia" class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Costo Referencia</label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 font-bold">$</span>
+                                    <span class="text-slate-400 font-bold">$</span>
                                 </div>
-                                <input asp-for="CostoReferencia" type="number" step="0.01" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-8 pr-4 py-3 text-white placeholder-gray-600 outline-none transition-all" placeholder="0.00" />
+                                <input asp-for="CostoReferencia" type="number" step="0.01" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl pl-8 pr-4 py-3 text-slate-800 placeholder-slate-400 outline-none transition-all" placeholder="0.00" />
                             </div>
                         </div>
 
                         <!-- Unique/Serial Switch -->
-                        <div class="bg-[#1a1b2e] rounded-xl p-4 border border-gray-700/50 flex items-center justify-between">
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex items-center justify-between">
                             <div>
-                                <label for="EsUnico" class="text-white font-bold block mb-1">¿Tiene Número de Serie?</label>
-                                <p class="text-gray-400 text-xs">Actívalo para equipos únicos (Laptops)</p>
+                                <label for="EsUnico" class="text-slate-800 font-bold block mb-1">¿Tiene Número de Serie?</label>
+                                <p class="text-slate-500 text-xs">Actívalo para equipos únicos (Laptops)</p>
                             </div>
                             <label class="relative inline-flex items-center cursor-pointer">
                                 <input asp-for="EsUnico" type="checkbox" class="sr-only peer">
-                                <div class="w-14 h-7 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
+                                <div class="w-14 h-7 bg-slate-100 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-blue-600"></div>
                             </label>
                         </div>
                     </div>
 
                     <!-- Row 4: Description -->
                     <div>
-                        <label asp-for="Descripcion" class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Descripción</label>
-                        <textarea asp-for="Descripcion" class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white placeholder-gray-600 outline-none transition-all" rows="3" placeholder="Detalles técnicos adicionales..."></textarea>
+                        <label asp-for="Descripcion" class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Descripción</label>
+                        <textarea asp-for="Descripcion" class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 placeholder-slate-400 outline-none transition-all" rows="3" placeholder="Detalles técnicos adicionales..."></textarea>
                     </div>
 
                 </div>
 
-                <div class="mt-8 pt-6 border-t border-gray-700/50 flex justify-end">
-                    <button type="submit" id="btnGuardarProducto" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105 flex items-center gap-2">
+                <div class="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+                    <button type="submit" id="btnGuardarProducto" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105 flex items-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                         Guardar Producto
                     </button>
@@ -251,24 +251,24 @@
 <!-- Modal Nueva Marca -->
 <div class="modal fade" id="modalMarca" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#1a1b2e] border border-gray-700 text-white shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700 p-4">
+        <div class="modal-content bg-slate-50 border border-slate-200 text-slate-800 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200 p-4">
                 <h5 class="modal-title font-bold text-lg flex items-center gap-2">
-                    <span class="bg-blue-500/10 text-blue-400 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg></span>
+                    <span class="bg-blue-500/10 text-blue-600 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg></span>
                     Nueva Marca
                 </h5>
-                <button type="button" class="text-gray-400 hover:text-white" data-bs-dismiss="modal">
+                <button type="button" class="text-slate-500 hover:text-slate-900" data-bs-dismiss="modal">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="modal-body p-6">
-                <div class="alert bg-red-500/10 text-red-400 p-3 rounded-lg mb-4 text-sm hidden" id="error-marca"></div>
-                <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la marca</label>
-                <input type="text" id="marca-nombre" class="w-full bg-[#24253b] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white outline-none transition-all" placeholder="Ej: Dell, HP..." autocomplete="off" />
+                <div class="alert bg-red-500/10 text-red-600 p-3 rounded-lg mb-4 text-sm hidden" id="error-marca"></div>
+                <label class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la marca</label>
+                <input type="text" id="marca-nombre" class="w-full bg-white border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 outline-none transition-all" placeholder="Ej: Dell, HP..." autocomplete="off" />
             </div>
-            <div class="modal-footer border-gray-700 p-4 flex justify-end gap-3">
-                <button type="button" class="text-gray-400 hover:text-white font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-6 rounded-xl transition-colors" id="btn-save-marca" onclick="guardarMarcaRapida()">Guardar</button>
+            <div class="modal-footer border-slate-200 p-4 flex justify-end gap-3">
+                <button type="button" class="text-slate-500 hover:text-slate-900 font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-xl transition-colors" id="btn-save-marca" onclick="guardarMarcaRapida()">Guardar</button>
             </div>
         </div>
     </div>
@@ -277,23 +277,23 @@
 <!-- Modal Nueva Categoria -->
 <div class="modal fade" id="modalCategoria" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#1a1b2e] border border-gray-700 text-white shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700 p-4">
+        <div class="modal-content bg-slate-50 border border-slate-200 text-slate-800 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200 p-4">
                 <h5 class="modal-title font-bold text-lg flex items-center gap-2">
-                    <span class="bg-emerald-500/10 text-emerald-400 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></span>
+                    <span class="bg-emerald-500/10 text-emerald-600 p-2 rounded-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg></span>
                     Nueva Categoría
                 </h5>
-                <button type="button" class="text-gray-400 hover:text-white" data-bs-dismiss="modal">
+                <button type="button" class="text-slate-500 hover:text-slate-900" data-bs-dismiss="modal">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <div class="modal-body p-6">
-                <div class="alert bg-red-500/10 text-red-400 p-3 rounded-lg mb-4 text-sm hidden" id="error-categoria"></div>
-                <label class="block text-gray-400 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la categoría</label>
-                <input type="text" id="categoria-nombre" class="w-full bg-[#24253b] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl px-4 py-3 text-white outline-none transition-all" placeholder="Ej: Laptop, Accesorio..." autocomplete="off" />
+                <div class="alert bg-red-500/10 text-red-600 p-3 rounded-lg mb-4 text-sm hidden" id="error-categoria"></div>
+                <label class="block text-slate-500 text-xs font-bold uppercase tracking-wider mb-2">Nombre de la categoría</label>
+                <input type="text" id="categoria-nombre" class="w-full bg-white border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-xl px-4 py-3 text-slate-800 outline-none transition-all" placeholder="Ej: Laptop, Accesorio..." autocomplete="off" />
             </div>
-            <div class="modal-footer border-gray-700 p-4 flex justify-end gap-3">
-                <button type="button" class="text-gray-400 hover:text-white font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
+            <div class="modal-footer border-slate-200 p-4 flex justify-end gap-3">
+                <button type="button" class="text-slate-500 hover:text-slate-900 font-medium px-4 py-2" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-xl transition-colors" id="btn-save-categoria" onclick="guardarCategoriaRapida()">Guardar</button>
             </div>
         </div>

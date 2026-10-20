@@ -8,9 +8,9 @@
     <div class="card-body p-4 p-sm-5">
         <!-- Encabezado -->
         <div class="text-center mb-4">
-            <div class="display-4 mb-2">🚀</div>
-            <h1 class="h3 fw-bold text-white mb-0">Zeltek v2.0</h1>
-            <p class="text-secondary small mt-1">Inicia sesión en tu cuenta</p>
+            <div class="login-logo mb-3">Z</div>
+            <h1 class="h4 fw-bold mb-0">ZELTEK</h1>
+            <p class="text-secondary small mt-1 mb-0">ERP Nicaragua · Inicia sesión en tu cuenta</p>
         </div>
 
         @if (!ViewData.ModelState.IsValid && ViewData.ModelState.ErrorCount > 0)
@@ -24,26 +24,26 @@
             @Html.AntiForgeryToken()
 
             <div class="mb-3">
-                <label asp-for="Usuario" class="form-label text-white">Usuario</label>
+                <label asp-for="Usuario" class="form-label text-slate-800">Usuario</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary text-secondary rounded-start">👤</span>
+                    <span class="input-group-text"><i class="bi bi-person"></i></span>
                     <input asp-for="Usuario" class="form-control form-control-lg login-input rounded-end" placeholder="Usuario o email" autocomplete="username" />
                 </div>
                 <span asp-validation-for="Usuario" class="text-danger small"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="Password" class="form-label text-white">Contraseña</label>
+                <label asp-for="Password" class="form-label text-slate-800">Contraseña</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-dark border-secondary text-secondary rounded-start">🔒</span>
+                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
                     <input asp-for="Password" type="password" class="form-control form-control-lg login-input rounded-end" placeholder="Contraseña" autocomplete="current-password" />
                 </div>
                 <span asp-validation-for="Password" class="text-danger small"></span>
             </div>
 
             <div class="form-check mb-4">
-                <input asp-for="Recordarme" class="form-check-input bg-dark border-secondary" id="recordarme" />
-                <label class="form-check-label text-white" for="recordarme">Recordarme</label>
+                <input asp-for="Recordarme" class="form-check-input" id="recordarme" />
+                <label class="form-check-label text-slate-800" for="recordarme">Recordarme</label>
             </div>
 
             <button type="submit" class="btn btn-primary login-btn w-100 rounded-pill mb-3">Entrar</button>

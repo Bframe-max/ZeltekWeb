@@ -7,7 +7,7 @@
 }
 
 <div class="mb-4">
-    <h2 class="fw-bold text-white">🛡️ Garantías Vigentes</h2>
+    <h2 class="fw-bold text-slate-800">🛡️ Garantías Vigentes</h2>
 </div>
 
 <div class="card mb-4 bg-card border-0">
@@ -16,7 +16,7 @@
             <div class="col-md-10">
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0 text-secondary" style="border-color: var(--border-color);">🔍</span>
-                    <input type="text" name="buscar" class="form-control border-start-0 text-white bg-dark"
+                    <input type="text" name="buscar" class="form-control border-start-0 text-slate-800 bg-dark"
                            placeholder="Buscar por cliente, teléfono, producto o serie..."
                            value="@ViewData["Busqueda"]" />
                 </div>
@@ -33,7 +33,7 @@
         <div class="card bg-card border-start border-4 border-success">
             <div class="card-body">
                 <small class="text-secondary text-uppercase fw-bold">Total vigentes</small>
-                <h3 class="text-white fw-bold mb-0">@todas.Count</h3>
+                <h3 class="text-slate-800 fw-bold mb-0">@todas.Count</h3>
                 <small class="text-success">Garantías activas</small>
             </div>
         </div>
@@ -90,10 +90,10 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead style="border-bottom: 1px solid var(--border-color);">
                         <tr>
-                            <th class="ps-4 text-white">Cliente</th>
-                            <th class="text-white">Producto vendido</th>
-                            <th class="text-white">Garantía</th>
-                            <th class="text-end pe-4 text-white">Días restantes</th>
+                            <th class="ps-4 text-slate-800">Cliente</th>
+                            <th class="text-slate-800">Producto vendido</th>
+                            <th class="text-slate-800">Garantía</th>
+                            <th class="text-end pe-4 text-slate-800">Días restantes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -102,7 +102,7 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-white">@g.Cliente</span>
+                                        <span class="fw-bold text-slate-800">@g.Cliente</span>
                                         @if (!string.IsNullOrWhiteSpace(g.Telefono))
                                         {
                                             <small class="text-secondary" style="font-size: 0.8rem;">
@@ -113,7 +113,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-white">@g.Producto</span>
+                                        <span class="fw-bold text-slate-800">@g.Producto</span>
                                         <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(g.NumeroSerie) ? "—" : g.NumeroSerie)</small>
                                         <small class="text-secondary mt-1" style="font-size: 0.7rem;">
                                             @if (!string.IsNullOrEmpty(g.Procesador) || g.RAM_GB > 0 || g.Almacenamiento_GB > 0)
@@ -174,10 +174,10 @@
                 <table class="table table-hover align-middle mb-0">
                     <thead style="border-bottom: 1px solid var(--border-color);">
                         <tr>
-                            <th class="ps-4 text-white">Cliente</th>
-                            <th class="text-white">Producto vendido</th>
-                            <th class="text-white">Garantía</th>
-                            <th class="text-end pe-4 text-white">Días restantes</th>
+                            <th class="ps-4 text-slate-800">Cliente</th>
+                            <th class="text-slate-800">Producto vendido</th>
+                            <th class="text-slate-800">Garantía</th>
+                            <th class="text-end pe-4 text-slate-800">Días restantes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -186,7 +186,7 @@
                             <tr>
                                 <td class="ps-4">
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-white">@g.Cliente</span>
+                                        <span class="fw-bold text-slate-800">@g.Cliente</span>
                                         @if (!string.IsNullOrWhiteSpace(g.Telefono))
                                         {
                                             <small class="text-secondary" style="font-size: 0.8rem;">
@@ -197,7 +197,7 @@
                                 </td>
                                 <td>
                                     <div class="d-flex flex-column">
-                                        <span class="fw-bold text-white">@g.Producto</span>
+                                        <span class="fw-bold text-slate-800">@g.Producto</span>
                                         <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(g.NumeroSerie) ? "—" : g.NumeroSerie)</small>
                                         <small class="text-secondary mt-1" style="font-size: 0.7rem;">
                                             @if (!string.IsNullOrEmpty(g.Procesador) || g.RAM_GB > 0 || g.Almacenamiento_GB > 0)
@@ -251,18 +251,18 @@
 
 <style>
     .nav-tabs .nav-link {
-        color: #8a8a9e;
+        color: #7b8399;
         border: none;
         background: transparent;
         border-bottom: 3px solid transparent;
     }
     .nav-tabs .nav-link:hover {
-        color: #fff;
+        color: #1e2433;
     }
     .nav-tabs .nav-link.active {
         background-color: transparent !important;
-        color: #fff !important;
-        border-bottom-color: #198754 !important;
+        color: #4f46e5 !important;
+        border-bottom-color: #4f46e5 !important;
     }
 </style>
 

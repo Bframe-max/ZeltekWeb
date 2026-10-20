@@ -10,21 +10,21 @@
 <!-- Header & Search -->
 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
     <div>
-        <h2 class="text-3xl font-bold text-white tracking-tight">Inventario</h2>
-        <p class="text-gray-400 text-sm mt-1">Gestión de dispositivos y accesorios</p>
+        <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Inventario</h2>
+        <p class="text-slate-500 text-sm mt-1">Gestión de dispositivos y accesorios</p>
     </div>
 
     <div class="w-full md:w-auto">
         <form asp-action="Index" method="get" class="relative group">
             <input type="hidden" name="filtro" value="@filtro" />
             
-            <div class="absolute -inset-0.5 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
-            <div class="relative flex items-center bg-[#1a1b2e] rounded-full border border-gray-700 focus-within:border-purple-500 transition-colors">
-                <div class="pl-4 text-gray-500">
+            <div class="absolute -inset-0.5 bg-indigo-600 hover:bg-indigo-700 rounded-full blur opacity-30 group-hover:opacity-60 transition duration-500"></div>
+            <div class="relative flex items-center bg-slate-50 rounded-full border border-slate-200 focus-within:border-purple-500 transition-colors">
+                <div class="pl-4 text-slate-400">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                 </div>
                 <input type="text" name="buscar" 
-                       class="w-full md:w-80 bg-transparent text-white border-0 focus:ring-0 px-4 py-2.5 placeholder-gray-500 text-sm"
+                       class="w-full md:w-80 bg-transparent text-slate-800 border-0 focus:ring-0 px-4 py-2.5 placeholder-slate-400 text-sm"
                        placeholder="Buscar por IMEI, Modelo..." 
                        value="@ViewData["Busqueda"]" autocomplete="off" />
                 <button type="submit" class="hidden">Buscar</button>
@@ -34,25 +34,25 @@
 </div>
 
 <!-- Main Filters (Status) -->
-<div class="flex flex-wrap gap-2 mb-6 border-b border-gray-800 pb-1">
+<div class="flex flex-wrap gap-2 mb-6 border-b border-slate-200 pb-1">
     <a asp-action="Index" asp-route-filtro="Stock" asp-route-buscar="@Model.Busqueda"
-       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Stock" ? "text-purple-400 border-purple-500 bg-[#24253b]" : "text-gray-400 border-transparent hover:text-white hover:bg-white/5")">
+       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Stock" ? "text-purple-600 border-purple-500 bg-white" : "text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50")">
         📦 En Stock
     </a>
     <a asp-action="Index" asp-route-filtro="Transito" asp-route-buscar="@Model.Busqueda"
-       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Transito" ? "text-blue-400 border-blue-500 bg-[#24253b]" : "text-gray-400 border-transparent hover:text-white hover:bg-white/5")">
+       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Transito" ? "text-blue-600 border-blue-500 bg-white" : "text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50")">
         ✈️ En Tránsito
     </a>
     <a asp-action="Index" asp-route-filtro="Vendido" asp-route-buscar="@Model.Busqueda"
-       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Vendido" ? "text-emerald-400 border-emerald-500 bg-[#24253b]" : "text-gray-400 border-transparent hover:text-white hover:bg-white/5")">
+       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 @(filtro == "Vendido" ? "text-emerald-600 border-emerald-500 bg-white" : "text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50")">
         💰 Historial
     </a>
     <a asp-action="Calidad" 
-       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 text-gray-400 border-transparent hover:text-white hover:bg-white/5">
+       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50">
         🛠️ Mesa de Calidad
     </a>
     <a asp-action="Reparaciones" 
-       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 text-gray-400 border-transparent hover:text-white hover:bg-white/5">
+       class="px-4 py-2 text-sm font-medium rounded-t-lg transition-colors border-b-2 text-slate-500 border-transparent hover:text-slate-900 hover:bg-slate-50">
         🔧 Reparaciones
     </a>
 </div>
@@ -61,17 +61,17 @@
 <!-- Since we are replacing Bootstrap, we can use simple JS or just Tailwind tabs. We'll use Bootstrap data-attributes for compatibility if Bootstrap JS is loaded (likely is), but style with Tailwind classes. -->
 <ul class="flex gap-4 mb-6 px-2" id="typeTabs" role="tablist">
     <li role="presentation">
-        <button class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all active-tab-btn bg-purple-500/10 text-purple-400 border border-purple-500/20" 
+        <button class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all active-tab-btn bg-purple-500/10 text-purple-600 border border-purple-500/20" 
                 id="tab-laptops" data-bs-toggle="tab" data-bs-target="#panel-laptops" type="button" role="tab" aria-selected="true"
                 onclick="setActiveTab(this)">
             📱 Dispositivos <span class="ml-2 bg-purple-500/20 px-1.5 py-0.5 rounded text-xs">@laptops.Count</span>
         </button>
     </li>
     <li role="presentation">
-        <button class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all text-gray-400 hover:text-white hover:bg-white/5" 
+        <button class="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all text-slate-500 hover:text-slate-900 hover:bg-slate-50" 
                 id="tab-accesorios" data-bs-toggle="tab" data-bs-target="#panel-accesorios" type="button" role="tab" aria-selected="false"
                  onclick="setActiveTab(this)">
-            🔌 Accesorios <span class="ml-2 bg-gray-700 px-1.5 py-0.5 rounded text-xs">@accesorios.Count</span>
+            🔌 Accesorios <span class="ml-2 bg-slate-100 px-1.5 py-0.5 rounded text-xs">@accesorios.Count</span>
         </button>
     </li>
 </ul>
@@ -80,42 +80,42 @@
     
     <!-- Panel Laptops -->
     <div class="tab-pane fade show active" id="panel-laptops" role="tabpanel">
-        <div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">ID / Fecha</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Precios</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Acciones</th>
+                        <tr class="border-b border-slate-200 bg-slate-50">
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">ID / Fecha</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Producto</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Estado</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Precios</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-center">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#2e2f45]">
+                    <tbody class="divide-y divide-slate-100">
                         @if (laptops.Any())
                         {
                             foreach (var item in laptops)
                             {
-                                <tr class="group hover:bg-white/[0.02] transition-colors">
+                                <tr class="group hover:bg-slate-50 transition-colors">
                                     <td class="p-4 align-top">
                                         <div class="flex flex-col">
-                                            <span class="text-white font-mono text-sm">#@item.ItemID</span>
+                                            <span class="text-slate-800 font-mono text-sm">#@item.ItemID</span>
                                         </div>
                                     </td>
                                     <td class="p-4">
                                         <div class="flex items-start gap-3">
-                                            <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-500 text-xs shrink-0 border border-gray-700">
+                                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 text-xs shrink-0 border border-slate-200">
                                                 📱
                                             </div>
                                             <div>
-                                                <p class="text-blue-400 font-medium text-sm">@item.ProductoNombre</p>
-                                                <p class="text-gray-500 text-xs">@item.NumeroSerie</p>
+                                                <p class="text-blue-600 font-medium text-sm">@item.ProductoNombre</p>
+                                                <p class="text-slate-400 text-xs">@item.NumeroSerie</p>
                                                 <div class="flex flex-wrap gap-2 mt-1">
-                                                    @if(!string.IsNullOrEmpty(item.Procesador)) { <span class="text-[10px] text-gray-500 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700">@item.Procesador</span> }
-                                                    @if(item.RAM_GB > 0) { <span class="text-[10px] text-gray-500 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700">@item.RAM_GB GB</span> }
-                                                    @if(item.Almacenamiento_GB > 0) { <span class="text-[10px] text-gray-500 bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700">@item.Almacenamiento_GB GB</span> }
-                                                    @if(!string.IsNullOrEmpty(item.Color)) { <span class="text-[10px] text-white bg-gray-800/50 px-1.5 py-0.5 rounded border border-gray-700">@item.Color</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Procesador)) { <span class="text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">@item.Procesador</span> }
+                                                    @if(item.RAM_GB > 0) { <span class="text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">@item.RAM_GB GB</span> }
+                                                    @if(item.Almacenamiento_GB > 0) { <span class="text-[10px] text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">@item.Almacenamiento_GB GB</span> }
+                                                    @if(!string.IsNullOrEmpty(item.Color)) { <span class="text-[10px] text-slate-800 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">@item.Color</span> }
                                                 </div>
                                             </div>
                                         </div>
@@ -123,34 +123,34 @@
                                     <td class="p-4">
                                         @if (item.Estado == "En Stock")
                                         {
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">Stock</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-600 border border-purple-500/20">Stock</span>
                                         }
                                         else if (item.Estado == "Vendido")
                                         {
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Vendido</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Vendido</span>
                                         }
                                         else
                                         {
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">@item.Estado</span>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 border border-blue-500/20">@item.Estado</span>
                                         }
                                     </td>
                                     <td class="p-4 text-right">
                                         <div class="flex flex-col gap-1">
                                             @if(item.PrecioVenta > 0)
                                             {
-                                                <div class="text-emerald-400 font-mono text-sm font-bold">$@item.PrecioVenta.ToString("N2")</div>
+                                                <div class="text-emerald-600 font-mono text-sm font-bold">$@item.PrecioVenta.ToString("N2")</div>
                                             }
                                             else
                                             {
                                                 <button type="button" 
-                                                        class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer transition-colors"
+                                                        class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer transition-colors"
                                                         onclick="abrirModalPrecio(this)"
                                                         data-id="@item.ItemID"
                                                         data-costo="@item.CostoTotal">
                                                     ⚠️ Fijar Precio
                                                 </button>
                                             }
-                                            <div class="text-gray-600 text-[10px] font-mono">Costo: $@item.CostoTotal.ToString("N0")</div>
+                                            <div class="text-slate-400 text-[10px] font-mono">Costo: $@item.CostoTotal.ToString("N0")</div>
                                         </div>
                                     </td>
                                     <td class="p-4">
@@ -158,7 +158,7 @@
                                             @if (filtro == "Stock" && item.Estado == "En Stock")
                                             {
                                                 <button type="button" 
-                                                        class="p-2 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all btn-vender" 
+                                                        class="p-2 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-all btn-vender" 
                                                         title="Vender"
                                                         data-bs-toggle="modal" 
                                                         data-bs-target="#modalVenta"
@@ -178,7 +178,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="5" class="p-8 text-center text-gray-500">
+                                <td colspan="5" class="p-8 text-center text-slate-400">
                                     No se encontraron dispositivos en esta vista.
                                 </td>
                             </tr>
@@ -191,40 +191,40 @@
 
     <!-- Panel Accesorios -->
     <div class="tab-pane fade" id="panel-accesorios" role="tabpanel">
-        <div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Accesorio</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Stock</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Precios</th>
-                            <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-center">Acciones</th>
+                        <tr class="border-b border-slate-200 bg-slate-50">
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">ID</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Accesorio</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-center">Stock</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Precios</th>
+                            <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-center">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-[#2e2f45]">
+                    <tbody class="divide-y divide-slate-100">
                         @if (accesorios.Any())
                         {
                             foreach (var item in accesorios)
                             {
-                                <tr class="group hover:bg-white/[0.02] transition-colors">
+                                <tr class="group hover:bg-slate-50 transition-colors">
                                     <td class="p-4 align-top">
-                                        <span class="text-white font-mono text-sm">#@item.ItemID</span>
+                                        <span class="text-slate-800 font-mono text-sm">#@item.ItemID</span>
                                     </td>
                                     <td class="p-4">
                                         <div class="flex items-start gap-3">
-                                            <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-500 text-xs shrink-0 border border-gray-700">
+                                            <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 text-xs shrink-0 border border-slate-200">
                                                 🔌
                                             </div>
                                             <div>
-                                                <p class="text-blue-400 font-medium text-sm">@item.ProductoNombre</p>
-                                                <p class="text-gray-500 text-xs">@item.NumeroSerie</p>
+                                                <p class="text-blue-600 font-medium text-sm">@item.ProductoNombre</p>
+                                                <p class="text-slate-400 text-xs">@item.NumeroSerie</p>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="p-4 text-center">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-white border border-gray-600">
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
                                             @item.CantidadActual / @item.CantidadInicial
                                         </span>
                                     </td>
@@ -232,19 +232,19 @@
                                         <div class="flex flex-col gap-1">
                                             @if(item.PrecioVenta > 0)
                                             {
-                                                <div class="text-emerald-400 font-mono text-sm font-bold">$@((item.PrecioVenta / (item.CantidadInicial > 0 ? item.CantidadInicial : 1)).ToString("N2"))</div>
-                                                <div class="text-gray-600 text-[10px] font-mono">Lote: $@item.CostoTotal.ToString("N0")</div>
+                                                <div class="text-emerald-600 font-mono text-sm font-bold">$@((item.PrecioVenta / (item.CantidadInicial > 0 ? item.CantidadInicial : 1)).ToString("N2"))</div>
+                                                <div class="text-slate-400 text-[10px] font-mono">Lote: $@item.CostoTotal.ToString("N0")</div>
                                             }
                                             else
                                             {
                                                 <button type="button" 
-                                                        class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer transition-colors"
+                                                        class="px-2.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20 hover:bg-amber-500/20 cursor-pointer transition-colors"
                                                         onclick="abrirModalPrecio(this)"
                                                         data-id="@item.ItemID"
                                                         data-costo="@((item.CostoTotal/(item.CantidadInicial > 0 ? item.CantidadInicial : 1)))">
                                                     ⚠️ Fijar Precio
                                                 </button>
-                                                <div class="text-gray-600 text-[10px] font-mono">Lote: $@item.CostoTotal.ToString("N0")</div>
+                                                <div class="text-slate-400 text-[10px] font-mono">Lote: $@item.CostoTotal.ToString("N0")</div>
                                             }
                                         </div>
                                     </td>
@@ -253,7 +253,7 @@
                                             @if (filtro == "Stock" && item.CantidadActual > 0 && item.PrecioVenta > 0)
                                             {
                                                 <button type="button" 
-                                                        class="p-2 rounded-lg text-emerald-400 hover:text-emerald-300 hover:bg-emerald-500/10 transition-all" 
+                                                        class="p-2 rounded-lg text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-all" 
                                                         title="Vender"
                                                         data-bs-toggle="modal" 
                                                         data-bs-target="#modalVenta"
@@ -275,7 +275,7 @@
                         else
                         {
                              <tr>
-                                <td colspan="5" class="p-8 text-center text-gray-500">
+                                <td colspan="5" class="p-8 text-center text-slate-400">
                                     No se encontraron accesorios en esta vista.
                                 </td>
                             </tr>
@@ -290,29 +290,29 @@
 <!-- Modal Venta (Dark Premium) -->
 <div class="modal fade" id="modalVenta" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#24253b] text-white border border-gray-700 shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700">
+        <div class="modal-content bg-white text-slate-800 border border-slate-200 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200">
                 <h5 class="modal-title font-bold text-lg">Registrar Venta Rápida</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-6">
                 <form id="formVentaRapida">
                     <input type="hidden" id="v_itemId" name="itemId" />
                     <!-- Info Producto -->
-                    <div class="mb-4 bg-[#1a1b2e] p-4 rounded-xl border border-gray-700">
-                        <label class="block text-gray-400 text-xs uppercase font-bold mb-1">Producto</label>
-                        <p class="text-white font-medium text-lg" id="v_productoNombre">...</p>
-                        <p class="text-gray-500 text-sm" id="v_sn">...</p>
+                    <div class="mb-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <label class="block text-slate-500 text-xs uppercase font-bold mb-1">Producto</label>
+                        <p class="text-slate-800 font-medium text-lg" id="v_productoNombre">...</p>
+                        <p class="text-slate-400 text-sm" id="v_sn">...</p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Precio Venta ($)</label>
-                            <input type="number" id="v_precio" name="precioFinal" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-lg" step="0.01" min="0" required oninput="calcularGanancia()" />
+                            <label class="block text-slate-500 text-xs mb-1">Precio Venta ($)</label>
+                            <input type="number" id="v_precio" name="precioFinal" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-lg" step="0.01" min="0" required oninput="calcularGanancia()" />
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Costo (Ref)</label>
-                            <input type="text" id="v_costo" class="w-full bg-transparent border-0 px-0 py-2 text-gray-500 font-mono text-sm" readonly />
+                            <label class="block text-slate-500 text-xs mb-1">Costo (Ref)</label>
+                            <input type="text" id="v_costo" class="w-full bg-transparent border-0 px-0 py-2 text-slate-400 font-mono text-sm" readonly />
                             <input type="hidden" id="v_costo_hidden" />
                         </div>
                     </div>
@@ -322,59 +322,59 @@
 
                     <!-- Quantity Input -->
                     <div class="mb-4">
-                        <label class="block text-gray-400 text-xs mb-1">Cantidad</label>
+                        <label class="block text-slate-500 text-xs mb-1">Cantidad</label>
                         <input type="number" 
                                id="v_cantidad" 
                                name="cantidad" 
-                               class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none font-mono" 
+                               class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none font-mono" 
                                value="1" 
                                min="1" 
                                max="1" 
                                readonly 
                                onchange="calcularGanancia()" />
-                        <p class="text-gray-500 text-[10px] mt-1">Para laptops la cantidad es fija (1). Para accesorios puedes modificarla.</p>
+                        <p class="text-slate-400 text-[10px] mt-1">Para laptops la cantidad es fija (1). Para accesorios puedes modificarla.</p>
                     </div>
 
                     <!-- Client Search Section -->
                     <div class="mb-4">
-                        <label class="block text-gray-400 text-xs mb-1">Buscar Cliente (Nombre o Cédula)</label>
+                        <label class="block text-slate-500 text-xs mb-1">Buscar Cliente (Nombre o Cédula)</label>
                         <div class="relative">
-                            <input type="text" id="v_clienteBuscar" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none" placeholder="Escribe para buscar cliente existente..." autocomplete="off" />
-                            <div id="clienteAutocompleteResults" class="absolute z-50 w-full mt-1 bg-[#24253b] border border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
+                            <input type="text" id="v_clienteBuscar" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none" placeholder="Escribe para buscar cliente existente..." autocomplete="off" />
+                            <div id="clienteAutocompleteResults" class="absolute z-50 w-full mt-1 bg-white border border-slate-200 rounded-lg shadow-lg max-h-48 overflow-y-auto hidden"></div>
                         </div>
                         <input type="hidden" id="v_clienteIdExistente" name="clienteIdExistente" value="0" />
                     </div>
 
                     <div class="grid grid-cols-3 gap-3 mb-4">
                         <div class="col-span-1">
-                             <label class="block text-gray-400 text-xs mb-1">Tipo Cliente</label>
-                             <select id="v_tipoCliente" name="tipoVenta" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-2 py-2 text-white text-xs focus:border-blue-500 outline-none">
+                             <label class="block text-slate-500 text-xs mb-1">Tipo Cliente</label>
+                             <select id="v_tipoCliente" name="tipoVenta" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-2 py-2 text-slate-800 text-xs focus:border-indigo-400 outline-none">
                                 <option value="Final">Cliente Final</option>
                                 <option value="Revendedor">Revendedor</option>
                                 <option value="Tecnico">Técnico / Aliado</option>
                              </select>
                         </div>
                         <div class="col-span-2">
-                            <label class="block text-gray-400 text-xs mb-1">Nombre Completo *</label>
-                            <input type="text" id="v_clienteNombre" name="clienteNombre" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none" placeholder="Nombre Completo" required />
+                            <label class="block text-slate-500 text-xs mb-1">Nombre Completo *</label>
+                            <input type="text" id="v_clienteNombre" name="clienteNombre" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none" placeholder="Nombre Completo" required />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Cédula / RUC</label>
-                            <input type="text" id="v_clienteCedula" name="clienteCedula" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none font-mono" placeholder="0012345678" />
+                            <label class="block text-slate-500 text-xs mb-1">Cédula / RUC</label>
+                            <input type="text" id="v_clienteCedula" name="clienteCedula" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none font-mono" placeholder="0012345678" />
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Teléfono / WhatsApp</label>
-                            <input type="text" id="v_clienteCelular" name="clienteCelular" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none font-mono" placeholder="0987654321" />
+                            <label class="block text-slate-500 text-xs mb-1">Teléfono / WhatsApp</label>
+                            <input type="text" id="v_clienteCelular" name="clienteCelular" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none font-mono" placeholder="0987654321" />
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Método Pago</label>
-                            <select id="v_metodo" name="metodoPago" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none">
+                            <label class="block text-slate-500 text-xs mb-1">Método Pago</label>
+                            <select id="v_metodo" name="metodoPago" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none">
                                 <option value="Efectivo">Efectivo</option>
                                 <option value="Transferencia">Transferencia</option>
                                 <option value="Tarjeta">Tarjeta</option>
@@ -383,8 +383,8 @@
                             </select>
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Garantía</label>
-                            <select id="v_garantia" name="garantiaMeses" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-blue-500 outline-none">
+                            <label class="block text-slate-500 text-xs mb-1">Garantía</label>
+                            <select id="v_garantia" name="garantiaMeses" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-indigo-400 outline-none">
                                 <option value="1">1 Mes</option>
                                 <option value="3" selected>3 Meses</option>
                                 <option value="6">6 Meses</option>
@@ -397,9 +397,9 @@
 
                 </form>
             </div>
-            <div class="modal-footer border-gray-700 p-4">
-                <button type="button" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" id="btnGuardarVenta" class="px-6 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white shadow-lg shadow-emerald-500/20 font-medium text-sm transition-all transform hover:scale-105" onclick="submitVenta()">
+            <div class="modal-footer border-slate-200 p-4">
+                <button type="button" class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="btnGuardarVenta" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-500/20 font-medium text-sm transition-all transform hover:scale-105" onclick="submitVenta()">
                     Confirmar Venta
                 </button>
             </div>
@@ -410,28 +410,28 @@
 <!-- Modal Fijar Precio (Dark Premium) -->
 <div class="modal fade" id="modalFijarPrecio" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content bg-[#24253b] text-white border border-gray-700 shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700 p-4">
+        <div class="modal-content bg-white text-slate-800 border border-slate-200 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200 p-4">
                 <h5 class="modal-title font-bold text-base">Fijar Precio</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close " data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-5">
                 <input type="hidden" id="fp_itemId" />
                 <div class="mb-4">
-                    <label class="block text-gray-500 text-xs uppercase font-bold mb-1">Costo Real</label>
-                    <div class="text-white font-mono text-lg" id="fp_costo">$0.00</div>
+                    <label class="block text-slate-400 text-xs uppercase font-bold mb-1">Costo Real</label>
+                    <div class="text-slate-800 font-mono text-lg" id="fp_costo">$0.00</div>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-500 text-xs uppercase font-bold mb-1">Sugerido (+30%)</label>
-                    <div class="text-emerald-400 font-mono text-base font-bold" id="fp_sugerido">$0.00</div>
+                    <label class="block text-slate-400 text-xs uppercase font-bold mb-1">Sugerido (+30%)</label>
+                    <div class="text-emerald-600 font-mono text-base font-bold" id="fp_sugerido">$0.00</div>
                 </div>
                 <div>
-                    <label class="block text-gray-400 text-xs mb-1">Precio Final</label>
-                    <input type="number" id="fp_precio" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-lg" step="0.01" min="0" />
+                    <label class="block text-slate-500 text-xs mb-1">Precio Final</label>
+                    <input type="number" id="fp_precio" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none font-bold text-lg" step="0.01" min="0" />
                 </div>
             </div>
-            <div class="modal-footer border-gray-700 p-3">
-                <button type="button" class="px-3 py-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 text-xs font-medium" data-bs-dismiss="modal">Cancelar</button>
+            <div class="modal-footer border-slate-200 p-3">
+                <button type="button" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 text-xs font-medium" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 font-medium text-xs transition-all" onclick="guardarPrecio()">Guardar</button>
             </div>
         </div>
@@ -443,26 +443,26 @@
     function setActiveTab(element) {
         // Remove active styles from all buttons
         document.querySelectorAll('#typeTabs button').forEach(btn => {
-            btn.classList.remove('bg-purple-500/10', 'text-purple-400', 'border-purple-500/20');
-            btn.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-white/5');
+            btn.classList.remove('bg-purple-500/10', 'text-purple-600', 'border-purple-500/20');
+            btn.classList.add('text-slate-500', 'hover:text-slate-900', 'hover:bg-slate-50');
             btn.setAttribute('aria-selected', 'false');
             
             // Badge style
             const badge = btn.querySelector('span');
             if(badge) {
                 badge.classList.remove('bg-purple-500/20');
-                badge.classList.add('bg-gray-700');
+                badge.classList.add('bg-slate-100');
             }
         });
 
         // Add active style to clicked button
-        element.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-white/5');
-        element.classList.add('bg-purple-500/10', 'text-purple-400', 'border', 'border-purple-500/20');
+        element.classList.remove('text-slate-500', 'hover:text-slate-900', 'hover:bg-slate-50');
+        element.classList.add('bg-purple-500/10', 'text-purple-600', 'border', 'border-purple-500/20');
         element.setAttribute('aria-selected', 'true');
         
         const badge = element.querySelector('span');
         if(badge) {
-            badge.classList.remove('bg-gray-700');
+            badge.classList.remove('bg-slate-100');
             badge.classList.add('bg-purple-500/20');
         }
 
@@ -505,12 +505,12 @@
                 
                 if (esLote) {
                     cantidadInput.removeAttribute('readonly');
-                    cantidadInput.classList.remove('bg-gray-800', 'cursor-not-allowed');
-                    cantidadInput.classList.add('bg-[#1a1b2e]');
+                    cantidadInput.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                    cantidadInput.classList.add('bg-slate-50');
                 } else {
                     cantidadInput.setAttribute('readonly', 'readonly');
-                    cantidadInput.classList.add('bg-gray-800', 'cursor-not-allowed');
-                    cantidadInput.classList.remove('bg-[#1a1b2e]');
+                    cantidadInput.classList.add('bg-slate-100', 'cursor-not-allowed');
+                    cantidadInput.classList.remove('bg-slate-50');
                 }
 
                 // Reset form fields
@@ -547,13 +547,13 @@
                             if (data && data.length > 0) {
                                 var html = '';
                                 data.forEach(function(cliente) {
-                                    html += '<div class="px-3 py-2 hover:bg-white/10 cursor-pointer border-b border-gray-700 last:border-0 cliente-result" ' +
+                                    html += '<div class="px-3 py-2 hover:bg-slate-100 cursor-pointer border-b border-slate-200 last:border-0 cliente-result" ' +
                                             'data-id="' + cliente.id + '" ' +
                                             'data-nombre="' + (cliente.nombre || '') + '" ' +
                                             'data-cedula="' + (cliente.cedula || '') + '" ' +
                                             'data-telefono="' + (cliente.telefono || '') + '">' +
-                                            '<div class="text-white text-sm font-medium">' + (cliente.nombre || 'Sin nombre') + '</div>' +
-                                            '<div class="text-gray-400 text-xs">Céd: ' + (cliente.cedula || 'N/A') + ' | Tel: ' + (cliente.telefono || 'N/A') + '</div>' +
+                                            '<div class="text-slate-800 text-sm font-medium">' + (cliente.nombre || 'Sin nombre') + '</div>' +
+                                            '<div class="text-slate-500 text-xs">Céd: ' + (cliente.cedula || 'N/A') + ' | Tel: ' + (cliente.telefono || 'N/A') + '</div>' +
                                             '</div>';
                                 });
                                 autocompleteResults.innerHTML = html;
@@ -571,7 +571,7 @@
                                     });
                                 });
                             } else {
-                                autocompleteResults.innerHTML = '<div class="px-3 py-2 text-gray-500 text-sm">No se encontraron clientes</div>';
+                                autocompleteResults.innerHTML = '<div class="px-3 py-2 text-slate-400 text-sm">No se encontraron clientes</div>';
                                 autocompleteResults.classList.remove('hidden');
                             }
                         })
@@ -602,14 +602,14 @@
         var ganancia = precioTotal - costoTotal;
         
         var alertBox = document.getElementById('alertGanancia');
-        alertBox.classList.remove('hidden', 'bg-red-500/20', 'text-red-400', 'bg-emerald-500/20', 'text-emerald-400');
+        alertBox.classList.remove('hidden', 'bg-red-500/20', 'text-red-600', 'bg-emerald-500/20', 'text-emerald-600');
 
         if (ganancia < 0) {
-            alertBox.classList.add('bg-red-500/20', 'text-red-400');
+            alertBox.classList.add('bg-red-500/20', 'text-red-600');
             alertBox.innerHTML = '⚠️ Pérdida: -$' + Math.abs(ganancia).toLocaleString('en-US', {minimumFractionDigits: 2}) +
                                 (cantidad > 1 ? ' (x' + cantidad + ' unidades)' : '');
         } else {
-            alertBox.classList.add('bg-emerald-500/20', 'text-emerald-400');
+            alertBox.classList.add('bg-emerald-500/20', 'text-emerald-600');
             alertBox.innerHTML = 'Profit: +$' + ganancia.toLocaleString('en-US', {minimumFractionDigits: 2}) +
                                 (cantidad > 1 ? ' (x' + cantidad + ' unidades)' : '');
         }
@@ -629,9 +629,7 @@
                 icon: 'warning',
                 title: 'Datos Incompletos',
                 text: 'El nombre del cliente es obligatorio',
-                background: '#24253b',
-                color: '#fff',
-                confirmButtonColor: '#7c3aed'
+                confirmButtonColor: '#4f46e5'
             });
             return;
         }
@@ -641,9 +639,7 @@
                 icon: 'warning',
                 title: 'Precio Inválido',
                 text: 'El precio de venta debe ser mayor a 0',
-                background: '#24253b',
-                color: '#fff',
-                confirmButtonColor: '#7c3aed'
+                confirmButtonColor: '#4f46e5'
             });
             return;
         }
@@ -666,22 +662,22 @@
             title: '¿Confirmar Venta?',
             html: `
                 <div class="text-left space-y-2" style="color: #d1d5db;">
-                    <div class="mb-4 p-3 bg-white/5 rounded-lg">
-                        <p class="text-sm text-gray-400 mb-1">Producto</p>
-                        <p class="text-white font-bold">${producto}</p>
-                        <p class="text-xs text-gray-500">${sn}</p>
-                        ${cantidad > 1 ? '<p class="text-xs text-amber-400 mt-1">Cantidad: ' + cantidad + ' unidades</p>' : ''}
+                    <div class="mb-4 p-3 bg-slate-50 rounded-lg">
+                        <p class="text-sm text-slate-500 mb-1">Producto</p>
+                        <p class="text-slate-800 font-bold">${producto}</p>
+                        <p class="text-xs text-slate-400">${sn}</p>
+                        ${cantidad > 1 ? '<p class="text-xs text-amber-600 mt-1">Cantidad: ' + cantidad + ' unidades</p>' : ''}
                     </div>
                     <div class="grid grid-cols-2 gap-3 mb-4">
-                        <div class="p-3 bg-white/5 rounded-lg">
-                            <p class="text-xs text-gray-400 mb-1">Cliente</p>
-                            <p class="text-white font-medium text-sm">${clienteNombre}</p>
-                            <p class="text-xs text-gray-500">Céd: ${clienteCedula}</p>
+                        <div class="p-3 bg-slate-50 rounded-lg">
+                            <p class="text-xs text-slate-500 mb-1">Cliente</p>
+                            <p class="text-slate-800 font-medium text-sm">${clienteNombre}</p>
+                            <p class="text-xs text-slate-400">Céd: ${clienteCedula}</p>
                         </div>
-                        <div class="p-3 bg-white/5 rounded-lg">
-                            <p class="text-xs text-gray-400 mb-1">Precio Final</p>
-                            <p class="text-emerald-400 font-bold text-lg">$${precioTotal.toFixed(2)}</p>
-                            ${cantidad > 1 ? '<p class="text-xs text-gray-500">$' + precioUnitario.toFixed(2) + ' x ' + cantidad + '</p>' : ''}
+                        <div class="p-3 bg-slate-50 rounded-lg">
+                            <p class="text-xs text-slate-500 mb-1">Precio Final</p>
+                            <p class="text-emerald-600 font-bold text-lg">$${precioTotal.toFixed(2)}</p>
+                            ${cantidad > 1 ? '<p class="text-xs text-slate-400">$' + precioUnitario.toFixed(2) + ' x ' + cantidad + '</p>' : ''}
                         </div>
                     </div>
                     <div class="p-3 rounded-lg" style="background-color: ${gananciaColor}20; border: 1px solid ${gananciaColor}40;">
@@ -694,12 +690,10 @@
             showCancelButton: true,
             confirmButtonText: 'Sí, Facturar y Entregar',
             cancelButtonText: 'Cancelar',
-            background: '#24253b',
-            color: '#fff',
             confirmButtonColor: '#10b981',
             cancelButtonColor: '#6b7280',
             customClass: {
-                popup: 'border border-gray-700'
+                popup: 'border border-slate-200'
             }
         }).then((result) => {
             if (result.isConfirmed) {
@@ -728,8 +722,6 @@
                     icon: 'success',
                     title: '¡Venta Registrada!',
                     text: 'La venta se ha procesado correctamente',
-                    background: '#24253b',
-                    color: '#fff',
                     confirmButtonColor: '#10b981',
                     timer: 2000
                 }).then(() => {
@@ -742,8 +734,6 @@
                     icon: 'error',
                     title: 'Error',
                     text: data.message || 'Error al procesar la venta',
-                    background: '#24253b',
-                    color: '#fff',
                     confirmButtonColor: '#ef4444'
                 });
                 btn.innerHTML = originalText;
@@ -756,8 +746,6 @@
                 icon: 'error',
                 title: 'Error de Conexión',
                 text: 'No se pudo conectar con el servidor',
-                background: '#24253b',
-                color: '#fff',
                 confirmButtonColor: '#ef4444'
             });
             btn.innerHTML = originalText;

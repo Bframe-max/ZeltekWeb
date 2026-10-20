@@ -5,7 +5,7 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="fw-bold text-white">📊 Reportes</h2>
+    <h2 class="fw-bold text-slate-800">📊 Reportes</h2>
     <div class="d-flex gap-2 align-items-center">
         <span class="text-secondary small">Tendencia:</span>
         <a asp-action="Index" asp-route-meses="6" asp-route-periodoGanancia="@Model.PeriodoGananciaMeses" class="btn btn-sm @(Model.MesesTendencia == 6 ? "btn-primary" : "btn-outline-secondary")">6 meses</a>
@@ -18,39 +18,39 @@
 <div class="mb-8">
     <div class="flex flex-col md:flex-row justify-between items-end mb-4">
         <div>
-            <h5 class="text-white font-bold text-xl flex items-center gap-2">
+            <h5 class="text-slate-800 font-bold text-xl flex items-center gap-2">
                 📊 Ganancia Neta
-                <span class="text-xs font-normal text-gray-500 bg-gray-800 px-2 py-1 rounded-full border border-gray-700">Últimos @Model.PeriodoGananciaMeses meses</span>
+                <span class="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-1 rounded-full border border-slate-200">Últimos @Model.PeriodoGananciaMeses meses</span>
             </h5>
-             <p class="text-gray-400 text-sm mt-1">Tu rentabilidad real (Ventas − Gastos).</p>
+             <p class="text-slate-500 text-sm mt-1">Tu rentabilidad real (Ventas − Gastos).</p>
         </div>
         <div class="flex gap-2 mt-2 md:mt-0">
              <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="1" 
-               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 1 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">1 mes</a>
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 1 ? "bg-indigo-600 border-blue-500 text-white" : "border-slate-200 text-slate-500 hover:bg-slate-100")">1 mes</a>
              <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="3" 
-               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 3 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">3 meses</a>
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 3 ? "bg-indigo-600 border-blue-500 text-white" : "border-slate-200 text-slate-500 hover:bg-slate-100")">3 meses</a>
              <a asp-action="Index" asp-route-meses="@Model.MesesTendencia" asp-route-periodoGanancia="12" 
-               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 12 ? "bg-blue-600 border-blue-500 text-white" : "border-gray-700 text-gray-400 hover:bg-gray-800")">12 meses</a>
+               class="px-3 py-1 text-sm rounded-lg border transition-colors @(Model.PeriodoGananciaMeses == 12 ? "bg-indigo-600 border-blue-500 text-white" : "border-slate-200 text-slate-500 hover:bg-slate-100")">12 meses</a>
         </div>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Card 1: Ganancia Bruta -->
-        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="group relative overflow-hidden rounded-[30px] bg-white border border-slate-100 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-blue-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-50 group-hover:opacity-100 transition-opacity"></div>
             <div class="relative p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div class="p-2 bg-blue-500/10 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     </div>
                      <!-- Decorative Sparkline -->
                      <svg class="w-16 h-8 text-blue-500/20" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="3">
                         <path d="M0 35 Q10 15 20 25 T40 15 T60 25 T80 10 T100 20" />
                      </svg>
                 </div>
-                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Ingresos Totales (Ventas)</p>
-                <h3 class="text-3xl font-bold text-white mt-1 group-hover:text-blue-400 transition-colors">$@Model.IngresoTotal.ToString("N2")</h3>
-                <div class="mt-4 flex items-center gap-1 text-xs text-blue-400 bg-blue-500/5 px-2 py-1 rounded-full w-fit">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wide">Ingresos Totales (Ventas)</p>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1 group-hover:text-blue-600 transition-colors">$@Model.IngresoTotal.ToString("N2")</h3>
+                <div class="mt-4 flex items-center gap-1 text-xs text-blue-600 bg-blue-500/5 px-2 py-1 rounded-full w-fit">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                     <span>Ingreso Total</span>
                 </div>
@@ -58,20 +58,20 @@
         </div>
 
         <!-- Card 2: Gastos Operativos -->
-        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/10">
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="group relative overflow-hidden rounded-[30px] bg-white border border-slate-100 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-red-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-50 group-hover:opacity-100 transition-opacity"></div>
              <!-- Background Texture -->
             <div class="absolute -right-6 -bottom-6 w-24 h-24 bg-red-500/5 rounded-full blur-2xl group-hover:bg-red-500/10 transition-all"></div>
 
             <div class="relative p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div class="p-2 bg-red-500/10 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-red-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
                     </div>
                 </div>
-                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Gastos Operativos</p>
-                <h3 class="text-3xl font-bold text-white mt-1 group-hover:text-red-400 transition-colors">− $@Model.TotalGastosOperativos.ToString("N2")</h3>
-                 <div class="mt-4 flex items-center gap-1 text-xs text-red-400 bg-red-500/5 px-2 py-1 rounded-full w-fit">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wide">Gastos Operativos</p>
+                <h3 class="text-3xl font-bold text-slate-800 mt-1 group-hover:text-red-600 transition-colors">− $@Model.TotalGastosOperativos.ToString("N2")</h3>
+                 <div class="mt-4 flex items-center gap-1 text-xs text-red-600 bg-red-500/5 px-2 py-1 rounded-full w-fit">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path></svg>
                     <span>Salida Total</span>
                 </div>
@@ -79,23 +79,23 @@
         </div>
 
         <!-- Card 3: Ganancia Neta -->
-        <div class="group relative overflow-hidden rounded-[30px] bg-[#24253b] border border-white/5 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-500/10">
-            <div class="absolute inset-0 bg-gradient-to-br from-gray-900/50 to-gray-800/50 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+        <div class="group relative overflow-hidden rounded-[30px] bg-white border border-slate-100 shadow-2xl transition-all duration-300 hover:scale-[1.02] hover:shadow-emerald-500/10">
+            <div class="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-50 group-hover:opacity-100 transition-opacity"></div>
              <div class="absolute -right-6 -top-6 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
 
             <div class="relative p-6">
                 <div class="flex justify-between items-start mb-4">
                     <div class="p-2 bg-emerald-500/10 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"></path><path d="M16 12v3.98A2 2 0 0 1 14 18H2.97"></path><path d="M11 12H8a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12V8H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2"></path><path d="M16 12v3.98A2 2 0 0 1 14 18H2.97"></path><path d="M11 12H8a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5"></path></svg>
                     </div>
                      <!-- Decorative Sparkline -->
                      <svg class="w-16 h-8 text-emerald-500/20" viewBox="0 0 100 40" fill="none" stroke="currentColor" stroke-width="3">
                         <path d="M0 30 Q20 30 30 20 T60 20 T90 10" />
                      </svg>
                 </div>
-                <p class="text-sm font-medium text-gray-400 uppercase tracking-wide">Ganancia Neta (Limpia)</p>
-                <h3 class="text-3xl font-bold @(Model.GananciaNeta >= 0 ? "text-emerald-400" : "text-red-400") mt-1">$@Model.GananciaNeta.ToString("N2")</h3>
-                <div class="mt-4 flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/5 px-2 py-1 rounded-full w-fit">
+                <p class="text-sm font-medium text-slate-500 uppercase tracking-wide">Ganancia Neta (Limpia)</p>
+                <h3 class="text-3xl font-bold @(Model.GananciaNeta >= 0 ? "text-emerald-600" : "text-red-600") mt-1">$@Model.GananciaNeta.ToString("N2")</h3>
+                <div class="mt-4 flex items-center gap-1 text-xs text-emerald-600 bg-emerald-500/5 px-2 py-1 rounded-full w-fit">
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     <span>En el bolsillo</span>
                 </div>
@@ -120,7 +120,7 @@
 <!-- Tendencia de Crecimiento -->
 <div class="card bg-card border-0 mb-4">
     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h5 class="text-white fw-bold mb-0">📈 Tendencia de Crecimiento</h5>
+        <h5 class="text-slate-800 fw-bold mb-0">📈 Tendencia de Crecimiento</h5>
         <small class="text-secondary">¿Estoy creciendo o cayendo respecto al mes pasado? Últimos @Model.MesesTendencia meses.</small>
     </div>
     <div class="card-body">
@@ -131,7 +131,7 @@
 <!-- 3. Top Productos -->
 <div class="card bg-card border-0 mb-4">
     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h5 class="text-white fw-bold mb-0">🏆 Top Productos (Qué comprar en eBay)</h5>
+        <h5 class="text-slate-800 fw-bold mb-0">🏆 Top Productos (Qué comprar en eBay)</h5>
         <small class="text-secondary">Invierte donde hay retorno rápido. Los que más vendes.</small>
     </div>
     <div class="card-body">
@@ -141,16 +141,16 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead style="border-bottom: 1px solid var(--border-color);">
                             <tr>
-                                <th class="text-white">Producto</th>
-                                <th class="text-end text-white">Ventas</th>
-                                <th class="text-end text-white">Total</th>
+                                <th class="text-slate-800">Producto</th>
+                                <th class="text-end text-slate-800">Ventas</th>
+                                <th class="text-end text-slate-800">Total</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach (var t in Model.TopProductos.Take(10))
                             {
                                 <tr>
-                                    <td class="fw-bold text-white">@t.ProductoNombre</td>
+                                    <td class="fw-bold text-slate-800">@t.ProductoNombre</td>
                                     <td class="text-end text-info">@t.CantidadVentas</td>
                                     <td class="text-end text-success">$@t.TotalVendido.ToString("N2")</td>
                                 </tr>
@@ -173,7 +173,7 @@
 <!-- 3.5 Top Clientes Revendedores (vw_TopClientes) -->
 <div class="card bg-card border-0 mb-4">
     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h5 class="text-white fw-bold mb-0">🤝 Top Clientes Revendedores</h5>
+        <h5 class="text-slate-800 fw-bold mb-0">🤝 Top Clientes Revendedores</h5>
         <small class="text-secondary">Quién más compra: desde vw_TopClientes (TipoCliente = Revendedor).</small>
     </div>
     <div class="card-body">
@@ -181,12 +181,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead style="border-bottom: 1px solid var(--border-color);">
                     <tr>
-                        <th class="ps-4 text-white">#</th>
-                        <th class="text-white">Cliente</th>
-                        <th class="text-center text-white">Compras</th>
-                        <th class="text-end text-white">Total comprado</th>
-                        <th class="text-end text-white">Ganancia generada</th>
-                        <th class="text-end pe-4 text-white">Última compra</th>
+                        <th class="ps-4 text-slate-800">#</th>
+                        <th class="text-slate-800">Cliente</th>
+                        <th class="text-center text-slate-800">Compras</th>
+                        <th class="text-end text-slate-800">Total comprado</th>
+                        <th class="text-end text-slate-800">Ganancia generada</th>
+                        <th class="text-end pe-4 text-slate-800">Última compra</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -195,7 +195,7 @@
                     {
                         <tr>
                             <td class="ps-4 text-secondary">@pos</td>
-                            <td class="fw-bold text-white">@r.NombreCliente</td>
+                            <td class="fw-bold text-slate-800">@r.NombreCliente</td>
                             <td class="text-center text-info">@r.CantidadCompras</td>
                             <td class="text-end text-success fw-bold">$@r.TotalComprado.ToString("N2")</td>
                             <td class="text-end text-success">$@r.GananciaGenerada.ToString("N2")</td>
@@ -216,7 +216,7 @@
 <!-- 4. Alerta Inventario Dormido -->
 <div class="card bg-card border-0 border-top border-4 border-danger">
     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-        <h5 class="text-white fw-bold mb-0">🐢 Alerta de Inventario Dormido (Aging)</h5>
+        <h5 class="text-slate-800 fw-bold mb-0">🐢 Alerta de Inventario Dormido (Aging)</h5>
         <small class="text-secondary">Productos +60 días en stock. Bájales el precio o sácalos ya.</small>
     </div>
     <div class="card-body p-0">
@@ -224,19 +224,19 @@
             <table class="table table-hover align-middle mb-0">
                 <thead style="border-bottom: 1px solid var(--border-color);">
                     <tr>
-                        <th class="ps-4 text-white">Producto / Serie</th>
-                        <th class="text-center text-white">Días en stock</th>
-                        <th class="text-end text-white">Costo</th>
-                        <th class="text-end text-white">Precio venta</th>
+                        <th class="ps-4 text-slate-800">Producto / Serie</th>
+                        <th class="text-center text-slate-800">Días en stock</th>
+                        <th class="text-end text-slate-800">Costo</th>
+                        <th class="text-end text-slate-800">Precio venta</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var d in Model.InventarioDormido)
                     {
-                        <tr class="table-danger bg-danger bg-opacity-10">
+                        <tr class="bg-red-50/60">
                             <td class="ps-4">
                                 <div class="d-flex flex-column">
-                                    <span class="fw-bold text-white">@d.ProductoNombre</span>
+                                    <span class="fw-bold text-slate-800">@d.ProductoNombre</span>
                                     <small class="text-secondary font-monospace" style="font-size: 0.75rem;">Serie: @(string.IsNullOrEmpty(d.NumeroSerie) ? "—" : d.NumeroSerie)</small>
                                     @if (!string.IsNullOrEmpty(d.Procesador) || d.RAM_GB > 0 || d.Almacenamiento_GB > 0)
                                     {
@@ -252,7 +252,7 @@
                                 <span class="badge bg-danger bg-opacity-25 text-danger border border-danger px-3">@d.DiasEnStock días</span>
                             </td>
                             <td class="text-end text-secondary">$@d.CostoTotal.ToString("N2")</td>
-                            <td class="text-end fw-bold text-white">$@d.PrecioVenta.ToString("N2")</td>
+                            <td class="text-end fw-bold text-slate-800">$@d.PrecioVenta.ToString("N2")</td>
                         </tr>
                     }
                 </tbody>
@@ -271,8 +271,8 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     (function () {
-        const coloresBarras = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c'];
-        const coloresPie = ['#5646ff', '#0dcaf0', '#198754', '#ffc107', '#fd7e14', '#6f42c1', '#20c997', '#e83e8c', '#6c757d', '#212529'];
+        const coloresBarras = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#d946ef', '#94a3b8'];
+        const coloresPie = ['#6366f1', '#0ea5e9', '#10b981', '#f59e0b', '#f43f5e', '#8b5cf6', '#d946ef', '#14b8a6', '#94a3b8', '#cbd5e1'];
 
         // Gráfico de tendencia: doble eje (barras = Total Facturado $, línea = Equipos Vendidos)
         const tendencia = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TendenciaMeses.Select(x => new { x.MesLabel, x.TotalVentas, x.CantidadEquipos })));
@@ -287,7 +287,7 @@
                             label: 'Total Facturado ($)',
                             data: tendencia.map(x => x.TotalVentas),
                             backgroundColor: 'rgba(86, 70, 255, 0.7)',
-                            borderColor: '#5646ff',
+                            borderColor: '#4f46e5',
                             borderWidth: 1,
                             borderRadius: 6,
                             yAxisID: 'y'
@@ -296,13 +296,13 @@
                             label: 'Equipos Vendidos',
                             type: 'line',
                             data: tendencia.map(x => x.CantidadEquipos),
-                            borderColor: '#FF5733',
+                            borderColor: '#f59e0b',
                             backgroundColor: 'rgba(255, 87, 51, 0.1)',
                             borderWidth: 2,
                             fill: false,
                             tension: 0.2,
                             pointRadius: 4,
-                            pointBackgroundColor: '#FF5733',
+                            pointBackgroundColor: '#f59e0b',
                             yAxisID: 'y1'
                         }
                     ]
@@ -314,7 +314,7 @@
                         legend: {
                             display: true,
                             position: 'top',
-                            labels: { color: '#fff', usePointStyle: true }
+                            labels: { color: zc().text, usePointStyle: true }
                         },
                         tooltip: {
                             callbacks: {
@@ -332,8 +332,8 @@
                             display: true,
                             position: 'left',
                             beginAtZero: true,
-                            grid: { color: 'rgba(255,255,255,0.06)' },
-                            ticks: { color: '#92929f', callback: v => '$' + v.toLocaleString() }
+                            grid: { color: zc().grid },
+                            ticks: { color: zc().muted, callback: v => '$' + v.toLocaleString() }
                         },
                         y1: {
                             type: 'linear',
@@ -342,7 +342,7 @@
                             beginAtZero: true,
                             min: 0,
                             ticks: {
-                                color: '#FF5733',
+                                color: '#f59e0b',
                                 stepSize: 1,
                                 callback: v => Number.isInteger(v) ? v : ''
                             },
@@ -350,7 +350,7 @@
                         },
                         x: {
                             grid: { display: false },
-                            ticks: { color: '#92929f' }
+                            ticks: { color: zc().muted }
                         }
                     }
                 }
@@ -369,13 +369,13 @@
                         data: topProductos.map(x => x.CantidadVentas),
                         backgroundColor: coloresPie.slice(0, topProductos.length),
                         borderWidth: 2,
-                        borderColor: '#1e1e2d'
+                        borderColor: zc().surface
                     }]
                 },
                 options: {
                     responsive: true,
                     plugins: {
-                        legend: { position: 'right', labels: { color: '#fff', padding: 12 } },
+                        legend: { position: 'right', labels: { color: zc().text, padding: 12 } },
                         tooltip: {
                             callbacks: {
                                 label: function (ctx) {

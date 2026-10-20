@@ -8,7 +8,7 @@
     <div class="col-md-6">
         <div class="card bg-card border-0 shadow-lg mt-5">
             <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                <h5 class="text-white fw-bold mb-0">✈️ Actualizar Estado del Pedido</h5>
+                <h5 class="text-slate-800 fw-bold mb-0">✈️ Actualizar Estado del Pedido</h5>
             </div>
             <div class="card-body p-4">
 
@@ -18,14 +18,14 @@
 
                     <div class="mb-4">
                         <label class="form-label text-secondary small fw-bold">Tracking Number (USA)</label>
-                        <input type="text" name="tracking" class="form-control bg-dark text-white border-secondary"
+                        <input type="text" name="tracking" class="form-control bg-dark text-slate-800 border-secondary"
                                value="@Model.TrackingProveedor" placeholder="Ej: TBA..." />
                         <div class="form-text text-muted">Ingrésalo cuando el vendedor te lo envíe.</div>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label text-secondary small fw-bold">Costo Total de la Compra ($)</label>
-                        <input type="number" name="costoTotal" step="0.01" min="0" class="form-control bg-dark text-white border-secondary"
+                        <input type="number" name="costoTotal" step="0.01" min="0" class="form-control bg-dark text-slate-800 border-secondary"
                                value="@(ViewBag.CostoTotal != null ? ((decimal)ViewBag.CostoTotal).ToString("0.00", System.Globalization.CultureInfo.InvariantCulture) : "0")"
                                placeholder="0.00" required />
                         <div class="form-text text-muted">Si lo cambias, el monto se repartirá entre todos los ítems de esta compra.</div>
@@ -33,7 +33,7 @@
 
                     <div class="mb-4">
                         <label class="form-label text-secondary small fw-bold">Estado Actual</label>
-                        <select name="estado" class="form-select bg-dark text-white border-secondary">
+                        <select name="estado" class="form-select bg-dark text-slate-800 border-secondary">
                             <!option value="Pagado" @(estado == "Pagado" ? "selected" : "")>💸 1. Pagado (Esperando envío)</!option>
                             <!option value="En Transito USA" @(estado == "En Transito USA" ? "selected" : "")>🇺🇸 2. En Tránsito (Dentro USA)</!option>
                             <!option value="En Miami" @(estado == "En Miami" ? "selected" : "")>🏢 3. Recibido en Miami</!option>
