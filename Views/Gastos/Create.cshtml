@@ -8,7 +8,7 @@
     <div class="col-lg-6">
         <div class="card bg-card border-0 shadow-lg mt-4">
             <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                <h4 class="text-white fw-bold mb-0">➕ Agregar Gasto Operativo</h4>
+                <h4 class="text-slate-800 fw-bold mb-0">➕ Agregar Gasto Operativo</h4>
             </div>
             <div class="card-body p-4">
 
@@ -17,14 +17,14 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <label asp-for="FechaGasto" class="form-label text-secondary small fw-bold"></label>
-                            <input asp-for="FechaGasto" type="date" class="form-control bg-dark text-white border-secondary" />
+                            <input asp-for="FechaGasto" type="date" class="form-control bg-dark text-slate-800 border-secondary" />
                             <span asp-validation-for="FechaGasto" class="text-danger small"></span>
                         </div>
                         <div class="col-md-6">
                             <label asp-for="Monto" class="form-label text-secondary small fw-bold"></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
-                                <input asp-for="Monto" type="number" step="0.01" class="form-control bg-dark text-white border-secondary" placeholder="0.00" />
+                                <input asp-for="Monto" type="number" step="0.01" class="form-control bg-dark text-slate-800 border-secondary" placeholder="0.00" />
                             </div>
                             <span asp-validation-for="Monto" class="text-danger small"></span>
                         </div>
@@ -32,13 +32,13 @@
 
                     <div class="mb-3">
                         <label asp-for="Descripcion" class="form-label text-secondary small fw-bold"></label>
-                        <input asp-for="Descripcion" class="form-control bg-dark text-white border-secondary" placeholder="Ej: Envío DHL, Pago luz..." />
+                        <input asp-for="Descripcion" class="form-control bg-dark text-slate-800 border-secondary" placeholder="Ej: Envío DHL, Pago luz..." />
                         <span asp-validation-for="Descripcion" class="text-danger small"></span>
                     </div>
 
                     <div class="mb-4">
                         <label asp-for="CategoriaGasto" class="form-label text-secondary small fw-bold"></label>
-                        <select asp-for="CategoriaGasto" class="form-select bg-dark text-white border-secondary">
+                        <select asp-for="CategoriaGasto" class="form-select bg-dark text-slate-800 border-secondary">
                             <option value="">-- Seleccionar categoría --</option>
                             @foreach (var c in ViewBag.Categorias as string[] ?? Array.Empty<string>())
                             {

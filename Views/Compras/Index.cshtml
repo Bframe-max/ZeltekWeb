@@ -11,10 +11,10 @@
 <!-- Header & Actions -->
 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
     <div>
-        <h2 class="text-3xl font-bold text-white tracking-tight">Compras e Importaciones</h2>
-        <p class="text-gray-400 text-sm mt-1">Gestión de inboud y rastreo de pedidos</p>
+        <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Compras e Importaciones</h2>
+        <p class="text-slate-500 text-sm mt-1">Gestión de inboud y rastreo de pedidos</p>
     </div>
-    <a asp-controller="Compras" asp-action="Create" class="group flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105">
+    <a asp-controller="Compras" asp-action="Create" class="group flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-blue-600/20 transition-all transform hover:scale-105">
         <svg class="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Nueva Compra
     </a>
@@ -23,20 +23,20 @@
 <!-- Alerts -->
 @if (TempData["ErrorEliminar"] != null)
 {
-    <div class="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3 relative" role="alert">
+    <div class="bg-red-500/10 border border-red-500/20 text-red-600 p-4 rounded-xl mb-6 flex items-start gap-3 relative" role="alert">
         <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span>@TempData["ErrorEliminar"]</span>
-        <button type="button" class="absolute top-4 right-4 text-red-400 hover:text-white" data-bs-dismiss="alert">
+        <button type="button" class="absolute top-4 right-4 text-red-600 hover:text-slate-900" data-bs-dismiss="alert">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
 }
 @if (TempData["SuccessEliminar"] != null)
 {
-    <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 p-4 rounded-xl mb-6 flex items-start gap-3 relative" role="alert">
+    <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 p-4 rounded-xl mb-6 flex items-start gap-3 relative" role="alert">
         <svg class="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
         <span>@TempData["SuccessEliminar"]</span>
-        <button type="button" class="absolute top-4 right-4 text-emerald-400 hover:text-white" data-bs-dismiss="alert">
+        <button type="button" class="absolute top-4 right-4 text-emerald-600 hover:text-slate-900" data-bs-dismiss="alert">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>
@@ -45,73 +45,73 @@
 <!-- KPIs / Bento Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
     <!-- Pedidos Activos -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-slate-100 relative overflow-hidden group">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <svg class="w-24 h-24 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
         </div>
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-2">
-                <div class="p-2 rounded-lg bg-blue-500/10 text-blue-400">
+                <div class="p-2 rounded-lg bg-blue-500/10 text-blue-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>
                 </div>
-                <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Pedidos Activos</h3>
+                <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Pedidos Activos</h3>
             </div>
-            <p class="text-4xl font-bold text-white mb-1">@kpiActivos</p>
-            <p class="text-blue-400 text-xs font-medium">En proceso de importación</p>
+            <p class="text-4xl font-bold text-slate-800 mb-1">@kpiActivos</p>
+            <p class="text-blue-600 text-xs font-medium">En proceso de importación</p>
         </div>
     </div>
 
     <!-- Inversión Flotante -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-slate-100 relative overflow-hidden group">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
             <svg class="w-24 h-24 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
         </div>
         <div class="relative z-10">
             <div class="flex items-center gap-3 mb-2">
-                <div class="p-2 rounded-lg bg-orange-500/10 text-orange-400">
+                <div class="p-2 rounded-lg bg-orange-500/10 text-orange-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                 </div>
-                <h3 class="text-gray-400 text-sm font-semibold uppercase tracking-wider">Inversión Flotante (Riesgo)</h3>
+                <h3 class="text-slate-500 text-sm font-semibold uppercase tracking-wider">Inversión Flotante (Riesgo)</h3>
             </div>
-            <p class="text-4xl font-bold text-orange-400 font-mono mb-1">$@Convert.ToDecimal(kpiInversion).ToString("N2")</p>
-            <p class="text-orange-400/80 text-xs font-medium">Dinero pendiente de llegar</p>
+            <p class="text-4xl font-bold text-orange-600 font-mono mb-1">$@Convert.ToDecimal(kpiInversion).ToString("N2")</p>
+            <p class="text-orange-600/80 text-xs font-medium">Dinero pendiente de llegar</p>
         </div>
     </div>
 </div>
 
 <!-- Search & Content -->
-<div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
     
     <!-- Toolbar -->
-    <div class="p-6 border-b border-gray-700/50 flex flex-col md:flex-row gap-4 justify-between items-center">
+    <div class="p-6 border-b border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
         <!-- Search -->
         <form method="get" action="@Url.Action("Index", "Compras")" class="w-full md:max-w-md relative">
             <input type="hidden" name="viewType" value="@viewType" />
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
             <input type="text" name="buscar" 
-                   class="w-full bg-[#1a1b2e] border border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-lg pl-10 pr-4 py-2.5 text-white placeholder-gray-500 text-sm transition-all"
+                   class="w-full bg-slate-50 border border-slate-200 focus:border-indigo-400 focus:ring-1 focus:ring-indigo-500 rounded-lg pl-10 pr-4 py-2.5 text-slate-800 placeholder-slate-400 text-sm transition-all"
                    placeholder="Buscar por Tienda, Tracking o Estado..."
                    value="@ViewData["BusquedaActual"]">
         </form>
 
         <!-- Segmented Control Tabs (Server-Side Navigation) -->
-        <div class="bg-[#1a1b2e] p-1 rounded-lg inline-flex">
+        <div class="bg-slate-50 p-1 rounded-lg inline-flex">
             <a href="@Url.Action("Index", new { viewType = "transit", buscar = ViewData["BusquedaActual"] })" 
-               class="px-4 py-2 rounded-md text-sm font-medium transition-all @(viewType == "transit" ? "bg-blue-600 text-white shadow-md" : "text-gray-400 hover:text-white hover:bg-white/5")">
+               class="px-4 py-2 rounded-md text-sm font-medium transition-all @(viewType == "transit" ? "bg-indigo-600 text-white shadow-md" : "text-slate-500 hover:text-white hover:bg-slate-50")">
                 ✈️ En Tránsito
                 @if(viewType == "transit") 
                 {
-                   <span class="ml-2 bg-black/20 text-white/90 px-1.5 py-0.5 rounded text-xs">@Model.Count</span>
+                   <span class="ml-2 bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-xs">@Model.Count</span>
                 }
             </a>
             <a href="@Url.Action("Index", new { viewType = "history", buscar = ViewData["BusquedaActual"] })" 
-               class="px-4 py-2 rounded-md text-sm font-medium transition-all @(viewType == "history" ? "bg-blue-600 text-white shadow-md" : "text-gray-400 hover:text-white hover:bg-white/5")">
+               class="px-4 py-2 rounded-md text-sm font-medium transition-all @(viewType == "history" ? "bg-indigo-600 text-white shadow-md" : "text-slate-500 hover:text-white hover:bg-slate-50")">
                 ✅ Historial
                  @if(viewType == "history") 
                 {
-                   <span class="ml-2 bg-black/20 text-white/90 px-1.5 py-0.5 rounded text-xs">@Model.Count</span>
+                   <span class="ml-2 bg-slate-100 text-slate-700 px-1.5 py-0.5 rounded text-xs">@Model.Count</span>
                 }
             </a>
         </div>

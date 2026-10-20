@@ -8,30 +8,30 @@
 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
     <div>
         <div class="flex items-center gap-3">
-            <h2 class="text-3xl font-bold text-white tracking-tight">Compra #@Model.CompraID</h2>
+            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Compra #@Model.CompraID</h2>
             <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider
-                @(Model.EstadoCompra == "Completado" || Model.EstadoCompra == "Recibido" ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" :
-                  Model.EstadoCompra == "Cancelado" ? "bg-red-500/10 text-red-400 border border-red-500/20" :
-                  "bg-blue-500/10 text-blue-400 border border-blue-500/20")">
+                @(Model.EstadoCompra == "Completado" || Model.EstadoCompra == "Recibido" ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20" :
+                  Model.EstadoCompra == "Cancelado" ? "bg-red-500/10 text-red-600 border border-red-500/20" :
+                  "bg-blue-500/10 text-blue-600 border border-blue-500/20")">
                 @Model.EstadoCompra
             </span>
         </div>
-        <div class="flex items-center gap-4 mt-2 text-gray-400 text-sm">
+        <div class="flex items-center gap-4 mt-2 text-slate-500 text-sm">
             <span class="flex items-center gap-1.5">
-                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                 @Model.Fecha.ToString("dd MMM yyyy")
             </span>
             <span class="flex items-center gap-1.5">
-                 <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
                 @Model.Vendedor
             </span>
         </div>
     </div>
     <div class="flex gap-3">
-        <a asp-action="Index" class="px-4 py-2 rounded-lg bg-[#24253b] text-gray-300 hover:text-white border border-gray-700 hover:bg-gray-700 transition-all font-medium text-sm border-0 shadow-sm">
+        <a asp-action="Index" class="px-4 py-2 rounded-lg bg-white text-slate-600 hover:text-slate-900 border border-slate-200 hover:bg-slate-100 transition-all font-medium text-sm border-0 shadow-sm">
             Volver
         </a>
-        <a asp-action="Edit" asp-route-id="@Model.CompraID" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-500/20 transition-all font-medium text-sm flex items-center gap-2 border-0">
+        <a asp-action="Edit" asp-route-id="@Model.CompraID" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-blue-500/20 transition-all font-medium text-sm flex items-center gap-2 border-0">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
             Editar Compra
         </a>
@@ -41,7 +41,7 @@
 @if (TempData["ErrorRecibir"] != null)
 {
     <div class="mb-6 bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
-        <svg class="w-6 h-6 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        <svg class="w-6 h-6 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         <span class="text-red-200 text-sm">@TempData["ErrorRecibir"]</span>
     </div>
 }
@@ -49,51 +49,51 @@
 <!-- Bento Grid (Financials) -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <!-- Costo Productos -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group hover:bg-[#2a2b42] transition-colors">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-slate-100 relative overflow-hidden group hover:bg-slate-100 transition-colors">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <svg class="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            <svg class="w-16 h-16 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
         </div>
-        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Costo Productos</p>
-        <h3 class="text-3xl font-bold text-white tracking-tight">$@costoProductos.ToString("N2")</h3>
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Costo Productos</p>
+        <h3 class="text-3xl font-bold text-slate-800 tracking-tight">$@costoProductos.ToString("N2")</h3>
     </div>
 
     <!-- Envío / Impuestos -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 border border-white/5 relative overflow-hidden group hover:bg-[#2a2b42] transition-colors">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 border border-slate-100 relative overflow-hidden group hover:bg-slate-100 transition-colors">
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-           <svg class="w-16 h-16 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+           <svg class="w-16 h-16 text-slate-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
         </div>
-        <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Envío e Impuestos</p>
-        <h3 class="text-3xl font-bold text-white tracking-tight">$@Model.CostoEnvio.ToString("N2")</h3>
+        <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Envío e Impuestos</p>
+        <h3 class="text-3xl font-bold text-slate-800 tracking-tight">$@Model.CostoEnvio.ToString("N2")</h3>
     </div>
 
     <!-- Total Inversión -->
-    <div class="bg-gradient-to-br from-emerald-900/40 to-[#24253b] rounded-2xl p-6 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 relative overflow-hidden group">
+    <div class="bg-gradient-to-br from-emerald-50 to-white rounded-2xl p-6 border border-emerald-500/30 shadow-lg shadow-emerald-500/10 relative overflow-hidden group">
         <div class="absolute top-0 px-8 py-0.5 bg-emerald-500/20 border-b border-l border-r border-emerald-500/30 rounded-b-lg left-1/2 -translate-x-1/2 backdrop-blur-sm">
-            <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Total</span>
+            <span class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Total</span>
         </div>
         <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-             <svg class="w-16 h-16 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+             <svg class="w-16 h-16 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         </div>
         <div class="mt-2">
-            <p class="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">Total Inversión</p>
-            <h3 class="text-4xl font-bold text-white tracking-tight text-shadow-glow">$@Model.CostoTotal.ToString("N2")</h3>
+            <p class="text-emerald-600 text-xs font-bold uppercase tracking-wider mb-1">Total Inversión</p>
+            <h3 class="text-4xl font-bold text-slate-800 tracking-tight text-shadow-glow">$@Model.CostoTotal.ToString("N2")</h3>
         </div>
     </div>
 </div>
 
 <!-- Tracking Card -->
-<div class="bg-[#24253b] rounded-2xl p-8 shadow-lg shadow-black/20 border border-white/5 mb-8 relative overflow-hidden">
+<div class="bg-white rounded-2xl p-8 shadow-lg shadow-slate-200/60 border border-slate-100 mb-8 relative overflow-hidden">
     <div class="flex flex-col md:flex-row justify-between items-center gap-8 relative z-10">
         <div class="flex items-center gap-6 w-full md:w-auto">
-            <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20 shrink-0 shadow-lg shadow-blue-500/10">
+            <div class="w-14 h-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 border border-blue-500/20 shrink-0 shadow-lg shadow-blue-500/10">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
             </div>
             <div>
-                <p class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Tracking Number</p>
+                <p class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Tracking Number</p>
                 <div class="flex items-center gap-3">
-                    <span class="text-2xl font-mono text-white font-bold tracking-tight">@Model.Tracking</span>
+                    <span class="text-2xl font-mono text-slate-800 font-bold tracking-tight">@Model.Tracking</span>
                      @if (Model.Tracking != "-" && Model.Tracking.Length > 5) {
-                        <a href="https://www.google.com/search?q=@Model.Tracking" target="_blank" class="text-blue-400 hover:text-blue-300 transition-colors p-1.5 hover:bg-blue-500/10 rounded-lg">
+                        <a href="https://www.google.com/search?q=@Model.Tracking" target="_blank" class="text-indigo-600 hover:text-indigo-700 transition-colors p-1.5 hover:bg-indigo-700/10 rounded-lg">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                         </a>
                     }
@@ -103,11 +103,11 @@
          @if(Model.EstadoCompra == "En Transito" || Model.EstadoCompra == "En Camino") {
             <div class="w-full md:flex-1 md:max-w-md">
                 <div class="flex justify-between mb-2">
-                    <span class="text-xs font-medium text-blue-400">En Tránsito</span>
-                    <span class="text-xs font-medium text-gray-500">Estimado: 7-10 días</span>
+                    <span class="text-xs font-medium text-blue-600">En Tránsito</span>
+                    <span class="text-xs font-medium text-slate-400">Estimado: 7-10 días</span>
                 </div>
-                <div class="bg-gray-800 rounded-full h-2.5 overflow-hidden border border-white/5">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-400 h-full w-2/3 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
+                <div class="bg-slate-100 rounded-full h-2.5 overflow-hidden border border-slate-100">
+                    <div class="bg-indigo-600 h-full w-2/3 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
                 </div>
             </div>
          }
@@ -115,64 +115,64 @@
 </div>
 
 <!-- Items Table -->
-<div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden mb-8">
-     <div class="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
-        <h3 class="text-white font-bold text-lg">Artículos en este pedido</h3>
-        <span class="text-gray-500 text-sm">@Model.Items.Count items</span>
+<div class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden mb-8">
+     <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="text-slate-800 font-bold text-lg">Artículos en este pedido</h3>
+        <span class="text-slate-400 text-sm">@Model.Items.Count items</span>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
              <thead>
-                <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider pl-6">Producto</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Costo Unitario</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right pr-6">Acciones</th>
+                <tr class="border-b border-slate-200 bg-slate-50">
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider pl-6">Producto</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Costo Unitario</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Estado</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-right pr-6">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-[#2e2f45]">
+            <tbody class="divide-y divide-slate-100">
                 @foreach (var item in Model.Items)
                 {
                     bool enCamino = item.Estado == "En Camino" || item.Estado == "En Transito";
-                    <tr class="group hover:bg-white/[0.02] transition-colors">
+                    <tr class="group hover:bg-slate-50 transition-colors">
                         <td class="p-4 pl-6">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-lg bg-gray-800 flex items-center justify-center text-gray-500 text-xs shrink-0 border border-gray-700">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400 text-xs shrink-0 border border-slate-200">
                                     📦
                                 </div>
-                                <span class="text-white font-medium text-sm">@item.ProductoNombre</span>
+                                <span class="text-slate-800 font-medium text-sm">@item.ProductoNombre</span>
                             </div>
                         </td>
                         <td class="p-4 text-right">
-                             <span class="text-emerald-400 font-mono text-sm font-bold">$@item.Costo.ToString("N2")</span>
+                             <span class="text-emerald-600 font-mono text-sm font-bold">$@item.Costo.ToString("N2")</span>
                         </td>
                          <td class="p-4">
                             @if (enCamino)
                             {
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-500/10 text-blue-600 border border-blue-500/20">
                                     ✈️ En Tránsito
                                 </span>
                             }
                             else if (item.Estado == "En Stock")
                             {
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-600 border border-purple-500/20">
                                     📦 En Stock
                                 </span>
                             }
                             else
                             {
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-700 text-gray-300 border border-gray-600">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
                                     @item.Estado
                                 </span>
                             }
                             @if(!string.IsNullOrEmpty(item.NumeroSerie) && item.NumeroSerie != "-") {
-                                <div class="text-[10px] text-gray-500 mt-1 font-mono">S/N: @item.NumeroSerie</div>
+                                <div class="text-[10px] text-slate-400 mt-1 font-mono">S/N: @item.NumeroSerie</div>
                             }
                         </td>
                         <td class="p-4 text-right pr-6">
                             @if (item.Estado != "En Stock" && item.Estado != "Vendido" && item.Estado != "Recibido" && item.Estado != "Completado")
                             {
-                                <button type="button" class="px-3 py-1.5 rounded-lg bg-[#1a1b2e] border border-[#2e2f45] hover:border-emerald-500/50 hover:bg-emerald-500/10 text-emerald-400 transition-all text-xs font-medium flex items-center gap-2 ml-auto"
+                                <button type="button" class="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 hover:border-emerald-500/50 hover:bg-emerald-500/10 text-emerald-600 transition-all text-xs font-medium flex items-center gap-2 ml-auto"
                                         data-itemid="@item.ItemID"
                                         data-nombre="@item.ProductoNombre"
                                         data-es-accesorio="@(item.EsAccesorio ? "true" : "false")"
@@ -188,7 +188,7 @@
                             }
                             else
                             {
-                                <span class="text-xs text-gray-500 italic">Completado</span>
+                                <span class="text-xs text-slate-400 italic">Completado</span>
                             }
                         </td>
                     </tr>
@@ -201,10 +201,10 @@
 <!-- Modal Recibir (Restyled) -->
 <div class="modal fade" id="modalRecibir" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content bg-[#24253b] text-white border border-gray-700 shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700">
-                <h5 class="modal-title font-bold text-lg text-white" id="modalTitulo">Recibir Producto</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        <div class="modal-content bg-white text-slate-800 border border-slate-200 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200">
+                <h5 class="modal-title font-bold text-lg text-slate-800" id="modalTitulo">Recibir Producto</h5>
+                <button type="button" class="btn-close " data-bs-dismiss="modal"></button>
             </div>
 
             <form asp-controller="Inventario" asp-action="Recibir" method="post" id="formRecibir">
@@ -215,23 +215,23 @@
                      <!-- Producto Nuevo Switch -->
                     <div class="mb-4 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/5 flex items-center">
                         <div class="form-check form-switch m-0 flex items-center gap-3">
-                            <input class="form-check-input bg-[#1a1b2e] border-gray-600 checked:bg-emerald-500 checked:border-emerald-500 focus:ring-emerald-500" type="checkbox" id="checkProductoNuevo" name="ProductoNuevo" value="true" style="cursor: pointer; width: 3em; height: 1.5em;">
-                            <label class="form-check-label fw-bold text-emerald-400 cursor-pointer select-none" for="checkProductoNuevo">
+                            <input class="form-check-input bg-slate-50 border-slate-200 checked:bg-emerald-500 checked:border-emerald-500 focus:ring-emerald-500" type="checkbox" id="checkProductoNuevo" name="ProductoNuevo" value="true" style="cursor: pointer; width: 3em; height: 1.5em;">
+                            <label class="form-check-label fw-bold text-emerald-600 cursor-pointer select-none" for="checkProductoNuevo">
                                 ✨ Producto Nuevo (Omitir Control de Calidad)
                             </label>
                         </div>
                     </div>
-                    <p class="text-gray-500 text-xs mb-6 pl-2">Si está marcado: pasa directo a <strong>Stock</strong>. Si no: va a <strong>Por Revisar</strong> (mesa de calidad).</p>
+                    <p class="text-slate-400 text-xs mb-6 pl-2">Si está marcado: pasa directo a <strong>Stock</strong>. Si no: va a <strong>Por Revisar</strong> (mesa de calidad).</p>
 
                      <!-- Cargador Switch -->
                     <div id="bloqueCargador" class="mb-6 p-4 rounded-xl border border-amber-500/20 bg-amber-500/5">
                         <div class="form-check form-switch mb-3 flex items-center gap-3">
-                            <input class="form-check-input bg-[#1a1b2e] border-gray-600 checked:bg-amber-500 checked:border-amber-500 focus:ring-amber-500" type="checkbox" id="checkRequiereCargador" name="RequiereCargadorDeStock" value="true" style="cursor: pointer; width: 3em; height: 1.5em;">
-                            <label class="form-check-label fw-bold text-amber-400 cursor-pointer select-none" for="checkRequiereCargador">🔌 ¿Asignar Cargador del Stock?</label>
+                            <input class="form-check-input bg-slate-50 border-slate-200 checked:bg-amber-500 checked:border-amber-500 focus:ring-amber-500" type="checkbox" id="checkRequiereCargador" name="RequiereCargadorDeStock" value="true" style="cursor: pointer; width: 3em; height: 1.5em;">
+                            <label class="form-check-label fw-bold text-amber-600 cursor-pointer select-none" for="checkRequiereCargador">🔌 ¿Asignar Cargador del Stock?</label>
                         </div>
                         <div id="wrapSelectCargador" class="d-none pl-2">
-                            <label class="block text-gray-500 text-xs mb-1">Tipo de Cargador</label>
-                            <select name="IdCargador" id="selectIdCargador" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-amber-500 outline-none">
+                            <label class="block text-slate-400 text-xs mb-1">Tipo de Cargador</label>
+                            <select name="IdCargador" id="selectIdCargador" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-amber-500 outline-none">
                                 <option value="">— Seleccione —</option>
                                 @if (ViewBag.Cargadores != null)
                                 {
@@ -245,19 +245,19 @@
                     </div>
 
                     <div id="seccionTecnica">
-                        <h6 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-700 pb-2">📋 DETALLES TÉCNICOS</h6>
+                        <h6 class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-4 border-b border-slate-200 pb-2">📋 DETALLES TÉCNICOS</h6>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                             <div>
-                                <label class="block text-gray-400 text-xs mb-1">Número de Serie (S/N)</label>
+                                <label class="block text-slate-500 text-xs mb-1">Número de Serie (S/N)</label>
                                 <input type="text" name="NumeroSerie" id="inputSerie"
-                                       class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white font-mono text-sm focus:border-blue-500 outline-none"
+                                       class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 font-mono text-sm focus:border-indigo-400 outline-none"
                                        placeholder="Escanea aquí..." />
-                                <small id="errorSerial" class="text-red-400 text-xs mt-1 d-none block">⛔ Serial ya existe en inventario</small>
+                                <small id="errorSerial" class="text-red-600 text-xs mt-1 d-none block">⛔ Serial ya existe en inventario</small>
                             </div>
                             <div>
-                                <label class="block text-gray-400 text-xs mb-1">Condición Estética</label>
-                                <select name="Condicion" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none">
+                                <label class="block text-slate-500 text-xs mb-1">Condición Estética</label>
+                                <select name="Condicion" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none">
                                     <option value="Grado A">✅ Grado A (Excelente)</option>
                                     <option value="Grado B">⚠️ Grado B (Leves Rayones)</option>
                                     <option value="Grado C">❌ Grado C (Desgaste visible)</option>
@@ -266,65 +266,65 @@
                                 </select>
                             </div>
                             <div class="md:col-span-2">
-                                <label class="block text-gray-400 text-xs mb-1">Color (Opcional)</label>
-                                <input type="text" name="Color" id="inputColor" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none" placeholder="Ej: Gris Espacial, Plata..." />
+                                <label class="block text-slate-500 text-xs mb-1">Color (Opcional)</label>
+                                <input type="text" name="Color" id="inputColor" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none" placeholder="Ej: Gris Espacial, Plata..." />
                             </div>
                         </div>
 
                         <div class="mb-4">
-                            <label class="block text-gray-400 text-xs mb-1">Procesador (CPU)</label>
-                            <input type="text" name="Procesador" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none"
+                            <label class="block text-slate-500 text-xs mb-1">Procesador (CPU)</label>
+                            <input type="text" name="Procesador" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none"
                                    placeholder="Ej: Intel Core i5-1135G7 2.40GHz" />
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                             <!-- RAM Radio Group styled as buttons -->
                             <div>
-                                <label class="block text-gray-400 text-xs mb-2">Memoria RAM (GB)</label>
+                                <label class="block text-slate-500 text-xs mb-2">Memoria RAM (GB)</label>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach(var r in new[] {4,6,8,12,16,32}) {
                                         <label class="cursor-pointer">
                                             <input type="radio" name="Ram" value="@r" class="peer sr-only">
-                                            <span class="px-3 py-1.5 rounded-lg border border-gray-600 bg-[#1a1b2e] text-gray-400 text-xs peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-500 transition-all hover:bg-gray-700">@r GB</span>
+                                            <span class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-500 transition-all hover:bg-slate-100">@r GB</span>
                                         </label>
                                     }
                                 </div>
                             </div>
                             <!-- ROM Radio Group -->
                             <div>
-                                <label class="block text-gray-400 text-xs mb-2">Almacenamiento</label>
+                                <label class="block text-slate-500 text-xs mb-2">Almacenamiento</label>
                                 <div class="flex flex-wrap gap-2">
                                     @foreach(var rom in new[] {128,256,512,1024}) {
                                         <label class="cursor-pointer">
                                             <input type="radio" name="Almacenamiento" value="@rom" class="peer sr-only">
-                                            <span class="px-3 py-1.5 rounded-lg border border-gray-600 bg-[#1a1b2e] text-gray-400 text-xs peer-checked:bg-purple-600 peer-checked:text-white peer-checked:border-purple-500 transition-all hover:bg-gray-700">@(rom >= 1024 ? "1 TB" : rom + " GB")</span>
+                                            <span class="px-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-500 text-xs peer-checked:bg-purple-600 peer-checked:text-white peer-checked:border-purple-500 transition-all hover:bg-slate-100">@(rom >= 1024 ? "1 TB" : rom + " GB")</span>
                                         </label>
                                     }
                                 </div>
                             </div>
                             <div>
-                                <label class="block text-gray-400 text-xs mb-1">Salud Bat (%) <span class="text-amber-500">Laptop/Cel</span></label>
-                                <input type="number" name="SaludBateria" id="inputBateria" min="1" max="100" step="1" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none" placeholder="1-100" />
-                                <small id="errorBateria" class="text-red-400 text-xs mt-1 d-none block">Debe ser 1-100</small>
+                                <label class="block text-slate-500 text-xs mb-1">Salud Bat (%) <span class="text-amber-500">Laptop/Cel</span></label>
+                                <input type="number" name="SaludBateria" id="inputBateria" min="1" max="100" step="1" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none" placeholder="1-100" />
+                                <small id="errorBateria" class="text-red-600 text-xs mt-1 d-none block">Debe ser 1-100</small>
                             </div>
                         </div>
                     </div>
 
-                    <h6 class="text-gray-400 text-xs font-bold uppercase tracking-wider mb-4 border-b border-gray-700 pb-2 mt-6">💰 COSTOS ADICIONALES</h6>
+                    <h6 class="text-slate-500 text-xs font-bold uppercase tracking-wider mb-4 border-b border-slate-200 pb-2 mt-6">💰 COSTOS ADICIONALES</h6>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Costo de Envío / Casillero ($)</label>
-                            <input type="number" step="0.01" name="CostoEnvio" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none" placeholder="0.00" value="0" />
+                            <label class="block text-slate-500 text-xs mb-1">Costo de Envío / Casillero ($)</label>
+                            <input type="number" step="0.01" name="CostoEnvio" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none" placeholder="0.00" value="0" />
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-xs mb-1">Costo Reparación / Extras ($)</label>
-                            <input type="number" step="0.01" name="CostoOtros" class="w-full bg-[#1a1b2e] border border-gray-600 rounded-lg px-3 py-2 text-white text-sm focus:border-blue-500 outline-none" placeholder="0.00" value="0" />
+                            <label class="block text-slate-500 text-xs mb-1">Costo Reparación / Extras ($)</label>
+                            <input type="number" step="0.01" name="CostoOtros" class="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-slate-800 text-sm focus:border-indigo-400 outline-none" placeholder="0.00" value="0" />
                         </div>
                     </div>
 
                 </div>
-                <div class="modal-footer border-gray-700 p-4">
-                    <button type="button" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
+                <div class="modal-footer border-slate-200 p-4">
+                    <button type="button" class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
                     <button type="button" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 font-medium text-sm transition-all" id="btnConfirmarRecibir">Recibir / Guardar</button>
                 </div>
             </form>
@@ -335,17 +335,17 @@
 <!-- Modal de confirmación antes de guardar (Wrapped in Dark) -->
 <div class="modal fade" id="modalConfirmarRecibir" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#24253b] text-white border border-gray-700">
-            <div class="modal-header border-gray-700">
+        <div class="modal-content bg-white text-slate-800 border border-slate-200">
+            <div class="modal-header border-slate-200">
                 <h5 class="modal-title font-bold">¿Confirmar ingreso?</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close " data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p class="mb-2 text-gray-300">Verifica los datos:</p>
+                <p class="mb-2 text-slate-600">Verifica los datos:</p>
                 <div id="resumenContent" class="text-sm"></div>
             </div>
-            <div class="modal-footer border-gray-700">
-                <button type="button" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10" data-bs-dismiss="modal">Cancelar</button>
+            <div class="modal-footer border-slate-200">
+                <button type="button" class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100" data-bs-dismiss="modal">Cancelar</button>
                 <button type="button" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium" id="btnEnviarRecibir">Sí, confirmar ingreso</button>
             </div>
         </div>
@@ -380,11 +380,11 @@
         if (esLote) {
             inputSerie.value = serialActual;
             inputSerie.setAttribute('readonly', 'readonly');
-            inputSerie.classList.add('bg-gray-700', 'text-gray-400'); 
+            inputSerie.classList.add('bg-slate-100', 'text-slate-500'); 
         } else {
             inputSerie.value = '';
             inputSerie.removeAttribute('readonly');
-            inputSerie.classList.remove('bg-gray-700', 'text-gray-400');
+            inputSerie.classList.remove('bg-slate-100', 'text-slate-500');
         }
 
         var inputProcesador = document.querySelector('input[name="Procesador"]');
@@ -562,10 +562,10 @@
 
                 if (esAccesorioActual) {
                      resumenHtml = '<ul class="list-none space-y-1">' +
-                                   '<li><strong class="text-gray-400">Producto:</strong> ' + producto + '</li>' +
-                                   '<li><strong class="text-gray-400">Tipo:</strong> Accesorio / Lote</li>' +
-                                   '<li><strong class="text-gray-400">Serial:</strong> ' + serial + '</li>' +
-                                   '<li><strong class="text-gray-400">Cantidad:</strong> 1 (Unidad)</li>' +
+                                   '<li><strong class="text-slate-500">Producto:</strong> ' + producto + '</li>' +
+                                   '<li><strong class="text-slate-500">Tipo:</strong> Accesorio / Lote</li>' +
+                                   '<li><strong class="text-slate-500">Serial:</strong> ' + serial + '</li>' +
+                                   '<li><strong class="text-slate-500">Cantidad:</strong> 1 (Unidad)</li>' +
                                    '</ul>';
                 } else {
                     var proc = formRecibir.querySelector('input[name="Procesador"]').value || '-';
@@ -575,10 +575,10 @@
                     var bat = document.getElementById('inputBateria').value || '-';
 
                     resumenHtml = '<ul class="list-none space-y-1">' +
-                                  '<li><strong class="text-gray-400">Producto:</strong> ' + producto + '</li>' +
-                                  '<li><strong class="text-gray-400">Serial:</strong> ' + serial + '</li>' +
-                                  '<li><strong class="text-gray-400">Condición:</strong> ' + condicion + '</li>' +
-                                  '<li class="mt-2 text-blue-400 font-bold">Especificaciones:</li>' +
+                                  '<li><strong class="text-slate-500">Producto:</strong> ' + producto + '</li>' +
+                                  '<li><strong class="text-slate-500">Serial:</strong> ' + serial + '</li>' +
+                                  '<li><strong class="text-slate-500">Condición:</strong> ' + condicion + '</li>' +
+                                  '<li class="mt-2 text-blue-600 font-bold">Especificaciones:</li>' +
                                   '<li>• Procesador: ' + proc + '</li>' +
                                   '<li>• RAM: ' + ram + ' GB</li>' +
                                   '<li>• Disco: ' + alm + ' GB</li>' +
@@ -623,7 +623,7 @@
                     if(modalMain) modalMain.hide();
 
                     if(currentBtn) {
-                        currentBtn.parentNode.innerHTML = '<span class="text-xs text-gray-500 italic">Completado</span>';
+                        currentBtn.parentNode.innerHTML = '<span class="text-xs text-slate-400 italic">Completado</span>';
                     }
                 } else {
                     alert('Error: ' + (data.message || 'No se pudo procesar la solicitud.'));

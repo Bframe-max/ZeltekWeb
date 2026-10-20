@@ -4,14 +4,14 @@
 }
 
 <div class="mb-4">
-    <h2 class="fw-bold text-white mb-0">🔍 Búsqueda global</h2>
+    <h2 class="fw-bold text-slate-800 mb-0">🔍 Búsqueda global</h2>
     <p class="text-secondary small mb-0">Resultados por serie, nombre o tracking</p>
 </div>
 
 <form asp-controller="Dashboard" asp-action="Buscar" method="get" class="mb-4">
     <div class="input-group input-group-lg rounded-pill overflow-hidden border border-secondary">
         <span class="input-group-text bg-dark border-0 text-secondary">🔍</span>
-        <input type="search" name="q" class="form-control bg-dark text-white border-0" placeholder="Buscar…" value="@Model.Query" autocomplete="off" />
+        <input type="search" name="q" class="form-control bg-dark text-slate-800 border-0" placeholder="Buscar…" value="@Model.Query" autocomplete="off" />
         <button type="submit" class="btn btn-primary px-4 rounded-0">Buscar</button>
     </div>
 </form>
@@ -41,12 +41,12 @@
 {
     <div class="card bg-card border-0 mb-4">
         <div class="card-header bg-transparent border-bottom border-secondary py-2">
-            <h6 class="text-white fw-bold mb-0">💰 Ventas (@Model.Ventas.Count)</h6>
+            <h6 class="text-slate-800 fw-bold mb-0">💰 Ventas (@Model.Ventas.Count)</h6>
         </div>
         <div class="list-group list-group-flush">
             @foreach (var v in Model.Ventas)
             {
-                <a asp-controller="Ventas" asp-action="Index" class="list-group-item list-group-item-action bg-transparent border-secondary text-white d-flex justify-content-between align-items-center">
+                <a asp-controller="Ventas" asp-action="Index" class="list-group-item list-group-item-action bg-transparent border-secondary text-slate-800 d-flex justify-content-between align-items-center">
                     <span><strong>#@v.VentaID</strong> · @(string.IsNullOrEmpty(v.ClienteNombre) ? "Sin cliente" : v.ClienteNombre) · @v.Fecha.ToString("dd/MM/yyyy")</span>
                     <span class="text-success">$@v.Total.ToString("N2")</span>
                 </a>
@@ -60,12 +60,12 @@
 {
     <div class="card bg-card border-0 mb-4">
         <div class="card-header bg-transparent border-bottom border-secondary py-2">
-            <h6 class="text-white fw-bold mb-0">🛒 Compras (@Model.Compras.Count)</h6>
+            <h6 class="text-slate-800 fw-bold mb-0">🛒 Compras (@Model.Compras.Count)</h6>
         </div>
         <div class="list-group list-group-flush">
             @foreach (var c in Model.Compras)
             {
-                <a asp-controller="Compras" asp-action="Details" asp-route-id="@c.CompraID" class="list-group-item list-group-item-action bg-transparent border-secondary text-white d-flex justify-content-between align-items-center">
+                <a asp-controller="Compras" asp-action="Details" asp-route-id="@c.CompraID" class="list-group-item list-group-item-action bg-transparent border-secondary text-slate-800 d-flex justify-content-between align-items-center">
                     <span><strong>#@c.CompraID</strong> · @(string.IsNullOrEmpty(c.ProductoPrincipal) ? "Varios" : c.ProductoPrincipal) · @(string.IsNullOrEmpty(c.Tracking) ? "-" : c.Tracking) · @c.Fecha.ToString("dd/MM/yyyy")</span>
                     <span class="text-info">$@c.Total.ToString("N2")</span>
                 </a>
@@ -79,12 +79,12 @@
 {
     <div class="card bg-card border-0 mb-4">
         <div class="card-header bg-transparent border-bottom border-secondary py-2">
-            <h6 class="text-white fw-bold mb-0">📦 Inventario (@Model.Inventario.Count)</h6>
+            <h6 class="text-slate-800 fw-bold mb-0">📦 Inventario (@Model.Inventario.Count)</h6>
         </div>
         <div class="list-group list-group-flush">
             @foreach (var i in Model.Inventario)
             {
-                <a asp-controller="Items" asp-action="Edit" asp-route-id="@i.ItemID" class="list-group-item list-group-item-action bg-transparent border-secondary text-white d-flex justify-content-between align-items-center">
+                <a asp-controller="Items" asp-action="Edit" asp-route-id="@i.ItemID" class="list-group-item list-group-item-action bg-transparent border-secondary text-slate-800 d-flex justify-content-between align-items-center">
                     <span><strong>@i.ProductoNombre</strong> · @i.NumeroSerie</span>
                     <span class="badge bg-secondary">@i.Estado</span>
                 </a>

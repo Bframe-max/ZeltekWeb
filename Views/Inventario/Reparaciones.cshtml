@@ -6,55 +6,55 @@
 <!-- Header -->
 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
     <div>
-        <h2 class="text-3xl font-bold text-white tracking-tight">Equipos en Reparación</h2>
-        <p class="text-gray-400 text-sm mt-1">Gestiona los ítems enviados a reparación y finalízalos cuando estén listos.</p>
+        <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Equipos en Reparación</h2>
+        <p class="text-slate-500 text-sm mt-1">Gestiona los ítems enviados a reparación y finalízalos cuando estén listos.</p>
     </div>
-    <a asp-controller="Inventario" asp-action="Index" class="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-medium transition-colors border border-white/10 flex items-center gap-2">
+    <a asp-controller="Inventario" asp-action="Index" class="px-5 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-800 font-medium transition-colors border border-slate-200 flex items-center gap-2">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
         Volver a Inventario
     </a>
 </div>
 
 <!-- Main Content Card -->
-<div class="bg-[#24253b] rounded-2xl shadow-lg shadow-black/20 border border-white/5 overflow-hidden">
+<div class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b border-gray-800 bg-[#1a1b2e]/50">
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Serie / ID</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Problema Reportado</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha Ingreso</th>
-                    <th class="p-4 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Acciones</th>
+                <tr class="border-b border-slate-200 bg-slate-50">
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Producto</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Serie / ID</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Problema Reportado</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha Ingreso</th>
+                    <th class="p-4 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-[#2e2f45]">
+            <tbody class="divide-y divide-slate-100">
                 @if (Model.Any())
                 {
                     foreach (var item in Model)
                     {
-                        <tr class="group hover:bg-white/[0.02] transition-colors">
+                        <tr class="group hover:bg-slate-50 transition-colors">
                             <td class="p-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-400 shrink-0 border border-orange-500/20">
+                                    <div class="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center text-orange-600 shrink-0 border border-orange-500/20">
                                         🔧
                                     </div>
-                                    <span class="text-white font-medium">@item.ProductoNombre</span>
+                                    <span class="text-slate-800 font-medium">@item.ProductoNombre</span>
                                 </div>
                             </td>
                             <td class="p-4">
-                                <span class="text-gray-400 font-mono text-sm bg-black/30 px-2 py-1 rounded border border-white/5">@item.NumeroSerie</span>
+                                <span class="text-slate-500 font-mono text-sm bg-slate-100 px-2 py-1 rounded border border-slate-100">@item.NumeroSerie</span>
                             </td>
                             <td class="p-4">
-                                <span class="text-gray-400 text-sm">@(string.IsNullOrWhiteSpace(item.ProblemaReportado) ? "—" : item.ProblemaReportado)</span>
+                                <span class="text-slate-500 text-sm">@(string.IsNullOrWhiteSpace(item.ProblemaReportado) ? "—" : item.ProblemaReportado)</span>
                             </td>
                             <td class="p-4">
-                                <span class="text-gray-400 text-sm">@(item.FechaIngreso?.ToString("dd/MM/yyyy") ?? "—")</span>
+                                <span class="text-slate-500 text-sm">@(item.FechaIngreso?.ToString("dd/MM/yyyy") ?? "—")</span>
                             </td>
                             <td class="p-4 text-right">
                                 <div class="flex items-center justify-end gap-2">
                                     <button type="button" 
-                                            class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all text-xs font-medium flex items-center gap-1"
+                                            class="px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all text-xs font-medium flex items-center gap-1"
                                             data-itemid="@item.ItemID"
                                             data-producto="@item.ProductoNombre"
                                             data-serie="@item.NumeroSerie"
@@ -62,7 +62,7 @@
                                         ✅ Finalizar
                                     </button>
                                     <button type="button" 
-                                            class="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 transition-all text-xs font-medium flex items-center gap-1"
+                                            class="px-3 py-1.5 rounded-lg bg-red-500/10 text-red-600 hover:bg-red-500/20 border border-red-500/20 transition-all text-xs font-medium flex items-center gap-1"
                                             data-itemid="@item.ItemID"
                                             data-producto="@item.ProductoNombre"
                                             data-serie="@item.NumeroSerie"
@@ -77,9 +77,9 @@
                 else
                 {
                     <tr>
-                        <td colspan="5" class="p-12 text-center text-gray-500">
+                        <td colspan="5" class="p-12 text-center text-slate-400">
                             <div class="flex flex-col items-center gap-3">
-                                <div class="w-16 h-16 rounded-full bg-gray-800/50 flex items-center justify-center text-gray-600">
+                                <div class="w-16 h-16 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                                     <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <p>No hay equipos en reparación actualmente.</p>
@@ -95,51 +95,51 @@
 <!-- Modal Finalizar Reparación -->
 <div class="modal fade" id="modalFinalizarReparacion" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#24253b] text-white border border-gray-700 shadow-2xl rounded-2xl">
-            <div class="modal-header border-gray-700">
+        <div class="modal-content bg-white text-slate-800 border border-slate-200 shadow-2xl rounded-2xl">
+            <div class="modal-header border-slate-200">
                 <h5 class="modal-title font-bold text-lg">✅ Finalizar reparación</h5>
-                <button type="button" class="text-gray-400 hover:text-white transition-colors" data-bs-dismiss="modal" aria-label="Cerrar">
+                <button type="button" class="text-slate-500 hover:text-slate-900 transition-colors" data-bs-dismiss="modal" aria-label="Cerrar">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
             <form asp-action="FinalizarReparacion" method="post" id="formFinalizarReparacion">
                 <input type="hidden" name="itemId" id="finalizarItemId" />
                 <div class="modal-body p-6">
-                    <div class="mb-6 p-4 rounded-xl bg-[#1a1b2e] border border-white/5">
-                        <p class="text-gray-300 text-sm mb-1">Producto</p>
-                        <p class="text-white font-medium" id="finalizarProducto"></p>
-                        <p class="text-gray-500 text-xs font-mono mt-1" id="finalizarSerie"></p>
+                    <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <p class="text-slate-600 text-sm mb-1">Producto</p>
+                        <p class="text-slate-800 font-medium" id="finalizarProducto"></p>
+                        <p class="text-slate-400 text-xs font-mono mt-1" id="finalizarSerie"></p>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label class="block text-gray-400 text-xs font-bold uppercase mb-2">Costo Repuestos</label>
+                            <label class="block text-slate-500 text-xs font-bold uppercase mb-2">Costo Repuestos</label>
                             <div class="relative">
-                                <span class="absolute left-3 top-2.5 text-gray-500">$</span>
+                                <span class="absolute left-3 top-2.5 text-slate-400">$</span>
                                 <input type="number" step="0.01" min="0" name="costoRepuestos" id="inputCostoRepuestos" value="0"
-                                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent pl-7 py-2 text-sm transition-all" />
+                                       class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent pl-7 py-2 text-sm transition-all" />
                             </div>
                         </div>
                         <div>
-                            <label class="block text-gray-400 text-xs font-bold uppercase mb-2">Mano de Obra</label>
+                            <label class="block text-slate-500 text-xs font-bold uppercase mb-2">Mano de Obra</label>
                             <div class="relative">
-                                <span class="absolute left-3 top-2.5 text-gray-500">$</span>
+                                <span class="absolute left-3 top-2.5 text-slate-400">$</span>
                                 <input type="number" step="0.01" min="0" name="costoManoObra" id="inputCostoManoObra" value="0"
-                                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent pl-7 py-2 text-sm transition-all" />
+                                       class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent pl-7 py-2 text-sm transition-all" />
                             </div>
                         </div>
                     </div>
                     
                     <div>
-                        <label class="block text-gray-400 text-xs font-bold uppercase mb-2">Notas del trabajo</label>
+                        <label class="block text-slate-500 text-xs font-bold uppercase mb-2">Notas del trabajo</label>
                         <textarea name="notasReparacion" id="inputNotasReparacion" rows="3"
-                                  class="w-full bg-[#1a1b2e] border border-gray-700 text-white rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent p-3 text-sm transition-all"
+                                  class="w-full bg-slate-50 border border-slate-200 text-slate-800 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent p-3 text-sm transition-all"
                                   placeholder="Describe el trabajo realizado..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-gray-700 p-4">
-                    <button type="button" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all">
+                <div class="modal-footer border-slate-200 p-4">
+                    <button type="button" class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold shadow-lg shadow-emerald-500/20 transition-all">
                         Guardar y Finalizar
                     </button>
                 </div>
@@ -151,10 +151,10 @@
 <!-- Modal Declarar Pérdida -->
 <div class="modal fade" id="modalPerdida" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content bg-[#24253b] text-white border border-red-500/30 shadow-2xl rounded-2xl">
+        <div class="modal-content bg-white text-slate-800 border border-red-500/30 shadow-2xl rounded-2xl">
             <div class="modal-header border-red-500/20">
-                <h5 class="modal-title font-bold text-lg text-red-400">⚠️ Declarar Pérdida Total</h5>
-                <button type="button" class="text-gray-400 hover:text-white transition-colors" data-bs-dismiss="modal" aria-label="Cerrar">
+                <h5 class="modal-title font-bold text-lg text-red-600">⚠️ Declarar Pérdida Total</h5>
+                <button type="button" class="text-slate-500 hover:text-slate-900 transition-colors" data-bs-dismiss="modal" aria-label="Cerrar">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
@@ -162,31 +162,31 @@
                 <input type="hidden" name="itemId" id="perdidaItemId" />
                 <div class="modal-body p-6">
                     <div class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 flex gap-4 items-start">
-                        <div class="text-red-400 mt-1">
+                        <div class="text-red-600 mt-1">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                         </div>
-                        <div class="text-sm text-gray-300">
-                            <p class="font-bold text-red-400 mb-1">Acción Irreversible</p>
+                        <div class="text-sm text-slate-600">
+                            <p class="font-bold text-red-600 mb-1">Acción Irreversible</p>
                             El ítem se marcará como pérdida total y se registrará un gasto por "Merma/Daño" equivalente a su costo.
                         </div>
                     </div>
                     
-                    <div class="mb-6 p-4 rounded-xl bg-[#1a1b2e] border border-white/5">
-                        <p class="text-gray-300 text-sm mb-1">Producto</p>
-                        <p class="text-white font-medium" id="perdidaProducto"></p>
-                        <p class="text-gray-500 text-xs font-mono mt-1" id="perdidaSerie"></p>
+                    <div class="mb-6 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                        <p class="text-slate-600 text-sm mb-1">Producto</p>
+                        <p class="text-slate-800 font-medium" id="perdidaProducto"></p>
+                        <p class="text-slate-400 text-xs font-mono mt-1" id="perdidaSerie"></p>
                     </div>
 
                     <div>
-                        <label class="block text-gray-400 text-xs font-bold uppercase mb-2">Motivo de la pérdida</label>
+                        <label class="block text-slate-500 text-xs font-bold uppercase mb-2">Motivo de la pérdida</label>
                         <textarea name="motivo" required rows="3" 
-                                  class="w-full bg-[#1a1b2e] border border-red-500/30 text-white rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent p-3 text-sm transition-all"
+                                  class="w-full bg-slate-50 border border-red-500/30 text-slate-800 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent p-3 text-sm transition-all"
                                   placeholder="Ej: Placa base quemada, irreparable..."></textarea>
                     </div>
                 </div>
                 <div class="modal-footer border-red-500/20 p-4">
-                    <button type="button" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="px-6 py-2 rounded-lg bg-gradient-to-r from-red-600 to-orange-600 hover:from-red-500 hover:to-orange-500 text-white text-sm font-bold shadow-lg shadow-red-500/20 transition-all">
+                    <button type="button" class="px-4 py-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-all text-sm font-medium" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="px-6 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm font-bold shadow-lg shadow-red-500/20 transition-all">
                         Confirmar Pérdida
                     </button>
                 </div>

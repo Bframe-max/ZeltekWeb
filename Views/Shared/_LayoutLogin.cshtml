@@ -4,58 +4,71 @@
     <meta charset="utf-8" />
     <title>@ViewData["Title"] - Zeltek</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script>
+        (function () {
+            var t = 'light';
+            try { t = localStorage.getItem('zeltek-theme') || 'light'; } catch (e) { }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+    </script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
-        :root {
-            --login-bg: #151521;
-            --login-bg-grad: linear-gradient(145deg, #151521 0%, #1a1a2e 50%, #151521 100%);
-            --login-card: #1e1e2d;
-            --login-input: #1b1b29;
-            --login-border: rgba(255,255,255,.08);
-            --login-focus: #0d6efd;
-            --login-text: #e4e6ef;
-            --login-muted: #a1a5b7;
-        }
         body.login-page {
             min-height: 100vh;
-            background: var(--login-bg);
-            background: var(--login-bg-grad);
-            color: var(--login-text);
+            background:
+                radial-gradient(900px 500px at 15% -10%, #e0e7ff 0%, transparent 60%),
+                radial-gradient(700px 400px at 110% 110%, #ede9fe 0%, transparent 55%),
+                var(--z-bg) !important;
         }
         .login-card {
-            background: var(--login-card);
-            border: 1px solid var(--login-border);
-            border-radius: 1rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,.4);
+            border-radius: 24px !important;
+            box-shadow: 0 24px 60px -24px rgba(30, 36, 51, .25) !important;
         }
-        .login-input {
-            background: var(--login-input) !important;
-            border: 1px solid var(--login-border) !important;
-            color: #fff !important;
+        .login-logo {
+            width: 56px; height: 56px; border-radius: 16px;
+            background: var(--z-primary); color: #fff;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.5rem;
+            box-shadow: 0 10px 24px -10px rgba(79, 70, 229, .7);
         }
-        .login-input::placeholder { color: var(--login-muted); }
-        .login-input:focus {
-            border-color: var(--login-focus) !important;
-            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25);
+        .login-input { height: 48px; font-size: 1rem !important; }
+        .input-group .input-group-text { border-right: 0 !important; border-radius: 10px 0 0 10px !important; }
+        .input-group .login-input { border-left: 0 !important; border-radius: 0 10px 10px 0 !important; }
+        .input-group:focus-within .input-group-text { border-color: #a5b4fc !important; color: var(--z-primary) !important; }
+        .login-btn { height: 48px; font-weight: 600 !important; border-radius: 12px !important; }
+        .link-accent { color: var(--z-primary); font-weight: 500; }
+        .link-accent:hover { color: var(--z-primary-hover); }
+        html[data-theme="dark"] .link-accent { color: #818cf8; }
+        html[data-theme="dark"] body.login-page {
+            background:
+                radial-gradient(900px 500px at 15% -10%, rgba(99, 102, 241, .18) 0%, transparent 60%),
+                radial-gradient(700px 400px at 110% 110%, rgba(139, 92, 246, .14) 0%, transparent 55%),
+                var(--z-bg) !important;
         }
-        .login-btn {
-            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
-            border: none;
-            font-weight: 600;
-            padding: 0.75rem 1rem;
+
+        .z-theme {
+            position: fixed; top: 20px; right: 20px;
+            width: 42px; height: 42px; border-radius: 12px;
+            display: inline-flex; align-items: center; justify-content: center;
+            background: var(--z-surface); border: 1px solid var(--z-border);
+            color: var(--z-muted); font-size: 1.1rem; box-shadow: var(--z-shadow);
         }
-        .login-btn:hover {
-            background: linear-gradient(135deg, #0a58ca 0%, #084298 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(13, 110, 253, .4);
-        }
-        .form-check-input:checked { background-color: #0d6efd; }
-        .form-check-input:focus { border-color: #86b7fe; box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, .25); }
-        .link-accent { color: #6ea8fe; text-decoration: none; }
-        .link-accent:hover { color: #9ec5fe; }
+        .z-theme:hover { color: var(--z-primary); }
+        .z-theme .bi-sun { display: none; }
+        html[data-theme="dark"] .z-theme .bi-sun { display: inline; }
+        html[data-theme="dark"] .z-theme .bi-moon { display: none; }
     </style>
 </head>
 <body class="login-page">
+    <button type="button" class="z-theme" title="Cambiar modo claro / oscuro" aria-label="Cambiar modo claro / oscuro"
+            onclick="var r=document.documentElement,n=r.getAttribute('data-theme')==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('zeltek-theme',n)}catch(e){}">
+        <i class="bi bi-moon"></i><i class="bi bi-sun"></i>
+    </button>
     <div class="container min-vh-100 d-flex justify-content-center align-items-center py-5">
         <div class="col-12 col-sm-10 col-md-6 col-lg-5 col-xl-4">
             @RenderBody()

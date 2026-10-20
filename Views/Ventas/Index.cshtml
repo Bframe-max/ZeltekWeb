@@ -6,52 +6,52 @@
 
 <div class="d-flex justify-content-between align-items-center mb-6">
     <div>
-        <h2 class="text-2xl font-bold text-white tracking-tight">Reporte de Ventas</h2>
-        <p class="text-gray-400 text-sm mt-1">Visión general del rendimiento comercial</p>
+        <h2 class="text-2xl font-bold text-slate-800 tracking-tight">Reporte de Ventas</h2>
+        <p class="text-slate-500 text-sm mt-1">Visión general del rendimiento comercial</p>
     </div>
 </div>
 
 <!-- Bento Grid Stats -->
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
     <!-- Total Facturado -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
-        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-blue-500/10"></div>
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-indigo-700/10"></div>
         <div class="relative flex justify-between items-start">
             <div>
-                <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Total Facturado</p>
-                <h3 class="text-3xl font-bold text-white tracking-tight">$@ViewBag.TotalVendido.ToString("N0")</h3>
+                <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Total Facturado</p>
+                <h3 class="text-3xl font-bold text-slate-800 tracking-tight">$@ViewBag.TotalVendido.ToString("N0")</h3>
             </div>
-            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400">
+            <div class="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-600">
                 <i class="bi bi-cash-stack text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Ganancia Bruta -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-emerald-500/10"></div>
         <div class="relative flex justify-between items-start">
             <div>
-                <p class="text-xs font-semibold text-emerald-400/80 uppercase tracking-wider mb-1">Ganancia Bruta</p>
-                <h3 class="text-3xl font-bold text-white tracking-tight">$@ViewBag.TotalGanancia.ToString("N0")</h3>
-                <p class="text-xs text-gray-500 mt-1">(Venta - Costos)</p>
+                <p class="text-xs font-semibold text-emerald-600/80 uppercase tracking-wider mb-1">Ganancia Bruta</p>
+                <h3 class="text-3xl font-bold text-slate-800 tracking-tight">$@ViewBag.TotalGanancia.ToString("N0")</h3>
+                <p class="text-xs text-slate-400 mt-1">(Venta - Costos)</p>
             </div>
-            <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-600">
                 <i class="bi bi-graph-up-arrow text-xl"></i>
             </div>
         </div>
     </div>
 
     <!-- Equipos Vendidos -->
-    <div class="bg-[#24253b] rounded-2xl p-6 shadow-lg shadow-black/20 relative overflow-hidden group">
+    <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/60 relative overflow-hidden group">
         <div class="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-3xl -mr-16 -mt-16 transition-all group-hover:bg-purple-500/10"></div>
         <div class="relative flex justify-between items-start">
             <div>
-                <p class="text-xs font-semibold text-purple-400/80 uppercase tracking-wider mb-1">Equipos Vendidos</p>
-                <h3 class="text-3xl font-bold text-white tracking-tight">@ViewBag.TotalEquipos</h3>
-                <p class="text-xs text-gray-500 mt-1">Unidades</p>
+                <p class="text-xs font-semibold text-purple-600/80 uppercase tracking-wider mb-1">Equipos Vendidos</p>
+                <h3 class="text-3xl font-bold text-slate-800 tracking-tight">@ViewBag.TotalEquipos</h3>
+                <p class="text-xs text-slate-400 mt-1">Unidades</p>
             </div>
-            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400">
+            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-600">
                 <i class="bi bi-box-seam text-xl"></i>
             </div>
         </div>
@@ -59,37 +59,37 @@
 </div>
 
 <!-- Floating Filter Bar -->
-<div class="bg-[#24253b] rounded-xl p-5 mb-8 shadow-lg shadow-black/20 border border-white/5">
+<div class="bg-white rounded-xl p-5 mb-8 shadow-lg shadow-slate-200/60 border border-slate-100">
     <form method="get" class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
         <div class="md:col-span-4">
-            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Buscar</label>
+            <label class="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">Buscar</label>
             <div class="relative">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="text-gray-500">🔍</span>
+                    <span class="text-slate-400">🔍</span>
                 </div>
                 <input type="text" name="buscar" 
-                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block pl-10 p-2.5 placeholder-gray-600 transition-colors"
+                       class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block pl-10 p-2.5 placeholder-slate-400 transition-colors"
                        placeholder="Cliente, Serie, Producto..." value="@ViewData["Busqueda"]">
             </div>
         </div>
         
         <div class="md:col-span-3">
-            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Desde</label>
+            <label class="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">Desde</label>
             <input type="date" name="fechaInicio" lang="es-ES" style="color-scheme: dark;"
-                   class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
+                   class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
                    value="@ViewData["FechaInicio"]">
         </div>
         
         <div class="md:col-span-3">
-            <label class="block text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide">Hasta</label>
+            <label class="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">Hasta</label>
             <input type="date" name="fechaFin" lang="es-ES" style="color-scheme: dark;"
-                       class="w-full bg-[#1a1b2e] border border-gray-700 text-white text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
+                       class="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent block p-2.5 transition-colors"
                        value="@ViewData["FechaFin"]">
         </div>
         
         <div class="md:col-span-2">
             <button type="submit" 
-                    class="w-full bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-md shadow-purple-900/20 transition-all hover:shadow-purple-500/25">
+                    class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-md  transition-all hover:shadow-purple-500/25">
                 Filtrar
             </button>
         </div>
@@ -97,48 +97,48 @@
 </div>
 
 <!-- Main Table Card -->
-<div class="bg-[#24253b] rounded-xl shadow-xl shadow-black/20 border border-white/5 overflow-hidden">
+<div class="bg-white rounded-xl shadow-xl shadow-slate-200/60 border border-slate-100 overflow-hidden">
     <div class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
             <thead>
-                <tr class="border-b border-gray-800 bg-[#1f2033]">
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha / ID</th>
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Cliente</th>
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Costo Real</th>
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Venta</th>
-                    <th class="py-4 px-6 text-xs font-medium text-gray-500 uppercase tracking-wider text-right">Profit</th>
+                <tr class="border-b border-slate-200 bg-slate-50">
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Fecha / ID</th>
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Cliente</th>
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider">Producto</th>
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Costo Real</th>
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Venta</th>
+                    <th class="py-4 px-6 text-xs font-medium text-slate-400 uppercase tracking-wider text-right">Profit</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-800">
+            <tbody class="divide-y divide-slate-100">
                 @foreach (var v in Model)
                 {
-                    <tr class="hover:bg-gray-800/30 transition-colors group">
+                    <tr class="hover:bg-slate-100/30 transition-colors group">
                         <!-- Fecha / ID -->
                         <td class="py-4 px-6 align-top">
                             <div class="flex flex-col">
-                                <span class="text-white font-medium text-sm">@v.FechaVenta.ToString("dd/MM/yyyy")</span>
-                                <span class="text-xs text-gray-500 font-mono mt-1">#@v.VentaID</span>
+                                <span class="text-slate-800 font-medium text-sm">@v.FechaVenta.ToString("dd/MM/yyyy")</span>
+                                <span class="text-xs text-slate-400 font-mono mt-1">#@v.VentaID</span>
                             </div>
                         </td>
 
                         <!-- Cliente -->
                         <td class="py-4 px-6 align-top">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">
                                     @(string.IsNullOrEmpty(v.Cliente) ? "?" : v.Cliente.Substring(0, 1).ToUpper())
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="text-gray-200 text-sm font-medium">@v.Cliente</span>
+                                    <span class="text-slate-700 text-sm font-medium">@v.Cliente</span>
                                     @if (v.TipoCliente == "Revendedor")
                                     {
-                                        <span class="text-[10px] text-amber-400 mt-0.5 font-medium flex items-center gap-1">
+                                        <span class="text-[10px] text-amber-600 mt-0.5 font-medium flex items-center gap-1">
                                             <i class="bi bi-handshake"></i> Revendedor
                                         </span>
                                     }
                                     else
                                     {
-                                        <span class="text-[10px] text-gray-500 mt-0.5">Público General</span>
+                                        <span class="text-[10px] text-slate-400 mt-0.5">Público General</span>
                                     }
                                 </div>
                             </div>
@@ -148,25 +148,25 @@
                         <td class="py-4 px-6 align-top">
                             <div class="flex gap-3">
                                 <!-- Thumbnail Placeholder -->
-                                <div class="w-10 h-10 rounded-md bg-gray-700/50 border border-gray-600/30 flex-shrink-0 flex items-center justify-center text-gray-500">
+                                <div class="w-10 h-10 rounded-md bg-slate-100/50 border border-slate-200/30 flex-shrink-0 flex items-center justify-center text-slate-400">
                                     <i class="bi bi-phone"></i>
                                 </div>
                                 <div class="flex flex-col">
-                                    <span class="text-blue-400 text-sm font-medium hover:text-blue-300 transition-colors cursor-pointer">@v.Producto</span>
-                                    <span class="text-xs text-gray-400 mt-0.5">@v.Especificaciones</span>
-                                    <span class="text-[10px] text-gray-600 font-mono mt-0.5 uppercase tracking-wide">SN: @v.NumeroSerie</span>
+                                    <span class="text-blue-600 text-sm font-medium hover:text-blue-700 transition-colors cursor-pointer">@v.Producto</span>
+                                    <span class="text-xs text-slate-500 mt-0.5">@v.Especificaciones</span>
+                                    <span class="text-[10px] text-slate-400 font-mono mt-0.5 uppercase tracking-wide">SN: @v.NumeroSerie</span>
                                 </div>
                             </div>
                         </td>
 
                         <!-- Costo -->
                          <td class="py-4 px-6 align-middle text-right">
-                             <span class="text-gray-400 font-mono text-sm">$@v.CostoTotalVenta.ToString("N2")</span>
+                             <span class="text-slate-500 font-mono text-sm">$@v.CostoTotalVenta.ToString("N2")</span>
                          </td>
 
                         <!-- Venta -->
                         <td class="py-4 px-6 align-middle text-right">
-                            <span class="text-white font-bold font-mono text-sm">$@v.VentaTotal.ToString("N2")</span>
+                            <span class="text-slate-800 font-bold font-mono text-sm">$@v.VentaTotal.ToString("N2")</span>
                         </td>
 
                         <!-- Profit Pill -->
@@ -174,13 +174,13 @@
                             <div class="flex justify-end">
                                 @if (v.Ganancia > 0)
                                 {
-                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-xs font-medium">
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 text-xs font-medium">
                                         <span>+$@v.Ganancia.ToString("N2")</span>
                                     </div>
                                 }
                                 else
                                 {
-                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-medium">
+                                    <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/10 text-red-600 text-xs font-medium">
                                         <span>$@v.Ganancia.ToString("N2")</span>
                                     </div>
                                 }
@@ -193,7 +193,7 @@
                 {
                     <tr>
                         <td colspan="6" class="py-12 text-center">
-                            <div class="flex flex-col items-center justify-center text-gray-500">
+                            <div class="flex flex-col items-center justify-center text-slate-400">
                                 <i class="bi bi-inbox text-4xl mb-3 opacity-50"></i>
                                 <p class="text-sm">No se encontraron ventas con los filtros seleccionados.</p>
                             </div>

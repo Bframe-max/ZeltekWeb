@@ -15,8 +15,8 @@
         height: 1.3em;
         margin-top: 0.15em;
         vertical-align: top;
-        background-color: #2b3035;
-        border-color: #6c757d;
+        background-color: var(--z-surface);
+        border-color: var(--z-border-strong);
         cursor: pointer;
     }
     .form-check-input:checked {
@@ -39,7 +39,7 @@
         <a asp-action="Calidad" class="btn btn-outline-secondary btn-sm mb-2 text-decoration-none">
             <i class="bi bi-arrow-left"></i> Volver a Mesa de Calidad
         </a>
-        <h2 class="text-white fw-bold mb-0">📋 Inspección de Calidad</h2>
+        <h2 class="text-slate-800 fw-bold mb-0">📋 Inspección de Calidad</h2>
         <div class="d-flex align-items-center gap-3 mt-1">
             <span class="badge bg-primary fs-6">@Model.ProductoNombre</span>
             <span class="text-secondary small font-monospace">S/N: @Model.NumeroSerie</span>
@@ -62,7 +62,7 @@
             <div class="col-lg-5">
                 <div class="card bg-card border-0 shadow-lg card-modern h-100">
                     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                        <h5 class="text-white fw-bold mb-0"><i class="bi bi-eye-fill me-2"></i>Estado Físico</h5>
+                        <h5 class="text-slate-800 fw-bold mb-0"><i class="bi bi-eye-fill me-2"></i>Estado Físico</h5>
                     </div>
                     <div class="card-body p-4">
                         
@@ -72,19 +72,19 @@
                             <div class="d-flex flex-column gap-3">
                                 <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
                                     <input type="radio" asp-for="Condicion" value="A" class="form-check-input" id="CondicionA" required />
-                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionA">
+                                    <label class="form-check-label text-slate-800 fw-semibold w-100" for="CondicionA">
                                         Grado A <span class="d-block text-secondary small fw-normal">Impecable, sin marcas visibles.</span>
                                     </label>
                                 </div>
                                 <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
                                     <input type="radio" asp-for="Condicion" value="B" class="form-check-input" id="CondicionB" required />
-                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionB">
+                                    <label class="form-check-label text-slate-800 fw-semibold w-100" for="CondicionB">
                                         Grado B <span class="d-block text-secondary small fw-normal">Uso normal, marcas leves.</span>
                                     </label>
                                 </div>
                                 <div class="form-check p-3 rounded-3 border border-secondary bg-dark bg-opacity-25">
                                     <input type="radio" asp-for="Condicion" value="C" class="form-check-input" id="CondicionC" required />
-                                    <label class="form-check-label text-white fw-semibold w-100" for="CondicionC">
+                                    <label class="form-check-label text-slate-800 fw-semibold w-100" for="CondicionC">
                                         Grado C <span class="d-block text-secondary small fw-normal">Desgaste visible, golpes o rayones.</span>
                                     </label>
                                 </div>
@@ -98,7 +98,7 @@
                             <label asp-for="SaludBateriaPorcentaje" class="form-label text-light fw-bold small">Salud de Batería (%)</label>
                             <div class="input-group input-group-lg">
                                 <span class="input-group-text bg-dark border-secondary text-secondary"><i class="bi bi-battery-half"></i></span>
-                                <input asp-for="SaludBateriaPorcentaje" type="number" id="inputBateria" min="0" max="100" class="form-control bg-dark text-white border-secondary fw-bold" placeholder="Ej: 85" required />
+                                <input asp-for="SaludBateriaPorcentaje" type="number" id="inputBateria" min="0" max="100" class="form-control bg-dark text-slate-800 border-secondary fw-bold" placeholder="Ej: 85" required />
                             </div>
                         </div>
                         <!-- Dynamic Alert for Battery -->
@@ -113,7 +113,7 @@
             <div class="col-lg-7">
                 <div class="card bg-card border-0 shadow-lg card-modern h-100">
                     <div class="card-header bg-transparent border-bottom border-secondary py-3">
-                        <h5 class="text-white fw-bold mb-0"><i class="bi bi-check2-square me-2"></i>Funcionalidad & Checklist</h5>
+                        <h5 class="text-slate-800 fw-bold mb-0"><i class="bi bi-check2-square me-2"></i>Funcionalidad & Checklist</h5>
                     </div>
                     <div class="card-body p-4">
                         
@@ -125,19 +125,19 @@
                                     <div class="col-sm-4">
                                         <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
                                             <input asp-for="PantallaOk" class="form-check-input check-required" id="checkPantalla" />
-                                            <label asp-for="PantallaOk" class="form-check-label text-white" for="checkPantalla">Pantalla OK</label>
+                                            <label asp-for="PantallaOk" class="form-check-label text-slate-800" for="checkPantalla">Pantalla OK</label>
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
                                         <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
                                             <input asp-for="TecladoOk" class="form-check-input check-required" id="checkTeclado" />
-                                            <label asp-for="TecladoOk" class="form-check-label text-white" for="checkTeclado">Teclado OK</label>
+                                            <label asp-for="TecladoOk" class="form-check-label text-slate-800" for="checkTeclado">Teclado OK</label>
                                         </div>
                                     </div>
                                     <div class="col-sm-4">
                                         <div class="form-check p-3 rounded-3 bg-dark border border-secondary h-100">
                                             <input asp-for="AudioOk" class="form-check-input check-required" id="checkAudio" />
-                                            <label asp-for="AudioOk" class="form-check-label text-white" for="checkAudio">Audio OK</label>
+                                            <label asp-for="AudioOk" class="form-check-label text-slate-800" for="checkAudio">Audio OK</label>
                                         </div>
                                     </div>
                                 </div>
@@ -181,7 +181,7 @@
             <div class="card-body p-4">
                 <div class="mb-4">
                     <label asp-for="NotasInspeccion" class="form-label text-light fw-bold small">Notas de Inspección</label>
-                    <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-white border-secondary rounded-3" rows="3" placeholder="Detalles adicionales, observaciones sobre la cosmética, etc."></textarea>
+                    <textarea asp-for="NotasInspeccion" class="form-control bg-dark text-slate-800 border-secondary rounded-3" rows="3" placeholder="Detalles adicionales, observaciones sobre la cosmética, etc."></textarea>
                 </div>
 
                 <div class="d-flex gap-3 justify-content-end">
@@ -211,11 +211,11 @@
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="form-label text-secondary small fw-bold">Total Recibido</label>
-                                <input type="text" readonly class="form-control-plaintext text-white fw-bold fs-4" value="@Model.CantidadTotal" />
+                                <input type="text" readonly class="form-control-plaintext text-slate-800 fw-bold fs-4" value="@Model.CantidadTotal" />
                             </div>
                             <div class="col-md-4">
                                 <label asp-for="CantidadAprobada" class="form-label text-success small fw-bold">U. Aprobadas</label>
-                                <input asp-for="CantidadAprobada" type="number" min="0" max="@Model.CantidadTotal" class="form-control bg-dark text-white border-success fw-bold p-3" id="inputAprobada" />
+                                <input asp-for="CantidadAprobada" type="number" min="0" max="@Model.CantidadTotal" class="form-control bg-dark text-slate-800 border-success fw-bold p-3" id="inputAprobada" />
                             </div>
                             <div class="col-md-4">
                                 <label class="form-label text-danger small fw-bold">U. Rechazadas</label>
@@ -225,7 +225,7 @@
 
                         <div class="mb-4 d-none" id="divMotivo">
                             <label asp-for="MotivoRechazo" class="form-label text-danger small fw-bold">Motivo del Rechazo (Merma)</label>
-                            <textarea asp-for="MotivoRechazo" id="MotivoRechazo" class="form-control bg-dark text-white border-danger" rows="3" placeholder="Ej: 2 unidades rotas, 1 no carga..."></textarea>
+                            <textarea asp-for="MotivoRechazo" id="MotivoRechazo" class="form-control bg-dark text-slate-800 border-danger" rows="3" placeholder="Ej: 2 unidades rotas, 1 no carga..."></textarea>
                         </div>
 
                         <div class="d-grid mt-5">
@@ -317,8 +317,6 @@
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: '<i class="bi bi-tools"></i> Confirmar Envío',
                         cancelButtonText: 'Cancelar',
-                        background: '#343a40',
-                        color: '#fff'
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // Set value to reparacion and submit

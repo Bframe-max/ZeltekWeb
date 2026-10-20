@@ -5,6 +5,22 @@
     <title>@ViewData["Title"] - Zeltek</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Tema: claro por defecto; se aplica antes de pintar para evitar parpadeo -->
+    <script>
+        (function () {
+            var t = 'light';
+            try { t = localStorage.getItem('zeltek-theme') || 'light'; } catch (e) { }
+            document.documentElement.setAttribute('data-theme', t);
+        })();
+
+        // Colores actuales del tema, para los gráficos de Chart.js de las vistas
+        window.zc = function () {
+            var s = getComputedStyle(document.documentElement);
+            var v = function (n) { return s.getPropertyValue(n).trim(); };
+            return { text: v('--z-text-2'), muted: v('--z-muted'), grid: v('--z-border'), surface: v('--z-surface') };
+        };
+    </script>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -12,7 +28,15 @@
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+
+    <!-- Tema claro de Zeltek -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <!-- Librerías JS en el head: varias vistas tienen scripts en medio de la página que usan $ -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -28,173 +52,124 @@
           extend: {
             fontFamily: {
               sans: ['Inter', 'sans-serif'],
+              mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
             },
             colors: {
-              'card-dark': '#1e1e2d',
-              'border-dark': '#2d2d3f',
+              'card-dark': '#ffffff',
+              'border-dark': '#e6e9f2',
             }
           }
         }
       }
     </script>
-    <style>
-        /* Select2 en tema oscuro */
-        .select2-container--default .select2-selection--single { background-color: #1b1b29; border-color: var(--border-color); color: #fff; }
-        .select2-container--default .select2-selection--single .select2-selection__rendered { color: #fff; }
-        .select2-container--default .select2-results__option--highlighted[aria-selected] { background-color: var(--accent-color); }
-        .select2-dropdown { background-color: #1e1e2d; border-color: var(--border-color); }
-        .select2-container--default .select2-results__option[aria-selected=true] { background-color: #2d2d3f; color: #fff; }
-        .select2-search--dropdown .select2-search__field { background: #1b1b29; color: #fff; border-color: var(--border-color); }
-    </style>
 
     <style>
-        /* ================= TEMA OSCURO (VARIABLES) ================= */
-        :root {
-            --bg-body: #1a1b2e;
-            --bg-card: #24253b;
-            --text-primary: #ffffff;
-            --text-secondary: #9ca3af;
-            --accent-color: #7c3aed;
-            --border-color: #2e2f45;
-            --sidebar-width: 280px;
-        }
-
-        /* 1. FORZAMOS EL BODY OSCURO */
-        body {
-            background-color: var(--bg-body) !important;
-            color: var(--text-primary) !important;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-
-        /* 2. ESTRUCTURA (FLEXBOX) */
+        /* ================= ESTRUCTURA ================= */
         #wrapper {
             display: flex;
             width: 100%;
             min-height: 100vh;
-            overflow: hidden;
         }
 
-        /* Sidebar Base */
         #sidebar-wrapper {
+            width: var(--sidebar-width);
             min-width: var(--sidebar-width);
-            max-width: var(--sidebar-width);
-            background: linear-gradient(180deg, #24253b 0%, #1a1b2e 100%) !important;
-            border-right: 1px solid var(--border-color);
-            transition: all 0.3s ease;
+            height: 100vh;
+            position: sticky;
+            top: 0;
+            background: var(--z-surface);
+            border-right: 1px solid var(--z-border);
             display: flex;
             flex-direction: column;
             z-index: 1000;
+            transition: left .25s ease;
         }
 
-        /* Contenido Base */
         #page-content-wrapper {
             flex-grow: 1;
             width: 100%;
             min-width: 0;
         }
 
-        /* Overlay para móvil */
         #overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(30, 36, 51, .35);
             z-index: 999;
         }
 
-        /* 3. LÓGICA PC (PANTALLA GRANDE) */
-        /* Nota: Usamos @@media porque estamos en un archivo .cshtml */
-        @@media (min-width: 769px) {
-            #sidebar-wrapper {
-                margin-left: 0;
-                position: relative; /* Ocupa espacio físico */
-            }
-
-            #mobile-toggle, #overlay {
-                display: none !important;
-            }
+        /* ================= MENÚ ================= */
+        .z-brand { padding: 22px 20px; border-bottom: 1px solid var(--z-border); }
+        .z-logo {
+            width: 44px; height: 44px; border-radius: 12px;
+            background: var(--z-primary); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 1.15rem;
+            box-shadow: 0 6px 16px -6px rgba(79, 70, 229, .6);
         }
+        .z-section {
+            font-size: .72rem; font-weight: 700; letter-spacing: .1em;
+            text-transform: uppercase; color: var(--z-subtle);
+            margin: 22px 0 10px 18px;
+        }
+        .z-link {
+            display: flex; align-items: center; gap: 14px;
+            padding: 12px 18px; margin-bottom: 4px;
+            border-radius: 12px;
+            color: var(--z-text-2); font-weight: 500; font-size: .95rem;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .z-link i { font-size: 1.15rem; color: var(--z-muted); transition: color .15s ease; }
+        .z-link:hover { background: var(--z-surface-2); color: var(--z-text); }
+        .z-link:hover i { color: var(--z-primary); }
+        .z-link.active {
+            background: var(--z-primary); color: #fff; font-weight: 600;
+            box-shadow: 0 8px 18px -8px rgba(79, 70, 229, .7);
+        }
+        .z-link.active i { color: #fff; }
 
-        /* 4. LÓGICA MÓVIL (PANTALLA PEQUEÑA) */
+        .z-user { border-top: 1px solid var(--z-border); padding: 16px 18px; }
+        .z-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            background: var(--z-primary-soft); color: var(--z-primary);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+        }
+        .z-logout { color: var(--z-muted); font-size: 1.2rem; padding: 6px; border-radius: 8px; }
+        .z-logout:hover { color: var(--z-danger); background: rgba(239, 68, 68, .1); }
+
+        .z-theme {
+            width: 38px; height: 38px; border-radius: 10px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: var(--z-muted); font-size: 1.1rem;
+            transition: background-color .15s ease, color .15s ease;
+        }
+        .z-theme:hover { background: var(--z-surface-2); color: var(--z-primary); }
+        /* Muestra la luna en modo claro y el sol en modo oscuro */
+        .z-theme .bi-sun { display: none; }
+        html[data-theme="dark"] .z-theme .bi-sun { display: inline; }
+        html[data-theme="dark"] .z-theme .bi-moon { display: none; }
+
+        /* ================= RESPONSIVE ================= */
+        #mobile-bar { display: none; }
+
         @@media (max-width: 768px) {
             #sidebar-wrapper {
-                position: fixed; /* Flota encima */
-                top: 0;
-                bottom: 0;
-                left: -260px; /* Escondido */
-                height: 100vh;
-                box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+                position: fixed;
+                left: calc(-1 * var(--sidebar-width));
+                box-shadow: var(--z-shadow-lg);
             }
-
-                #sidebar-wrapper.show-nav {
-                    left: 0; /* Aparece */
-                }
-
-            #overlay.show-nav {
-                display: block;
+            #sidebar-wrapper.show-nav { left: 0; }
+            #overlay.show-nav { display: block; }
+            #mobile-bar {
+                display: flex; align-items: center; gap: 12px;
+                padding: 12px 16px;
+                background: var(--z-surface);
+                border-bottom: 1px solid var(--z-border);
+                position: sticky; top: 0; z-index: 900;
             }
         }
-
-        /* ================= CORRECCIÓN DE COLORES (FORCE DARK) ================= */
-
-        /* TARJETAS: Matamos el blanco de Bootstrap con !important */
-        .card {
-            background-color: var(--bg-card) !important;
-            border: 1px solid var(--border-color) !important;
-            color: var(--text-primary) !important;
-        }
-
-        /* TEXTOS: Forzamos blanco en títulos que Bootstrap pone negros */
-        h1, h2, h3, h4, h5, h6, .card-title, .card-text {
-            color: var(--text-primary) !important;
-        }
-
-        /* NAVBAR: Transparente y textos blancos */
-        .navbar {
-            background-color: var(--bg-body) !important;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        /* ESTILOS DEL MENÚ */
-        .list-group-item {
-            background: transparent !important;
-            color: #9ca3af !important;
-            border: none !important;
-            padding: 12px 24px;
-            margin: 4px 16px;
-            border-radius: 12px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-
-            .list-group-item:hover {
-                color: #ffffff !important;
-                background-color: rgba(255, 255, 255, 0.05) !important;
-            }
-
-            .list-group-item.active {
-                background: linear-gradient(90deg, #7c3aed 0%, #3b82f6 100%) !important;
-                color: #ffffff !important;
-                box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
-            }
-            
-            /* Remove old border-left style */
-            .list-group-item.active { border-left: none !important; }
-
-        .sidebar-heading {
-            padding: 1.5rem;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--text-primary) !important;
-            border-bottom: 1px solid var(--border-color);
-        }
-        
-        /* SCROLLBAR PERSONALIZADO PARA SIDEBAR */
-        #sidebar-wrapper::-webkit-scrollbar { width: 5px; }
-        #sidebar-wrapper::-webkit-scrollbar-track { background: transparent; }
-        #sidebar-wrapper::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
-        #sidebar-wrapper::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 
@@ -204,132 +179,101 @@
 
     <div id="wrapper">
 
-        <div id="sidebar-wrapper" class="bg-[#24253b] border-r border-white/5 flex flex-col">
-            <!-- 1. Brand Section -->
-            <div class="p-6 flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/30 shrink-0">
-                     <i class="bi bi-rocket-takeoff-fill text-white"></i>
+        <aside id="sidebar-wrapper">
+            <!-- Marca -->
+            <div class="z-brand flex items-center gap-3">
+                <div class="z-logo">Z</div>
+                <div class="leading-tight flex-1">
+                    <div class="font-bold text-slate-900 tracking-wide" style="font-size:1.05rem">ZELTEK</div>
+                    <div class="text-sm text-slate-500">ERP Nicaragua</div>
                 </div>
-                <div>
-                    <h1 class="text-xl font-bold text-white tracking-tight leading-none mb-0">Zeltek</h1>
-                    <span class="text-[10px] font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-blue-400 uppercase tracking-widest">v2.0 PRO</span>
-                </div>
+                <button type="button" class="z-theme" data-theme-toggle title="Cambiar modo claro / oscuro" aria-label="Cambiar modo claro / oscuro">
+                    <i class="bi bi-moon"></i><i class="bi bi-sun"></i>
+                </button>
             </div>
 
-            <!-- 2. User Profile (IMEI Checker Style) -->
-            <div class="mx-4 mb-6 p-3 rounded-xl bg-white/5 border border-white/5 flex items-center gap-3 group hover:bg-white/10 transition-colors cursor-pointer">
-                <div class="h-10 w-10 rounded-full bg-gradient-to-br from-gray-700 to-gray-900 border border-white/10 flex items-center justify-center text-white font-bold text-sm shrink-0">
-                    @(User.Identity?.Name?.Length > 0 ? User.Identity.Name.Substring(0,1).ToUpper() : "U")
-                </div>
-                <div class="flex-1 overflow-hidden">
-                    <h6 class="text-sm font-bold text-white truncate mb-0">@(User.Identity?.Name ?? "Usuario")</h6>
-                    <p class="text-[10px] text-gray-400 truncate mb-0 group-hover:text-purple-300 transition-colors">Administrador</p>
-                </div>
-                <i class="bi bi-gear-fill text-gray-500 group-hover:text-white transition-colors text-xs"></i>
-            </div>
-
-            <!-- 3. Navigation -->
-            <div class="flex-1 overflow-y-auto px-4 flex flex-col gap-1 pb-4">
+            <!-- Navegación -->
+            <nav class="flex-1 overflow-y-auto px-3 pb-4">
                 @{
                     string currentPath = Context.Request.Path.ToString().ToLower();
-                    string ActiveClass(string path) => currentPath.Contains(path.ToLower()) || (path == "/" && currentPath == "/") ? 
-                        "bg-gradient-to-r from-purple-600 to-blue-500 text-white shadow-lg shadow-purple-500/20" : 
-                        "text-gray-400 hover:text-white hover:bg-white/5";
-                    
-                    string IconClass(string path) => currentPath.Contains(path.ToLower()) || (path == "/" && currentPath == "/") ? "text-white" : "text-gray-500 group-hover:text-white";
+                    // "Reparaciones" vive dentro de /Inventario: se evalúa primero para no marcar los dos
+                    bool enReparaciones = currentPath.Contains("/inventario/reparaciones");
+                    string Active(string path) =>
+                        path == "Reparaciones" ? (enReparaciones ? "active" : "")
+                        : path == "Inventario" ? (currentPath.Contains("/inventario") && !enReparaciones ? "active" : "")
+                        : currentPath.Contains(path.ToLower()) ? "active" : "";
                 }
 
-                <p class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mt-2 mb-2 ml-2">Principal</p>
+                <p class="z-section">Principal</p>
 
-                <a asp-controller="Dashboard" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Dashboard")">
-                    <i class="bi bi-grid-fill @IconClass("Dashboard") transition-colors"></i> 
-                    <span>Dashboard</span>
+                <a asp-controller="Dashboard" asp-action="Index" class="z-link @Active("Dashboard")">
+                    <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
                 </a>
-                <a asp-controller="Ventas" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Ventas")">
-                    <i class="bi bi-wallet-fill @IconClass("Ventas") transition-colors"></i> 
-                    <span>Ventas</span>
+                <a asp-controller="Ventas" asp-action="Index" class="z-link @Active("Ventas")">
+                    <i class="bi bi-cart3"></i><span>Ventas</span>
                 </a>
-                <a asp-controller="Inventario" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Inventario")">
-                    <i class="bi bi-box-seam-fill @IconClass("Inventario") transition-colors"></i> 
-                    <span>Inventario</span>
+                <a asp-controller="Inventario" asp-action="Index" class="z-link @Active("Inventario")">
+                    <i class="bi bi-display"></i><span>Inventario</span>
                 </a>
-                <a asp-controller="Inventario" asp-action="Reparaciones" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Reparaciones")">
-                    <i class="bi bi-tools @IconClass("Reparaciones") transition-colors"></i> 
-                    <span>Reparaciones</span>
+                <a asp-controller="Inventario" asp-action="Reparaciones" class="z-link @Active("Reparaciones")">
+                    <i class="bi bi-wrench-adjustable"></i><span>Reparaciones</span>
                 </a>
 
-                <p class="text-[10px] font-extrabold text-gray-500 uppercase tracking-widest mt-6 mb-2 ml-2">Administración</p>
+                <p class="z-section">Administración</p>
 
-                <a asp-controller="Producto" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Producto")">
-                    <i class="bi bi-tags-fill @IconClass("Producto") transition-colors"></i> 
-                    <span>Productos</span>
+                <a asp-controller="Producto" asp-action="Index" class="z-link @Active("Producto")">
+                    <i class="bi bi-box-seam"></i><span>Productos</span>
                 </a>
-                <a asp-controller="Compras" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Compras")">
-                    <i class="bi bi-cart-fill @IconClass("Compras") transition-colors"></i> 
-                    <span>Compras</span>
+                <a asp-controller="Compras" asp-action="Index" class="z-link @Active("Compras")">
+                    <i class="bi bi-bag"></i><span>Compras</span>
                 </a>
-                <a asp-controller="Gastos" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Gastos")">
-                    <i class="bi bi-receipt @IconClass("Gastos") transition-colors"></i> 
-                    <span>Gastos</span>
+                <a asp-controller="Gastos" asp-action="Index" class="z-link @Active("Gastos")">
+                    <i class="bi bi-receipt"></i><span>Gastos</span>
                 </a>
-                <a asp-controller="Garantias" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Garantias")">
-                    <i class="bi bi-shield-check @IconClass("Garantias") transition-colors"></i> 
-                    <span>Garantías</span>
+                <a asp-controller="Garantias" asp-action="Index" class="z-link @Active("Garantias")">
+                    <i class="bi bi-shield-check"></i><span>Garantías</span>
                 </a>
-                <a asp-controller="Reportes" asp-action="Index" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium group @ActiveClass("Reportes")">
-                    <i class="bi bi-bar-chart-fill @IconClass("Reportes") transition-colors"></i> 
-                    <span>Reportes</span>
+                <a asp-controller="Reportes" asp-action="Index" class="z-link @Active("Reportes")">
+                    <i class="bi bi-bar-chart-line"></i><span>Reportes</span>
+                </a>
+            </nav>
+
+            <!-- Usuario -->
+            @{
+                var uName = User.Identity?.Name ?? "Usuario";
+                var rol = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Usuario";
+            }
+            <div class="z-user flex items-center gap-3">
+                <div class="z-avatar shrink-0">@uName.Substring(0, 1).ToUpper()</div>
+                <div class="flex-1 min-w-0 leading-tight">
+                    <div class="font-semibold text-slate-900 truncate">@(rol == "Admin" ? "Administrador" : uName)</div>
+                    <div class="text-xs text-slate-500 uppercase tracking-wide truncate">@uName</div>
+                </div>
+                <a asp-controller="Auth" asp-action="Logout" class="z-logout" title="Cerrar sesión">
+                    <i class="bi bi-box-arrow-right"></i>
                 </a>
             </div>
-            
-            <!-- Footer/Logout -->
-            <div class="p-4 border-t border-white/5">
-                <a asp-controller="Auth" asp-action="Logout" class="flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-white hover:bg-red-500/10 transition-all font-medium">
-                     <i class="bi bi-box-arrow-right"></i>
-                     <span>Cerrar Sesión</span>
-                </a>
-            </div>
-        </div>
+        </aside>
 
         <div id="page-content-wrapper">
 
-            <nav class="navbar navbar-expand-lg px-4 py-3">
-                <button class="btn btn-outline-secondary d-md-none border-0 text-white me-3" id="mobile-toggle">
-                    <i class="bi bi-list fs-3"></i>
+            <!-- Barra superior solo en móvil -->
+            <div id="mobile-bar">
+                <button class="btn btn-outline-secondary border-0" id="mobile-toggle" aria-label="Abrir menú">
+                    <i class="bi bi-list fs-4"></i>
                 </button>
-
-                <div class="ms-auto flex items-center gap-6">
-                    <!-- Notifications Icon -->
-                    <button class="relative group p-1.5 text-gray-400 hover:text-white transition-colors outline-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-                        <!-- Red Dot -->
-                        <span class="absolute top-1.5 right-2 h-2.5 w-2.5 bg-red-500 border-2 border-[#1a1b2e] rounded-full"></span>
-                    </button>
-
-                    <!-- User Avatar (Logout Action) -->
-                    <div class="flex items-center gap-3">
-                        <a asp-controller="Auth" asp-action="Logout" class="relative group outline-none" title="Cerrar Sesión">
-                            <div class="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm shadow-lg hover:ring-2 hover:ring-purple-500/50 transition-all cursor-pointer">
-                                @{
-                                    var uName = User.Identity?.Name ?? "Admin";
-                                    var initials = uName.Length > 1 ? uName.Substring(0, 2).ToUpper() : uName.Substring(0, 1).ToUpper();
-                                }
-                                @initials
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </nav>
-
-            <div class="container-fluid px-4 py-4">
-                @RenderBody()
+                <div class="z-logo" style="width:34px;height:34px;font-size:.95rem">Z</div>
+                <span class="font-bold text-slate-900 flex-1">ZELTEK</span>
+                <button type="button" class="z-theme" data-theme-toggle title="Cambiar modo claro / oscuro" aria-label="Cambiar modo claro / oscuro">
+                    <i class="bi bi-moon"></i><i class="bi bi-sun"></i>
+                </button>
             </div>
+
+            <main class="container-fluid px-4 px-lg-5 py-4 py-lg-5">
+                @RenderBody()
+            </main>
         </div>
     </div>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
         // Select2: inicializar buscadores en selects con clase .select2-producto (Compras, Ventas, etc.)
@@ -343,6 +287,47 @@
             });
         });
 
+        // ================= MODO CLARO / OSCURO =================
+        // Cambia en los gráficos ya dibujados los colores del tema anterior por los del nuevo
+        function zRecolorCharts(antes, ahora) {
+            if (!window.Chart || !Chart.instances) return;
+            var mapa = {};
+            Object.keys(antes).forEach(function (k) { mapa[antes[k]] = ahora[k]; });
+            var vistos = new WeakSet();
+            function walk(o) {
+                if (!o || typeof o !== 'object' || vistos.has(o) || o instanceof HTMLElement) return;
+                vistos.add(o);
+                Object.keys(o).forEach(function (k) {
+                    if (typeof o[k] === 'string' && mapa[o[k]]) o[k] = mapa[o[k]];
+                    else walk(o[k]);
+                });
+            }
+            Object.values(Chart.instances).forEach(function (ch) {
+                walk(ch.config.options);
+                ch.config.data.datasets.forEach(walk);
+                ch.update('none');
+            });
+        }
+
+        document.querySelectorAll('[data-theme-toggle]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var root = document.documentElement;
+                var antes = zc();
+                var nuevo = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', nuevo);
+                try { localStorage.setItem('zeltek-theme', nuevo); } catch (e) { }
+                zRecolorCharts(antes, zc());
+            });
+        });
+
+        // SweetAlert2 con el color principal
+        if (window.Swal) {
+            window.Swal = Swal.mixin({
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#94a3b8'
+            });
+        }
+
         const toggleBtn = document.getElementById("mobile-toggle");
         const sidebar = document.getElementById("sidebar-wrapper");
         const overlay = document.getElementById("overlay");
@@ -352,14 +337,14 @@
             overlay.classList.toggle("show-nav");
         }
 
-        if(toggleBtn) {
+        if (toggleBtn) {
             toggleBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 toggleMenu();
             });
         }
 
-        if(overlay) {
+        if (overlay) {
             overlay.addEventListener("click", () => {
                 toggleMenu();
             });
